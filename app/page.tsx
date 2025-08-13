@@ -123,6 +123,60 @@ export default function Home() {
     setIsAIProcessing(false);
   };
 
+  const handleDownloadPDF = () => {
+    const printContent = document.getElementById('resume-preview-content');
+    if (!printContent) return;
+
+    // Create a new window for printing
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Resume - ${resumeData.personalInfo.fullName || 'Resume'}</title>
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              line-height: 1.5;
+              color: #1f2937;
+              background: white;
+            }
+            @page { 
+              margin: 0.5in; 
+              size: letter; 
+            }
+            .resume-content {
+              width: 100%;
+              max-width: none;
+              margin: 0;
+              padding: 0;
+              background: white;
+            }
+            @media print {
+              body { -webkit-print-color-adjust: exact; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="resume-content">
+            ${printContent.innerHTML}
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    
+    // Wait for content to load, then print
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
+
   const handleApplySuggestion = (type: string, suggestion: any) => {
     switch (type) {
       case 'skill':
@@ -246,6 +300,7 @@ export default function Home() {
         onFileUpload={handleFileUpload}
         onAIEnhance={handleAIEnhance}
         isAIProcessing={isAIProcessing}
+        onDownloadPDF={handleDownloadPDF}
       />
       
       <div className="container mx-auto px-4 py-8">
@@ -261,9 +316,9 @@ export default function Home() {
           onTemplateChange={(template) => updateResumeData({ selectedTemplate: template })}
         />
         
-        <div className="grid lg:grid-cols-3 gap-8 mt-8">
+        <div className="grid lg:grid-cols-5 gap-8 mt-8">
           {/* Form Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <Tabs defaultValue="form" className="space-y-4">
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="form">Resume Builder</TabsTrigger>
@@ -305,8 +360,8 @@ export default function Home() {
           </div>
 
           {/* Preview Section */}
-          <div className="lg:col-span-1 lg:sticky lg:top-8 lg:h-fit">
-            <ResumePreview resumeData={resumeData} />
+          <div className="lg:col-span-2 lg:sticky lg:top-8 lg:h-fit">
+            <ResumePreview resumeData={resumeData} onDownloadPDF={handleDownloadPDF} />
           </div>
         </div>
       </div>
