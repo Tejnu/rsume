@@ -5,8 +5,8 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Resume Builder - Create Professional Resumes in Minutes',
-  description: 'Build professional resumes with our easy-to-use resume builder. Choose from multiple templates and create your perfect resume.',
+  title: 'Alumna - AI-Powered Resume Builder',
+  description: 'Create professional resumes with AI assistance. Build, optimize, and download your perfect resume in minutes.',
 };
 
 export default function RootLayout({

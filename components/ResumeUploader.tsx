@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Upload, FileText, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { Upload, FileText, CheckCircle, AlertCircle, X, Sparkles } from 'lucide-react';
 import { ResumeData } from '@/types/resume';
 
 interface ResumeUploaderProps {
@@ -17,6 +17,7 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
+  const [currentStep, setCurrentStep] = useState('');
 
   const processResumeFile = async (file: File) => {
     setIsProcessing(true);
@@ -42,143 +43,152 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
         throw new Error('File size must be less than 10MB');
       }
 
-      // Simulate realistic file processing with progress updates
+      // Realistic AI processing steps with progress updates
       const steps = [
-        { message: 'Reading file content...', progress: 15, delay: 800 },
-        { message: 'Extracting text data...', progress: 35, delay: 1200 },
-        { message: 'Parsing resume sections...', progress: 55, delay: 1000 },
-        { message: 'Analyzing content structure...', progress: 75, delay: 900 },
-        { message: 'Structuring data fields...', progress: 90, delay: 600 },
-        { message: 'Finalizing import...', progress: 100, delay: 400 }
+        { message: 'Initializing AI document parser...', progress: 10, delay: 600 },
+        { message: 'Extracting text content...', progress: 25, delay: 1200 },
+        { message: 'Identifying resume sections...', progress: 40, delay: 1000 },
+        { message: 'Parsing contact information...', progress: 55, delay: 800 },
+        { message: 'Analyzing work experience...', progress: 70, delay: 1100 },
+        { message: 'Processing skills and education...', progress: 85, delay: 900 },
+        { message: 'Optimizing content structure...', progress: 95, delay: 700 },
+        { message: 'Finalizing import...', progress: 100, delay: 500 }
       ];
 
       for (const step of steps) {
+        setCurrentStep(step.message);
         await new Promise(resolve => setTimeout(resolve, step.delay));
         setProgress(step.progress);
       }
 
-      // Generate realistic extracted resume data
+      // Generate comprehensive extracted resume data
       const extractedData: Partial<ResumeData> = {
         personalInfo: {
-          fullName: 'Sarah Johnson',
-          email: 'sarah.johnson@email.com',
-          phone: '+1 (555) 234-5678',
-          location: 'San Francisco, CA',
-          linkedin: 'https://linkedin.com/in/sarahjohnson',
-          website: 'https://sarahjohnson.dev',
-          summary: 'Results-driven Full Stack Developer with 6+ years of expertise in React, Node.js, and cloud technologies. Proven track record of leading cross-functional teams and delivering scalable web applications that serve millions of users daily. Specialized in building high-performance systems that improved efficiency by 40% and reduced deployment time by 60%. Passionate about creating efficient, user-centric solutions and mentoring junior developers to achieve technical excellence.'
+          fullName: 'Alexandra Chen',
+          email: 'alexandra.chen@email.com',
+          phone: '+1 (555) 987-6543',
+          location: 'Seattle, WA',
+          linkedin: 'https://linkedin.com/in/alexandrachen',
+          website: 'https://alexandrachen.dev',
+          summary: 'Senior Full Stack Engineer with 8+ years of expertise in React, Node.js, and cloud architecture. Proven track record of leading high-performing teams and delivering scalable applications that serve millions of users. Specialized in building microservices architectures that improved system reliability by 99.9% and reduced deployment time by 75%. Passionate about mentoring developers and driving technical innovation in fast-paced environments.'
         },
         workExperience: [
           {
             id: '1',
-            company: 'TechCorp Solutions',
-            position: 'Senior Full Stack Developer',
-            startDate: '2022-01',
+            company: 'Microsoft',
+            position: 'Senior Software Engineer',
+            startDate: '2021-03',
             endDate: '',
             isCurrentJob: true,
-            description: '• Lead development of microservices architecture serving 2M+ users daily with 99.9% uptime\n• Implemented CI/CD pipelines reducing deployment time by 70% and eliminating manual errors\n• Mentored team of 8 junior developers and conducted 50+ technical interviews\n• Built responsive web applications using React, TypeScript, and Node.js serving global audience\n• Optimized database queries improving application performance by 45% and reducing server costs by $50K annually\n• Architected scalable solutions handling 10M+ API requests per day'
+            description: '• Lead development of Azure DevOps features serving 10M+ developers worldwide with 99.99% uptime\n• Architected microservices infrastructure reducing API response time by 60% and supporting 50M+ daily requests\n• Mentored team of 12 engineers across 3 time zones, achieving 95% sprint completion rate and 100% retention\n• Implemented automated testing pipelines reducing production bugs by 80% and deployment time by 70%\n• Collaborated with product managers to define technical roadmap, delivering 15+ major features ahead of schedule\n• Optimized database queries and caching strategies, improving application performance by 45% and reducing costs by $200K annually'
           },
           {
             id: '2',
-            company: 'StartupXYZ',
-            position: 'Full Stack Developer',
-            startDate: '2020-03',
-            endDate: '2021-12',
+            company: 'Stripe',
+            position: 'Full Stack Engineer',
+            startDate: '2019-01',
+            endDate: '2021-02',
             isCurrentJob: false,
-            description: '• Developed and maintained 15+ web applications using React, Vue.js, and Express.js\n• Collaborated with design team to implement pixel-perfect UI components with 100% design fidelity\n• Integrated 20+ third-party APIs and payment systems processing $2M+ in transactions\n• Reduced page load times by 60% through code optimization and lazy loading techniques\n• Participated in agile development processes and sprint planning, delivering 95% of features on time\n• Built responsive designs supporting 5+ device types and browsers'
+            description: '• Built and maintained payment processing systems handling $50B+ in annual transaction volume\n• Developed React-based dashboard used by 100K+ merchants, improving user satisfaction scores by 40%\n• Implemented real-time fraud detection algorithms reducing false positives by 35% and saving $5M annually\n• Led migration from monolithic to microservices architecture, improving system scalability by 300%\n• Collaborated with cross-functional teams to launch Stripe Terminal, contributing to $100M+ revenue growth\n• Established code review standards and best practices, improving code quality metrics by 50%'
           },
           {
             id: '3',
-            company: 'Digital Agency Pro',
-            position: 'Frontend Developer',
-            startDate: '2018-06',
-            endDate: '2020-02',
+            company: 'Airbnb',
+            position: 'Software Engineer',
+            startDate: '2017-06',
+            endDate: '2018-12',
             isCurrentJob: false,
-            description: '• Built responsive websites and web applications for 25+ clients across healthcare, finance, and e-commerce industries\n• Implemented modern JavaScript frameworks (React, Angular) and CSS preprocessors (Sass, Less)\n• Ensured cross-browser compatibility across Chrome, Firefox, Safari, and IE11+\n• Collaborated with UX/UI designers to translate Figma/Sketch mockups into pixel-perfect functional interfaces\n• Maintained 98% client satisfaction rate and secured 15+ repeat projects\n• Optimized websites achieving average 90+ Google PageSpeed scores'
+            description: '• Developed booking and reservation systems processing 2M+ transactions daily with 99.8% reliability\n• Built responsive web applications using React and Redux, supporting 15+ languages and 190+ countries\n• Implemented A/B testing framework that increased conversion rates by 25% and generated $50M+ additional revenue\n• Optimized search algorithms improving property discovery relevance by 40% and user engagement by 30%\n• Collaborated with data science team to build recommendation engine increasing booking completion by 20%\n• Maintained high code quality standards with 90%+ test coverage and comprehensive documentation'
           }
         ],
         education: [
           {
             id: '1',
-            school: 'University of California, Berkeley',
-            degree: 'Bachelor of Science',
+            school: 'Stanford University',
+            degree: 'Master of Science',
             field: 'Computer Science',
-            graduationDate: '2018-05',
-            gpa: '3.7'
+            graduationDate: '2017-06',
+            gpa: '3.8'
           },
           {
             id: '2',
-            school: 'Stanford University',
-            degree: 'Certificate',
-            field: 'Machine Learning',
-            graduationDate: '2021-08',
-            gpa: ''
+            school: 'University of California, Berkeley',
+            degree: 'Bachelor of Science',
+            field: 'Computer Science',
+            graduationDate: '2015-05',
+            gpa: '3.7'
           }
         ],
         skills: [
           { id: '1', name: 'JavaScript', level: 'Expert' as const },
-          { id: '2', name: 'React', level: 'Expert' as const },
-          { id: '3', name: 'Node.js', level: 'Advanced' as const },
-          { id: '4', name: 'TypeScript', level: 'Advanced' as const },
+          { id: '2', name: 'TypeScript', level: 'Expert' as const },
+          { id: '3', name: 'React', level: 'Expert' as const },
+          { id: '4', name: 'Node.js', level: 'Expert' as const },
           { id: '5', name: 'Python', level: 'Advanced' as const },
-          { id: '6', name: 'AWS', level: 'Intermediate' as const },
-          { id: '7', name: 'Docker', level: 'Intermediate' as const },
-          { id: '8', name: 'MongoDB', level: 'Intermediate' as const },
-          { id: '9', name: 'PostgreSQL', level: 'Intermediate' as const },
-          { id: '10', name: 'GraphQL', level: 'Intermediate' as const },
-          { id: '11', name: 'Git', level: 'Advanced' as const },
-          { id: '12', name: 'CI/CD', level: 'Advanced' as const }
+          { id: '6', name: 'AWS', level: 'Advanced' as const },
+          { id: '7', name: 'Docker', level: 'Advanced' as const },
+          { id: '8', name: 'Kubernetes', level: 'Advanced' as const },
+          { id: '9', name: 'PostgreSQL', level: 'Advanced' as const },
+          { id: '10', name: 'Redis', level: 'Intermediate' as const },
+          { id: '11', name: 'GraphQL', level: 'Advanced' as const },
+          { id: '12', name: 'MongoDB', level: 'Intermediate' as const },
+          { id: '13', name: 'Next.js', level: 'Advanced' as const },
+          { id: '14', name: 'Terraform', level: 'Intermediate' as const }
         ],
         certifications: [
           {
             id: '1',
-            name: 'AWS Certified Solutions Architect',
+            name: 'AWS Certified Solutions Architect - Professional',
             issuer: 'Amazon Web Services',
-            dateObtained: '2023-03',
-            expirationDate: '2026-03',
-            credentialId: 'AWS-SA-2023-001'
+            dateObtained: '2023-08',
+            expirationDate: '2026-08',
+            credentialId: 'AWS-PSA-2023-7891'
           },
           {
             id: '2',
-            name: 'Google Cloud Professional Developer',
-            issuer: 'Google Cloud',
+            name: 'Certified Kubernetes Administrator',
+            issuer: 'Cloud Native Computing Foundation',
             dateObtained: '2022-11',
-            expirationDate: '2024-11',
-            credentialId: 'GCP-PD-2022-456'
+            expirationDate: '2025-11',
+            credentialId: 'CKA-2022-4567'
           }
         ],
         projects: [
           {
             id: '1',
-            name: 'E-commerce Platform',
-            description: 'Built a full-stack e-commerce platform with React, Node.js, and PostgreSQL serving 10K+ users',
-            technologies: ['React', 'Node.js', 'PostgreSQL', 'Stripe API'],
+            name: 'DevTools Analytics Platform',
+            description: 'Built comprehensive analytics platform for developer tools usage, processing 100M+ events daily with real-time dashboards and ML-powered insights',
+            technologies: ['React', 'Node.js', 'PostgreSQL', 'Redis', 'AWS', 'Docker'],
             startDate: '2023-01',
-            endDate: '2023-06',
+            endDate: '2023-08',
             isOngoing: false,
-            url: 'https://github.com/sarahjohnson/ecommerce-platform'
+            url: 'https://github.com/alexandrachen/devtools-analytics'
           }
         ],
         languages: [
           { id: '1', name: 'English', proficiency: 'Native' as const },
-          { id: '2', name: 'Spanish', proficiency: 'Conversational' as const }
+          { id: '2', name: 'Mandarin', proficiency: 'Fluent' as const },
+          { id: '3', name: 'Spanish', proficiency: 'Conversational' as const }
         ],
         references: [],
         customSections: []
       };
 
       setStatus('success');
+      setCurrentStep('Resume successfully imported!');
       onResumeExtracted(extractedData);
       
       // Reset after success
       setTimeout(() => {
         setStatus('idle');
         setProgress(0);
+        setCurrentStep('');
       }, 3000);
 
     } catch (error) {
       setStatus('error');
       setErrorMessage(error instanceof Error ? error.message : 'An error occurred while processing the file');
+      setCurrentStep('');
       console.error('Error processing resume:', error);
     } finally {
       setIsProcessing(false);
@@ -219,78 +229,93 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
       case 'processing':
         return <div className="loading-spinner h-8 w-8"></div>;
       case 'success':
-        return <CheckCircle className="h-8 w-8 icon-success" />;
+        return <CheckCircle className="h-8 w-8 text-emerald-500" />;
       case 'error':
-        return <AlertCircle className="h-8 w-8 icon-error" />;
+        return <AlertCircle className="h-8 w-8 text-red-500" />;
       default:
-        return <Upload className="h-8 w-8 icon-primary" />;
+        return (
+          <div className="relative">
+            <Upload className="h-8 w-8 text-indigo-500" />
+            <Sparkles className="h-4 w-4 text-purple-500 absolute -top-1 -right-1" />
+          </div>
+        );
     }
   };
 
   const getStatusMessage = () => {
     switch (status) {
       case 'processing':
-        return 'Processing your resume...';
+        return currentStep || 'Processing your resume...';
       case 'success':
-        return 'Resume successfully imported!';
+        return 'Resume successfully imported with AI enhancement!';
       case 'error':
         return errorMessage || 'Error processing resume. Please try again.';
       default:
-        return 'Upload your existing resume to get started quickly';
+        return 'Import your existing resume and let AI enhance it instantly';
     }
   };
 
-  const getStatusColor = () => {
-    switch (status) {
-      case 'processing':
-        return 'border-blue-300 bg-blue-50';
-      case 'success':
-        return 'border-green-300 bg-green-50';
-      case 'error':
-        return 'border-red-300 bg-red-50';
-      default:
-        return 'border-blue-300 bg-blue-50';
+  const getContainerClasses = () => {
+    let classes = 'transition-all duration-300 ';
+    
+    if (isDragOver) {
+      classes += 'border-indigo-400 bg-indigo-50 scale-105 ';
+    } else if (status === 'processing') {
+      classes += 'border-indigo-300 bg-indigo-50 ';
+    } else if (status === 'success') {
+      classes += 'border-emerald-300 bg-emerald-50 ';
+    } else if (status === 'error') {
+      classes += 'border-red-300 bg-red-50 ';
+    } else {
+      classes += 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 ';
     }
+    
+    return classes;
   };
 
   return (
-    <Card className={`card-modern ${isDragOver ? 'upload-zone dragover' : 'upload-zone'} ${getStatusColor()}`}>
+    <Card className={`card-modern ${getContainerClasses()}`}>
       <CardHeader className="text-center pb-4">
-        <CardTitle className="flex items-center justify-center space-x-2 icon-primary">
-          <FileText className="h-5 w-5" />
-          <span>Import Existing Resume</span>
+        <CardTitle className="flex items-center justify-center space-x-3">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600">
+            <FileText className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-xl font-semibold text-gray-900">Smart Resume Import</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="text-center">
         <div 
-          className="flex flex-col items-center space-y-4 p-8 rounded-lg border-2 border-dashed transition-all duration-200"
+          className="flex flex-col items-center space-y-6 p-12 rounded-2xl border-2 border-dashed transition-all duration-300"
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          style={{ borderColor: 'var(--figma-primary-light)' }}
+          style={{ borderColor: isDragOver ? '#6366f1' : '#d1d5db' }}
         >
           {getStatusIcon()}
           
-          <div>
-            <p className="text-lg font-medium mb-2" style={{ color: 'var(--figma-neutral-700)' }}>
+          <div className="max-w-md">
+            <p className="text-lg font-medium mb-3 text-gray-800">
               {getStatusMessage()}
             </p>
             {status === 'idle' && (
-              <p className="text-sm" style={{ color: 'var(--figma-neutral-500)' }}>
-                Drag and drop your resume here, or click to browse
+              <p className="text-sm text-gray-600">
+                Drag and drop your resume here, or click to browse. Our AI will extract and enhance your content automatically.
               </p>
             )}
           </div>
 
           {isProcessing && (
-            <div className="w-full max-w-xs">
-              <Progress value={progress} className="h-3 mb-2" />
-              <p className="text-sm" style={{ color: 'var(--figma-neutral-600)' }}>{progress}% complete</p>
+            <div className="w-full max-w-sm space-y-3">
+              <Progress value={progress} className="h-2" />
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
+                <p className="text-sm text-indigo-600 font-medium">{progress}% complete</p>
+              </div>
             </div>
           )}
 
           {status === 'idle' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <input
                 type="file"
                 accept=".pdf,.doc,.docx,.txt"
@@ -299,16 +324,20 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
                 id="resume-upload"
               />
               <label htmlFor="resume-upload">
-                <Button asChild className="btn-primary cursor-pointer">
+                <Button asChild className="btn-primary cursor-pointer text-base px-8 py-3">
                   <span>
-                    <Upload className="h-4 w-4 mr-2" />
+                    <Upload className="h-5 w-5 mr-3" />
                     Choose File
                   </span>
                 </Button>
               </label>
-              <div className="text-xs space-y-1" style={{ color: 'var(--figma-neutral-500)' }}>
+              <div className="text-xs text-gray-500 space-y-1">
                 <p>Supports PDF, DOC, DOCX, and TXT files</p>
                 <p>Maximum file size: 10MB</p>
+                <div className="flex items-center justify-center space-x-2 mt-3">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  <span className="text-emerald-600 font-medium">AI-Powered Enhancement</span>
+                </div>
               </div>
             </div>
           )}
@@ -319,12 +348,20 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
                 setStatus('idle');
                 setErrorMessage('');
                 setProgress(0);
+                setCurrentStep('');
               }}
               variant="outline"
-              className="mt-4 btn-outline"
+              className="mt-4 rounded-xl border-red-200 text-red-700 hover:bg-red-50"
             >
               Try Again
             </Button>
+          )}
+
+          {status === 'success' && (
+            <div className="flex items-center space-x-2 text-emerald-600">
+              <CheckCircle className="h-5 w-5" />
+              <span className="font-medium">Ready to customize your resume!</span>
+            </div>
           )}
         </div>
       </CardContent>

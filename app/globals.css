@@ -78,77 +78,68 @@
   }
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    background: linear-gradient(135deg, #fafbfc 0%, #f4f6f8 100%);
   }
 }
 
-/* Figma Color Scheme Implementation */
+/* Alumna Brand Colors from Figma */
 :root {
-  /* Primary Colors from Figma - Deep Blue */
-  --figma-primary: #1e3a8a;
-  --figma-primary-light: #3b82f6;
-  --figma-primary-dark: #1e40af;
+  /* Primary Brand Colors */
+  --alumna-primary: #6366f1;
+  --alumna-primary-light: #818cf8;
+  --alumna-primary-dark: #4f46e5;
   
-  /* Secondary Colors - Teal/Cyan */
-  --figma-secondary: #0891b2;
-  --figma-secondary-light: #06b6d4;
-  --figma-secondary-dark: #0e7490;
+  /* Secondary Colors */
+  --alumna-secondary: #10b981;
+  --alumna-secondary-light: #34d399;
+  --alumna-secondary-dark: #059669;
   
-  /* Accent Colors - Purple */
-  --figma-accent: #7c3aed;
-  --figma-accent-light: #8b5cf6;
-  --figma-accent-dark: #6d28d9;
+  /* Accent Colors */
+  --alumna-accent: #f59e0b;
+  --alumna-accent-light: #fbbf24;
+  --alumna-accent-dark: #d97706;
   
-  /* Success - Green */
-  --figma-success: #059669;
-  --figma-success-light: #10b981;
-  --figma-success-dark: #047857;
+  /* Status Colors */
+  --alumna-success: #10b981;
+  --alumna-warning: #f59e0b;
+  --alumna-error: #ef4444;
+  --alumna-info: #3b82f6;
   
-  /* Warning - Orange */
-  --figma-warning: #ea580c;
-  --figma-warning-light: #f97316;
-  --figma-warning-dark: #c2410c;
-  
-  /* Error - Red */
-  --figma-error: #dc2626;
-  --figma-error-light: #ef4444;
-  --figma-error-dark: #b91c1c;
-  
-  /* Neutral Colors */
-  --figma-neutral-50: #f8fafc;
-  --figma-neutral-100: #f1f5f9;
-  --figma-neutral-200: #e2e8f0;
-  --figma-neutral-300: #cbd5e1;
-  --figma-neutral-400: #94a3b8;
-  --figma-neutral-500: #64748b;
-  --figma-neutral-600: #475569;
-  --figma-neutral-700: #334155;
-  --figma-neutral-800: #1e293b;
-  --figma-neutral-900: #0f172a;
+  /* Neutral Grays */
+  --alumna-gray-50: #fafbfc;
+  --alumna-gray-100: #f4f6f8;
+  --alumna-gray-200: #e5e7eb;
+  --alumna-gray-300: #d1d5db;
+  --alumna-gray-400: #9ca3af;
+  --alumna-gray-500: #6b7280;
+  --alumna-gray-600: #4b5563;
+  --alumna-gray-700: #374151;
+  --alumna-gray-800: #1f2937;
+  --alumna-gray-900: #111827;
 }
 
-/* Custom Component Styles with Figma Colors */
+/* Alumna Component Styles */
 .btn-primary {
-  @apply text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 shadow-lg;
-  background: linear-gradient(135deg, var(--figma-primary) 0%, var(--figma-primary-dark) 100%);
-  box-shadow: 0 4px 14px rgba(30, 58, 138, 0.25);
+  @apply text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl;
+  background: linear-gradient(135deg, var(--alumna-primary) 0%, var(--alumna-primary-dark) 100%);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(30, 58, 138, 0.35);
-  background: linear-gradient(135deg, var(--figma-primary-light) 0%, var(--figma-primary) 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, var(--alumna-primary-light) 0%, var(--alumna-primary) 100%);
 }
 
 .btn-secondary {
-  @apply text-white font-semibold px-6 py-3 rounded-lg transition-all duration-200 shadow-lg;
-  background: linear-gradient(135deg, var(--figma-secondary) 0%, var(--figma-secondary-dark) 100%);
-  box-shadow: 0 4px 14px rgba(8, 145, 178, 0.25);
+  @apply text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl;
+  background: linear-gradient(135deg, var(--alumna-secondary) 0%, var(--alumna-secondary-dark) 100%);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
 }
 
 .btn-secondary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(8, 145, 178, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
 }
 
 .btn-success {
@@ -185,34 +176,35 @@
   transform: translateY(-1px);
 }
 
-/* Card Styles */
+/* Modern Card Styles */
 .card-modern {
-  @apply bg-white rounded-xl shadow-sm border p-6 transition-all duration-200;
+  @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transition-all duration-300;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-color: var(--figma-neutral-200);
+  border-color: var(--alumna-gray-200);
 }
 
 .card-modern:hover {
-  @apply shadow-lg;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
+  @apply shadow-xl;
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(17, 24, 39, 0.08);
 }
 
-/* Form Styles */
+/* Enhanced Form Styles */
 .form-input {
-  @apply w-full px-4 py-3 border rounded-lg transition-all duration-200;
+  @apply w-full px-4 py-3 border rounded-xl transition-all duration-300 text-sm;
   background: rgba(255, 255, 255, 0.9);
-  border-color: var(--figma-neutral-300);
+  border-color: var(--alumna-gray-300);
 }
 
 .form-input:focus {
-  @apply ring-2 ring-opacity-50;
-  ring-color: var(--figma-primary);
-  border-color: var(--figma-primary);
-  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+  @apply ring-2 ring-opacity-30;
+  ring-color: var(--alumna-primary);
+  border-color: var(--alumna-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
+/* Header Gradient */
 .form-textarea {
   @apply w-full px-4 py-3 border rounded-lg transition-all duration-200 resize-none;
   background: rgba(255, 255, 255, 0.9);
@@ -233,52 +225,62 @@
 
 /* Header Styles */
 .header-gradient {
-  background: linear-gradient(135deg, var(--figma-primary) 0%, var(--figma-secondary) 100%);
+  background: linear-gradient(135deg, var(--alumna-primary) 0%, var(--alumna-secondary) 100%);
 }
 
-/* Template Selector */
-.template-card {
-  @apply border-2 rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-lg;
-  background: rgba(255, 255, 255, 0.9);
-  border-color: var(--figma-neutral-200);
+/* AI Enhancement Styles */
+.ai-gradient {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 
-.template-card.selected {
-  @apply shadow-lg;
-  border-color: var(--figma-primary);
-  background: linear-gradient(135deg, rgba(30, 58, 138, 0.05) 0%, rgba(8, 145, 178, 0.05) 100%);
+.preview-container {
+  background: linear-gradient(135deg, var(--alumna-gray-50) 0%, white 100%);
+  border: 2px solid var(--alumna-gray-200);
 }
 
-.template-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
+/* Status Indicators */
+.status-success {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--alumna-secondary-dark);
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-/* AI Features */
-.ai-card {
-  @apply rounded-xl p-6 transition-all duration-200;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(30, 58, 138, 0.05) 100%);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+.status-warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  color: var(--alumna-accent-dark);
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
-.ai-suggestion {
-  @apply bg-white rounded-lg p-4 border transition-all duration-200 hover:shadow-md;
-  border-color: var(--figma-accent-light);
+.status-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.ai-suggestion:hover {
-  transform: translateY(-1px);
+/* Icon Colors */
+.icon-primary { color: var(--alumna-primary); }
+.icon-secondary { color: var(--alumna-secondary); }
+.icon-accent { color: var(--alumna-accent); }
+.icon-success { color: var(--alumna-success); }
+.icon-warning { color: var(--alumna-warning); }
+.icon-error { color: var(--alumna-error); }
+
+/* Loading Animation */
+.loading-spinner {
+  @apply animate-spin rounded-full border-2;
+  border-color: var(--alumna-gray-300);
+  border-top-color: var(--alumna-primary);
 }
 
-/* Progress Bars */
-.progress-bar {
-  @apply rounded-full overflow-hidden h-2;
-  background-color: var(--figma-neutral-200);
+/* Smooth Animations */
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
 }
 
-.progress-fill {
-  @apply h-full rounded-full transition-all duration-500 ease-out;
-  background: linear-gradient(90deg, var(--figma-primary) 0%, var(--figma-secondary) 100%);
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Skill Level Badges */
