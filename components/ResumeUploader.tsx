@@ -354,21 +354,11 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     return dateStr
       .replace(/Jan[uary]?/ig, '01').replace(/Feb[ruary]?/ig, '02').replace(/Mar[ch]?/ig, '03')
       .replace(/Apr[il]?/ig, '04').replace(/May/ig, '05').replace(/Jun[e]?/ig, '06')
-      .replace(/Jul[y]?/ig, '07').replace(/Aug[ust]?/ig, '08').replace(/Sep[t]?[ember]?/ig, '09')
+      .replace(/Jul[y]?/ig, '07').replace /Aug[ust]?/ig, '08').replace(/Sep[t]?[ember]?/ig, '09')
       .replace(/Oct[ober]?/ig, '10').replace(/Nov[ember]?/ig, '11').replace(/Dec[ember]?/ig, '12')
       .replace(/\s+/g, '-')
       .replace(/(\d{2})-(\d{4})/, '$2-$1');
-  };kExperience.push({
-        id: String(Date.now() + i),
-        company: company || '',
-        position: position || '',
-        startDate: startDate || '',
-        endDate: endDateRaw?.includes('Present') ? '' : (endDateRaw || ''),
-        isCurrentJob: /Present/i.test(dateRange),
-        description: description || ''
-      });
-    }
-  }
+  };
 
   // Fallbacks: if parsing is weak, put raw text into summary and a generic experience entry
   const hasAnyData = (fullName || emailMatch || phoneMatch || linkedinMatch || urlMatch || workExperience.length || education.length || skills.length);

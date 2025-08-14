@@ -48,7 +48,7 @@ export default function Home() {
     // Load data from localStorage on component mount
     const savedData = localStorage.getItem('resumeData');
     const hasSeenWizard = localStorage.getItem('hasSeenWizard');
-    
+
     if (savedData) {
       try {
         setResumeData(JSON.parse(savedData));
@@ -72,7 +72,7 @@ export default function Home() {
     setWizardData(data);
     setShowWizard(false);
     localStorage.setItem('hasSeenWizard', 'true');
-    
+
     // Apply wizard data to resume
     const wizardEnhancements = generateWizardEnhancements(data);
     setResumeData(prev => ({ ...prev, ...wizardEnhancements }));
@@ -85,7 +85,7 @@ export default function Home() {
 
   const generateWizardEnhancements = (data: any) => {
     const enhancements: Partial<ResumeData> = {};
-    
+
     // Generate template suggestions based on wizard answers
     if (data.industry === 'tech') {
       enhancements.selectedTemplate = 'modern';
@@ -94,7 +94,7 @@ export default function Home() {
     } else if (data.experience === 'entry') {
       enhancements.selectedTemplate = 'minimal';
     }
-    
+
     return enhancements;
   };
 
@@ -121,7 +121,7 @@ export default function Home() {
       customSections: extractedData.customSections || [],
       selectedTemplate: resumeData.selectedTemplate // Keep current template selection
     };
-    
+
     setResumeData(newResumeData);
     setShowUploader(false);
   };
@@ -227,7 +227,7 @@ export default function Home() {
     `);
 
     printWindow.document.close();
-    
+
     // Wait for content to load, then print
     setTimeout(() => {
       printWindow.print();
@@ -247,7 +247,7 @@ export default function Home() {
           skills: [...resumeData.skills, ...newSkills]
         });
         break;
-      
+
       case 'summary':
         updateResumeData({
           personalInfo: {
@@ -256,7 +256,7 @@ export default function Home() {
           }
         });
         break;
-      
+
       case 'experience':
         const enhancedExperience = resumeData.workExperience.map(exp => {
           const enhancement = suggestion.suggestions.find((s: any) => s.id === exp.id);
@@ -311,13 +311,13 @@ export default function Home() {
           skills: [...resumeData.skills, ...newSkills]
         });
       }
-      
+
       // Enhance summary with job-specific content
       if (optimizations.enhanceSummary && optimizations.jobTitle) {
         const currentSummary = resumeData.personalInfo.summary || '';
         const enhancedSummary = currentSummary + 
           ` Seeking opportunities as ${optimizations.jobTitle} to leverage expertise in ${resumeData.skills.slice(0, 3).map(s => s.name).join(', ')}.`;
-        
+
         updateResumeData({
           personalInfo: {
             ...resumeData.personalInfo,
@@ -360,7 +360,7 @@ export default function Home() {
         isAIProcessing={isAIProcessing}
         onDownloadPDF={handleDownloadPDF}
       />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Upload Section - Show when no content or explicitly requested */}
         {(!hasContent || showUploader) && (
@@ -377,7 +377,7 @@ export default function Home() {
           selectedTemplate={resumeData.selectedTemplate}
           onTemplateChange={(template) => updateResumeData({ selectedTemplate: template })}
         />
-        
+
         <div className="grid lg:grid-cols-5 gap-8 mt-8">
           {/* Form Section */}
           <div className="lg:col-span-3">
@@ -388,7 +388,7 @@ export default function Home() {
                 <TabsTrigger value="analyzer">Analyzer</TabsTrigger>
                 <TabsTrigger value="job-match">Job Match</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="form">
                 <Card className="bg-white shadow-sm border border-gray-200">
                   <ResumeForm
@@ -397,21 +397,21 @@ export default function Home() {
                   />
                 </Card>
               </TabsContent>
-              
+
               <TabsContent value="ai">
                 <AIAssistant
                   resumeData={resumeData}
                   onApplySuggestion={handleApplySuggestion}
                 />
               </TabsContent>
-              
+
               <TabsContent value="analyzer">
                 <ResumeAnalyzer
                   resumeData={resumeData}
                   onApplyFix={handleAnalyzerFix}
                 />
               </TabsContent>
-              
+
               <TabsContent value="job-match">
                 <JobMatchAnalyzer
                   resumeData={resumeData}

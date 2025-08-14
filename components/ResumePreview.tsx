@@ -22,7 +22,7 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Safety check for resumeData
-  if (!resumeData) {
+  if (!resumeData || !resumeData.personalInfo) {
     return (
       <Card className="bg-white border border-gray-200 shadow-sm sticky top-24 h-fit">
         <div className="p-6">
