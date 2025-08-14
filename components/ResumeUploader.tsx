@@ -24,7 +24,7 @@ async function aiStructureFromText(rawText: string): Promise<Partial<ResumeData>
   try {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!apiKey || !rawText || rawText.length < 20) return null;
-    
+
     const prompt = {
       contents: [
         {
@@ -88,7 +88,15 @@ Parse into this EXACT JSON structure:
       "graduationDate": "YYYY-MM format"
     }
   ],
-  "skills": ["skill1", "skill2", "skill3"]
+  "skills": ["skill1", "skill2", "skill3"],
+  "certifications": ["cert1", "cert2"],
+  "projects": [
+    {
+      "id": "string",
+      "name": "string",
+      "description": "string"
+    }
+  ]
 }
 
 IMPORTANT: Return ONLY valid JSON. No markdown, no explanations, no code blocks.
@@ -100,7 +108,7 @@ ${rawText.slice(0, 12000)}`
         }
       ]
     };
-    
+
     const resp = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -108,10 +116,10 @@ ${rawText.slice(0, 12000)}`
     });
     const data = await resp.json();
     let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
+
     // Clean up the response to extract JSON
     text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
+
     let parsed: any = {};
     try { 
       parsed = JSON.parse(text); 
@@ -159,6 +167,20 @@ ${rawText.slice(0, 12000)}`
         graduationDate: e.graduationDate || ''
       }));
     }
+    if (Array.isArray(parsed.certifications)) {
+      result.certifications = parsed.certifications.slice(0, 10).map((c: any, i: number) => ({
+        id: c.id || String(Date.now() + i),
+        name: c.name || '',
+        description: c.description || ''
+      }));
+    }
+    if (Array.isArray(parsed.projects)) {
+      result.projects = parsed.projects.slice(0, 10).map((p: any, i: number) => ({
+        id: p.id || String(Date.now() + i),
+        name: p.name || '',
+        description: p.description || ''
+      }));
+    }
     return result;
   } catch {
     return null;
@@ -202,35 +224,46 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
   }
 
   // Better section detection
-  const sectionRegex = /(work experience|professional experience|experience|employment|career|education|academic|qualifications|skills|technical skills|competencies|abilities)/i;
+  const sectionRegex = /(work experience|professional experience|experience|employment|career|education|academic|qualifications|skills|technical skills|competencies|abilities|certifications?|certificates?|licensed?|courses?|training|coursework|projects?|personal projects?|side projects?|extracurricular|activities|volunteer|achievements?|honors?|awards?)/i;
   const sections: Record<string, string[]> = {};
-  let current = 'intro';
-  let foundSections = new Set<string>();
-  
+  let currentSection = 'intro';
+  const foundSections = new Set<string>();
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const nextLine = lines[i + 1] || '';
     
-    // More sophisticated section detection
-    if (sectionRegex.test(line) || (line.length < 50 && line.toUpperCase() === line && line.length > 3)) {
-      let sectionName = 'other';
-      
-      if (/work|professional|experience|employment|career/i.test(line)) {
-        sectionName = 'experience';
-      } else if (/education|academic|qualifications|university|college|school/i.test(line)) {
-        sectionName = 'education';
-      } else if (/skills|technical|competencies|abilities|technologies/i.test(line)) {
-        sectionName = 'skills';
+    // Improved section header detection
+    if (sectionRegex.test(line) || (line.length < 50 && line.toUpperCase() === line && line.length > 3 && !line.includes(' ') && !line.includes(':'))) {
+      let identifiedSection = 'other';
+
+      if (/^(experience|work|employment|career|professional)/i.test(line)) {
+        identifiedSection = 'work';
+      } else if (/^(education|academic|school|university|college)/i.test(line)) {
+        identifiedSection = 'education';
+      } else if (/^(skills|technical|abilities|competencies)/i.test(line)) {
+        identifiedSection = 'skills';
+      } else if (/^(personal|contact|profile|summary|objective)/i.test(line)) {
+        identifiedSection = 'personal';
+      } else if (/^(certifications?|certificates?|licensed?)/i.test(line)) {
+        identifiedSection = 'certifications';
+      } else if (/^(courses?|training|coursework)/i.test(line)) {
+        identifiedSection = 'courses';
+      } else if (/^(projects?|personal projects?|side projects?)/i.test(line)) {
+        identifiedSection = 'projects';
+      } else if (/^(extracurricular|activities|volunteer)/i.test(line)) {
+        identifiedSection = 'extracurricular';
+      } else if (/^(achievements?|honors?|awards?)/i.test(line)) {
+        identifiedSection = 'achievements';
       }
-      
-      if (!foundSections.has(sectionName)) {
-        current = sectionName;
-        foundSections.add(sectionName);
-        sections[current] = [];
+
+      if (!foundSections.has(identifiedSection)) {
+        currentSection = identifiedSection;
+        foundSections.add(identifiedSection);
+        sections[currentSection] = [];
       }
     } else if (line.length > 0) {
-      if (!sections[current]) sections[current] = [];
-      sections[current].push(line);
+      if (!sections[currentSection]) sections[currentSection] = [];
+      sections[currentSection].push(line);
     }
   }
 
@@ -253,7 +286,7 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
       'illustrator', 'figma', 'sketch', 'project management', 'agile', 'scrum', 'jira',
       'tensorflow', 'pytorch', 'machine learning', 'data analysis', 'tableau', 'power bi'
     ];
-    
+
     const tokens = skillsText
       .split(/[,•\n;|\-\(\)]+/)
       .map(s => s.trim())
@@ -264,12 +297,12 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
         if (/\b(years?|experience|working|with|of|in|at|the|and|or|for)\b/i.test(s)) return false;
         if (/\d+\s*(years?|months?|yr|mo)/i.test(s)) return false;
         if (/(company|corporation|inc|llc|ltd|university|college)/i.test(s)) return false;
-        
+
         // Check if it's likely a skill
         return commonSkillKeywords.some(keyword => lower.includes(keyword)) || 
                /^[a-zA-Z][a-zA-Z0-9\s\.\+\#\-]{1,25}$/.test(s);
       });
-      
+
     skills = Array.from(new Set(tokens)).slice(0, 20).map((name, idx) => ({
       id: String(Date.now() + idx),
       name: name.charAt(0).toUpperCase() + name.slice(1),
@@ -286,8 +319,8 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
       const c = chunks[i];
       const school = (c.match(/^(.*?)(?:,|\n|$)/)?.[1] || '').trim();
       if (!school) continue;
-      const degree = (c.match(/(Bachelor|Master|B\.?Sc\.?|M\.?Sc\.?|Ph\.?D\.?|Diploma|Degree)[^\n,]*/i)?.[0] || '').trim();
-      const field = (c.match(/(Computer|Engineering|Science|Arts|Business|Technology|Design)[^\n,]*/i)?.[0] || '').trim();
+      const degree = (c.match(/(Bachelor|Master|B\.?Sc\.?|M\.?Sc\.?|Ph\.?D\.?|Diploma|Certificate|Associate's|High School Diploma)[^\n,]*/i)?.[0] || '').trim();
+      const field = (c.match(/(Computer Science|Engineering|Information Technology|Business Administration|Arts|Science|Mathematics|Physics|Chemistry|Biology|Economics|Psychology|Design|Marketing|Finance)[^\n,]*/i)?.[0] || '').trim();
       const year = (c.match(/(19|20)\d{2}[-–]?(0[1-9]|1[0-2])?/g)?.pop() || '').replace(/[–]/g, '-');
       education.push({
         id: String(Date.now() + i),
@@ -299,19 +332,33 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     }
   }
 
+  // Parse certifications
+  const certifications = (sections['certifications'] || []).map((certText, i) => {
+    const name = certText.split('\n')[0]?.trim() || '';
+    const description = certText.split('\n').slice(1).join('\n').trim();
+    return { id: String(Date.now() + i), name, description };
+  }).slice(0, 10);
+
+  // Parse projects
+  const projects = (sections['projects'] || []).map((projText, i) => {
+    const name = projText.split('\n')[0]?.trim() || '';
+    const description = projText.split('\n').slice(1).join('\n').trim();
+    return { id: String(Date.now() + i), name, description };
+  }).slice(0, 10);
+
   // Parse experience entries - significantly improved
   const workExperience: WorkExperience[] = [];
-  const expLines = sections['experience'] || [];
-  
+  const expLines = sections['work'] || [];
+
   if (expLines.length) {
     // Advanced job entry detection
     let currentEntry = '';
     const jobEntries: string[] = [];
-    
+
     for (let i = 0; i < expLines.length; i++) {
       const line = expLines[i];
       const nextLine = expLines[i + 1] || '';
-      
+
       // Enhanced patterns for detecting new job entries
       const isNewJobEntry = 
         // Position at Company format
@@ -321,7 +368,7 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
         // Position - Company format
         /^[A-Z][^.!?]*\s+-\s+[A-Z][A-Za-z\s&.,'-]+$/i.test(line) ||
         // Company followed by position on next line
-        (/^[A-Z][A-Za-z\s&.,'-]+(?:Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services)?\.?$/i.test(line) && 
+        (/^[A-Z][A-Za-z\s&.,'-]+(?:Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services|Consulting|Agency)?\.?$/i.test(line) && 
          nextLine && /^[A-Z][^.!?]*$/.test(nextLine) && !nextLine.includes('•')) ||
         // Line with dates indicating job period
         /\d{4}.*(?:present|current|\d{4})/i.test(line) ||
@@ -336,7 +383,7 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
         currentEntry += line + '\n';
       }
     }
-    
+
     if (currentEntry.trim()) {
       jobEntries.push(currentEntry.trim());
     }
@@ -345,16 +392,16 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     for (let i = 0; i < jobEntries.length && workExperience.length < 8; i++) {
       const entry = jobEntries[i];
       const entryLines = entry.split('\n').map(l => l.trim()).filter(Boolean);
-      
+
       if (entryLines.length === 0) continue;
-      
+
       let position = '', company = '', startDate = '', endDate = '', isCurrentJob = false;
       let description = '';
-      
+
       // Enhanced company and position extraction
       for (let j = 0; j < Math.min(3, entryLines.length); j++) {
         const line = entryLines[j];
-        
+
         // Check for common patterns
         if (line.includes(' at ') || line.includes(' @ ')) {
           const parts = line.split(/ at | @ /i);
@@ -370,18 +417,18 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
           }
         } else if (line.includes(', ') && !line.includes('•')) {
           const parts = line.split(', ');
-          if (parts.length === 2 && !parts[1].includes('LLC') && !parts[1].includes('Inc')) {
+          if (parts.length === 2 && !parts[1].toLowerCase().includes('university') && !parts[1].toLowerCase().includes('college') && !parts[1].toLowerCase().includes('institute')) {
             company = parts[0]?.trim() || '';
             position = parts[1]?.trim().replace(/[,.]$/, '') || '';
             break;
           }
         }
-        
+
         // Try to identify company vs position based on common indicators
         if (!company && !position) {
           const hasCompanyIndicators = /\b(Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services|Consulting|Agency)\b/i.test(line);
-          const hasPositionIndicators = /\b(Manager|Director|Developer|Engineer|Analyst|Specialist|Coordinator|Assistant|Lead|Senior|Junior)\b/i.test(line);
-          
+          const hasPositionIndicators = /\b(Manager|Director|Developer|Engineer|Analyst|Specialist|Coordinator|Assistant|Lead|Senior|Junior|Intern)\b/i.test(line);
+
           if (hasCompanyIndicators && !hasPositionIndicators) {
             company = line.replace(/[,.]$/, '');
           } else if (hasPositionIndicators && !hasCompanyIndicators) {
@@ -394,14 +441,14 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
           }
         }
       }
-      
+
       // Enhanced date extraction
       const datePatterns = [
-        /((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})\s*[–\-to]+\s*(Present|Current|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}))/i,
+        /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})\s*[–\-to]+\s*(Present|Current|(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}))/i,
         /(\d{1,2}\/\d{4})\s*[–\-to]+\s*(Present|Current|\d{1,2}\/\d{4})/i,
         /(\d{4})\s*[–\-to]+\s*(Present|Current|\d{4})/i
       ];
-      
+
       for (const pattern of datePatterns) {
         const dateMatch = entry.match(pattern);
         if (dateMatch) {
@@ -414,17 +461,17 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
           break;
         }
       }
-      
+
       // Extract description (everything that's not header or dates)
       const descriptionLines = entryLines.filter(line => {
         // Skip header lines and date lines
         const isHeader = line === entryLines[0] || line === entryLines[1];
         const hasDate = datePatterns.some(pattern => pattern.test(line));
-        return !isHeader && !hasDate;
+        return !isHeader && !hasDate && !line.includes(' at ') && !line.includes(' - ') && !line.includes(', ');
       });
-      
+
       description = descriptionLines.join('\n').trim();
-      
+
       // Fallback: if we couldn't parse company/position clearly
       if (!company && !position && entryLines[0]) {
         const firstLine = entryLines[0];
@@ -451,10 +498,9 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     }
   }
 
-  
 
   // Fallbacks: if parsing is weak, put raw text into summary and a generic experience entry
-  const hasAnyData = (fullName || emailMatch || phoneMatch || linkedinMatch || urlMatch || workExperience.length || education.length || skills.length);
+  const hasAnyData = (fullName || emailMatch || phoneMatch || linkedinMatch || urlMatch || workExperience.length || education.length || skills.length || certifications.length || projects.length);
   let fallbackSummary = summary || lines.slice(0, 12).join(' ');
   if (!fallbackSummary) {
     fallbackSummary = text.split(/\n{2,}/)[0]?.slice(0, 1200) || '';
@@ -498,6 +544,8 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     workExperience: normalizedWork,
     education,
     skills,
+    certifications,
+    projects,
     customSections
   } as Partial<ResumeData>;
 }
@@ -596,6 +644,8 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
           workExperience: aiData.workExperience?.length ? aiData.workExperience : extractedData.workExperience,
           education: aiData.education?.length ? aiData.education : extractedData.education,
           skills: aiData.skills?.length ? aiData.skills : extractedData.skills,
+          certifications: aiData.certifications?.length ? aiData.certifications : extractedData.certifications,
+          projects: aiData.projects?.length ? aiData.projects : extractedData.projects
         } as Partial<ResumeData>;
       }
 
@@ -625,7 +675,7 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
       if (onExternalFileProcessed) {
         onExternalFileProcessed();
       }
-      
+
       // Reset after success
       setTimeout(() => {
         setStatus('idle');
@@ -663,10 +713,10 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(false);
-    
+
     const files = Array.from(e.dataTransfer.files);
     const file = files[0];
-    
+
     if (file) {
       processResumeFile(file);
     }
@@ -712,7 +762,7 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
 
   const getContainerClasses = () => {
     let classes = 'transition-all duration-300 ';
-    
+
     if (isDragOver) {
       classes += 'border-indigo-400 bg-indigo-50 scale-105 ';
     } else if (status === 'processing') {
@@ -724,7 +774,7 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
     } else {
       classes += 'border-gray-200 bg-white hover:border-indigo-300 hover:bg-indigo-50 ';
     }
-    
+
     return classes;
   };
 
@@ -747,7 +797,7 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
           style={{ borderColor: isDragOver ? '#6366f1' : '#d1d5db' }}
         >
           {getStatusIcon()}
-          
+
           <div className="max-w-md">
             <p className="text-lg font-medium mb-3 text-gray-800">
               {getStatusMessage()}
