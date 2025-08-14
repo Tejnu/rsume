@@ -2,14 +2,13 @@
 'use client';
 
 import { ResumeData } from '@/types/resume';
-import { Mail, Phone, MapPin, Code, Terminal, Database } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Linkedin, Github, Code, Award, BookOpen, Languages } from 'lucide-react';
 
 interface TechnicalTemplateProps {
   data: ResumeData;
 }
 
 export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
-  // Safety check for data
   if (!data) {
     return (
       <div className="w-full h-96 flex items-center justify-center text-gray-500">
@@ -18,7 +17,13 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
     );
   }
 
-  const { personalInfo, workExperience, education, skills } = data;
+  const { personalInfo, workExperience, education, skills, projects, certifications, languages } = data;
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString + '-01');
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+  };
 
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg" style={{ minHeight: '1056px' }}>
@@ -26,141 +31,251 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-3xl font-mono font-bold mb-1">{data.personalInfo.fullName}</h1>
-            <h2 className="text-lg text-pink-200 font-mono">{data.personalInfo.title}</h2>
-            {data.personalInfo.summary && (
-              <p className="text-gray-300 text-sm mt-3 max-w-xl font-mono">{data.personalInfo.summary}</p>
-            )}
+            <h1 className="text-3xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
+            {personalInfo.title && <p className="text-xl mb-4">{personalInfo.title}</p>}
+            <div className="flex flex-wrap gap-4 text-sm">
+              {personalInfo.email && (
+                <div className="flex items-center">
+                  <Mail className="h-4 w-4 mr-1" />
+                  {personalInfo.email}
+                </div>
+              )}
+              {personalInfo.phone && (
+                <div className="flex items-center">
+                  <Phone className="h-4 w-4 mr-1" />
+                  {personalInfo.phone}
+                </div>
+              )}
+              {personalInfo.location && (
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  {personalInfo.location}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="text-right space-y-1 text-sm font-mono">
-            {data.personalInfo.email && (
-              <div className="flex items-center justify-end">
-                <Mail className="h-4 w-4 mr-2" />
-                {data.personalInfo.email}
+          <div className="text-right text-sm">
+            {personalInfo.website && (
+              <div className="flex items-center justify-end mb-1">
+                <Globe className="h-4 w-4 mr-1" />
+                {personalInfo.website}
               </div>
             )}
-            {data.personalInfo.phone && (
-              <div className="flex items-center justify-end">
-                <Phone className="h-4 w-4 mr-2" />
-                {data.personalInfo.phone}
+            {personalInfo.linkedin && (
+              <div className="flex items-center justify-end mb-1">
+                <Linkedin className="h-4 w-4 mr-1" />
+                LinkedIn
               </div>
             )}
-            {data.personalInfo.location && (
+            {personalInfo.github && (
               <div className="flex items-center justify-end">
-                <MapPin className="h-4 w-4 mr-2" />
-                {data.personalInfo.location}
+                <Github className="h-4 w-4 mr-1" />
+                GitHub
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="p-6">
-        <div className="grid grid-cols-4 gap-6">
-          {/* Skills Sidebar */}
-          <div className="col-span-1 space-y-6">
-            {data.skills.length > 0 && (
-              <section>
-                <h3 className="text-lg font-bold text-purple-600 mb-3 flex items-center font-mono">
-                  <Terminal className="h-5 w-5 mr-2 text-purple-600" />
-                  Skills
-                </h3>
-                <div className="space-y-3">
-                  {data.skills.map((skill, index) => (
-                    <div key={index} className="border border-gray-200 rounded p-2">
-                      <div className="text-sm font-mono font-semibold text-gray-800">{skill.name}</div>
-                      <div className="text-xs text-gray-600 mt-1">
-                        <div className="flex items-center">
-                          <div className={`w-full bg-gray-200 rounded-full h-1.5 mr-2`}>
-                            <div
-                              className={`h-1.5 rounded-full ${
-                                skill.level === 'expert' ? 'bg-purple-600 w-full' :
-                                skill.level === 'advanced' ? 'bg-purple-500 w-4/5' :
-                                skill.level === 'intermediate' ? 'bg-pink-500 w-3/5' :
-                                'bg-pink-400 w-2/5'
-                              }`}
-                            />
-                          </div>
-                          <span className="text-xs capitalize">{skill.level}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
+      <div className="p-8">
+        {/* Summary */}
+        {personalInfo.summary && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2">
+              TECHNICAL SUMMARY
+            </h2>
+            <p className="text-gray-700 leading-relaxed">{personalInfo.summary}</p>
+          </section>
+        )}
 
-            {data.education.length > 0 && (
-              <section>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 font-mono">Education</h3>
-                <div className="space-y-3">
-                  {data.education.map((edu, index) => (
-                    <div key={index} className="text-sm">
-                      <div className="font-semibold text-gray-800">{edu.degree}</div>
-                      <div className="text-gray-600">{edu.school}</div>
-                      {edu.graduationDate && (
-                        <div className="text-gray-500 text-xs">{edu.graduationDate}</div>
-                      )}
+        {/* Technical Skills */}
+        {skills && skills.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center">
+              <Code className="mr-2" />
+              TECHNICAL SKILLS
+            </h2>
+            <div className="grid grid-cols-2 gap-6">
+              {['Expert', 'Advanced', 'Intermediate', 'Beginner'].map(level => {
+                const levelSkills = skills.filter(skill => skill.level === level);
+                if (levelSkills.length === 0) return null;
+                
+                return (
+                  <div key={level} className="mb-4">
+                    <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wider">{level}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {levelSkills.map(skill => (
+                        <span
+                          key={skill.id}
+                          className={`px-3 py-1 rounded-md text-xs font-medium border ${
+                            level === 'Expert' ? 'bg-purple-100 text-purple-800 border-purple-300' :
+                            level === 'Advanced' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+                            level === 'Intermediate' ? 'bg-green-100 text-green-800 border-green-300' :
+                            'bg-gray-100 text-gray-800 border-gray-300'
+                          }`}
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
-          {/* Main Content */}
-          <div className="col-span-3 space-y-6">
-            {/* Experience */}
-            {data.workExperience.length > 0 && (
-              <section>
-                <h3 className="text-xl font-bold text-purple-600 mb-4 flex items-center font-mono">
-                  <Code className="h-6 w-6 mr-2 text-purple-600" />
-                  Experience
-                </h3>
-                <div className="space-y-5">
-                  {data.workExperience.map((exp, index) => (
-                    <div key={index} className="border-l-4 border-purple-500 pl-4 bg-purple-50 p-4 rounded-r">
+        {/* Experience */}
+        {workExperience && workExperience.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2">
+              PROFESSIONAL EXPERIENCE
+            </h2>
+            <div className="space-y-6">
+              {workExperience.map((exp, index) => (
+                <div key={exp.id} className="relative">
+                  {index !== workExperience.length - 1 && (
+                    <div className="absolute left-0 top-8 bottom-0 w-px bg-purple-200"></div>
+                  )}
+                  <div className="flex">
+                    <div className="flex-shrink-0 w-4 h-4 bg-purple-600 rounded-full mt-1 mr-4"></div>
+                    <div className="flex-grow">
                       <div className="flex justify-between items-start mb-2">
                         <div>
-                          <h4 className="text-lg font-semibold text-gray-900 font-mono">{exp.position}</h4>
-                          <p className="text-gray-700 font-medium">{exp.company}</p>
+                          <h3 className="text-lg font-bold text-gray-900">{exp.position}</h3>
+                          <p className="text-purple-600 font-semibold">{exp.company}</p>
+                          {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
                         </div>
-                        <div className="text-right text-sm text-gray-600 font-mono">
-                          <div>{exp.startDate} - {exp.endDate || 'Present'}</div>
-                          {exp.location && <div className="mt-1">{exp.location}</div>}
+                        <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                          {formatDate(exp.startDate)} - {exp.isCurrentJob ? 'Present' : formatDate(exp.endDate)}
                         </div>
                       </div>
                       {exp.description && (
-                        <div className="text-gray-700 text-sm leading-relaxed font-mono bg-white p-3 rounded border">
-                          {exp.description}
-                        </div>
+                        <p className="text-gray-700 text-sm leading-relaxed">{exp.description}</p>
                       )}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </section>
-            )}
+              ))}
+            </div>
+          </section>
+        )}
 
-            {/* Certifications */}
-            {data.certifications && data.certifications.length > 0 && (
-              <section>
-                <h3 className="text-xl font-bold text-purple-600 mb-4 flex items-center font-mono">
-                  <Database className="h-6 w-6 mr-2 text-purple-600" />
-                  Certifications
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {data.certifications.map((cert, index) => (
-                    <div key={index} className="border border-gray-200 rounded p-3 bg-gray-50">
-                      <div className="font-semibold text-gray-800 font-mono">{cert.name}</div>
-                      <div className="text-gray-600 text-sm">{cert.issuer}</div>
-                      {cert.date && <div className="text-gray-500 text-xs font-mono">{cert.date}</div>}
+        {/* Projects */}
+        {projects && projects.length > 0 && (
+          <section className="mb-8">
+            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2">
+              KEY PROJECTS
+            </h2>
+            <div className="grid gap-6">
+              {projects.map((project) => (
+                <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-lg font-bold text-gray-900">{project.name}</h3>
+                    {(project.startDate || project.endDate) && (
+                      <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                        {project.startDate && formatDate(project.startDate)} 
+                        {project.startDate && project.endDate && ' - '}
+                        {project.endDate && formatDate(project.endDate)}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {project.description && (
+                    <p className="text-gray-700 text-sm mb-3">{project.description}</p>
+                  )}
+                  
+                  {project.technologies && project.technologies.length > 0 && (
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold text-gray-600 mb-2">TECHNOLOGIES:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {project.technologies.map((tech, index) => (
+                          <span key={index} className="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded border border-purple-200">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                  ))}
+                  )}
+                  
+                  {project.url && (
+                    <a href={project.url} className="text-sm text-purple-600 hover:underline" target="_blank" rel="noopener noreferrer">
+                      {project.url}
+                    </a>
+                  )}
                 </div>
-              </section>
-            )}
-          </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Education & Certifications */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Education */}
+          {education && education.length > 0 && (
+            <section>
+              <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center">
+                <BookOpen className="mr-2" />
+                EDUCATION
+              </h2>
+              <div className="space-y-4">
+                {education.map((edu) => (
+                  <div key={edu.id} className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="font-bold text-gray-900">{edu.degree}</h3>
+                    <p className="text-purple-600 font-semibold">{edu.school}</p>
+                    {edu.field && <p className="text-sm text-gray-600">{edu.field}</p>}
+                    {edu.gpa && <p className="text-sm text-gray-600">GPA: {edu.gpa}</p>}
+                    <p className="text-sm text-gray-500 mt-1">{formatDate(edu.graduationDate)}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Certifications */}
+          {certifications && certifications.length > 0 && (
+            <section>
+              <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center">
+                <Award className="mr-2" />
+                CERTIFICATIONS
+              </h2>
+              <div className="space-y-3">
+                {certifications.map((cert) => (
+                  <div key={cert.id} className="bg-gray-50 p-3 rounded-lg">
+                    <h3 className="font-bold text-gray-900 text-sm">{cert.name}</h3>
+                    <p className="text-purple-600 text-sm">{cert.issuer}</p>
+                    <p className="text-xs text-gray-500">{formatDate(cert.date)}</p>
+                    {cert.url && (
+                      <a href={cert.url} className="text-xs text-purple-600 hover:underline" target="_blank" rel="noopener noreferrer">
+                        View Certificate
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
+
+        {/* Languages */}
+        {languages && languages.length > 0 && (
+          <section>
+            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center">
+              <Languages className="mr-2" />
+              LANGUAGES
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              {languages.map((lang) => (
+                <div key={lang.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                  <span className="font-medium text-gray-900">{lang.name}</span>
+                  <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded font-medium">
+                    {lang.proficiency}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

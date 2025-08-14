@@ -63,6 +63,21 @@ export interface Language {
   proficiency: 'Basic' | 'Conversational' | 'Professional' | 'Native';
 }
 
+export interface Reference {
+  id: string;
+  name: string;
+  position: string;
+  company: string;
+  email: string;
+  phone?: string;
+}
+
+export interface CustomSection {
+  id: string;
+  title: string;
+  content: string;
+}
+
 export interface ResumeData {
   personalInfo: PersonalInfo;
   workExperience: WorkExperience[];
@@ -71,6 +86,8 @@ export interface ResumeData {
   projects: Project[];
   certifications: Certification[];
   languages: Language[];
+  references?: Reference[];
+  customSections?: CustomSection[];
   selectedTemplate: ResumeTemplate;
 }
 
@@ -92,5 +109,7 @@ export const defaultResumeData: ResumeData = {
   projects: [],
   certifications: [],
   languages: [],
+  references: [],
+  customSections: [],
   selectedTemplate: 'modern'
 };

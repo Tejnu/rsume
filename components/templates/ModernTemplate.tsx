@@ -2,7 +2,7 @@
 'use client';
 
 import { ResumeData } from '@/types/resume';
-import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
 
 interface ModernTemplateProps {
   resumeData: ResumeData;
@@ -18,7 +18,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
     );
   }
 
-  const { personalInfo, workExperience, education, skills } = resumeData;
+  const { personalInfo, workExperience, education, skills, projects, certifications, languages } = resumeData;
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
@@ -32,6 +32,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
       <header className="mb-8">
         <div className="text-white p-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
           <h1 className="text-3xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
+          {personalInfo.title && <p className="text-xl mb-4">{personalInfo.title}</p>}
           <div className="flex flex-wrap gap-4 text-sm">
             {personalInfo.email && (
               <div className="flex items-center">
@@ -63,6 +64,12 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
                 LinkedIn
               </div>
             )}
+            {personalInfo.github && (
+              <div className="flex items-center">
+                <Github className="h-4 w-4 mr-1" />
+                GitHub
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -78,7 +85,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
       )}
 
       {/* Work Experience */}
-      {workExperience.length > 0 && (
+      {workExperience && workExperience.length > 0 && (
         <section className="mb-8">
           <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
             Work Experience
@@ -90,6 +97,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
                   <div>
                     <h3 className="font-semibold text-lg">{exp.position}</h3>
                     <p className="text-gray-700 font-medium">{exp.company}</p>
+                    {exp.location && <p className="text-sm text-gray-600">{exp.location}</p>}
                   </div>
                   <div className="text-sm text-gray-600">
                     {formatDate(exp.startDate)} - {exp.isCurrentJob ? 'Present' : formatDate(exp.endDate)}
@@ -105,7 +113,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
       )}
 
       {/* Education */}
-      {education.length > 0 && (
+      {education && education.length > 0 && (
         <section className="mb-8">
           <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
             Education
@@ -130,8 +138,94 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
         </section>
       )}
 
+      {/* Projects */}
+      {projects && projects.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
+            Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((project) => (
+              <div key={project.id} className="border-l-4 border-purple-400 pl-4">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="font-semibold">{project.name}</h3>
+                    {project.description && (
+                      <p className="text-sm text-gray-700 mt-1">{project.description}</p>
+                    )}
+                    {project.technologies && project.technologies.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {project.technologies.map((tech, index) => (
+                          <span key={index} className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {project.url && (
+                      <p className="text-sm text-purple-600 mt-1">{project.url}</p>
+                    )}
+                  </div>
+                  {(project.startDate || project.endDate) && (
+                    <div className="text-sm text-gray-600">
+                      {project.startDate && formatDate(project.startDate)} 
+                      {project.startDate && project.endDate && ' - '}
+                      {project.endDate && formatDate(project.endDate)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Certifications */}
+      {certifications && certifications.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
+            Certifications
+          </h2>
+          <div className="space-y-3">
+            {certifications.map((cert) => (
+              <div key={cert.id} className="border-l-4 border-purple-400 pl-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold">{cert.name}</h3>
+                    <p className="text-sm text-gray-700">{cert.issuer}</p>
+                    {cert.url && <p className="text-sm text-purple-600">{cert.url}</p>}
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {formatDate(cert.date)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Languages */}
+      {languages && languages.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
+            Languages
+          </h2>
+          <div className="grid grid-cols-2 gap-4">
+            {languages.map((lang) => (
+              <div key={lang.id} className="flex justify-between items-center">
+                <span className="font-medium">{lang.name}</span>
+                <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">
+                  {lang.proficiency}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Skills */}
-      {skills.length > 0 && (
+      {skills && skills.length > 0 && (
         <section>
           <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
             Skills
