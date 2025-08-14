@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { LandingPage } from '@/components/LandingPage';
 import { GuidedWizard } from '@/components/GuidedWizard';
 import { ResumeForm } from '@/components/ResumeForm';
 import { ResumePreview } from '@/components/ResumePreview';
@@ -43,20 +44,25 @@ export default function Home() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [showWizard, setShowWizard] = useState(false);
   const [wizardData, setWizardData] = useState<any>(null);
+  const [showLanding, setShowLanding] = useState(true);
 
   useEffect(() => {
     // Load data from localStorage on component mount
     const savedData = localStorage.getItem('resumeData');
     const hasSeenWizard = localStorage.getItem('hasSeenWizard');
+    const hasSeenLanding = localStorage.getItem('hasSeenLanding');
 
-    if (savedData) {
-      try {
-        setResumeData(JSON.parse(savedData));
-      } catch (error) {
-        console.error('Error loading saved resume data:', error);
+    if (hasSeenLanding) {
+      setShowLanding(false);
+      if (savedData) {
+        try {
+          setResumeData(JSON.parse(savedData));
+        } catch (error) {
+          console.error('Error loading saved resume data:', error);
+        }
+      } else if (!hasSeenWizard) {
+        setShowWizard(true);
       }
-    } else if (!hasSeenWizard) {
-      setShowWizard(true);
     }
     setIsLoaded(true);
   }, []);
@@ -81,6 +87,19 @@ export default function Home() {
   const handleWizardSkip = () => {
     setShowWizard(false);
     localStorage.setItem('hasSeenWizard', 'true');
+  };
+
+  const handleGetStarted = () => {
+    setShowLanding(false);
+    localStorage.setItem('hasSeenLanding', 'true');
+    
+    // Check if we should show wizard
+    const hasSeenWizard = localStorage.getItem('hasSeenWizard');
+    const savedData = localStorage.getItem('resumeData');
+    
+    if (!hasSeenWizard && !savedData) {
+      setShowWizard(true);
+    }
   };
 
   const generateWizardEnhancements = (data: any) => {
@@ -339,6 +358,10 @@ export default function Home() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
+  }
+
+  if (showLanding) {
+    return <LandingPage onGetStarted={handleGetStarted} />;
   }
 
   if (showWizard) {

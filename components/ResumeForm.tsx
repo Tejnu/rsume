@@ -7,8 +7,10 @@ import { WorkExperienceForm } from './forms/WorkExperienceForm';
 import { EducationForm } from './forms/EducationForm';
 import { SkillsForm } from './forms/SkillsForm';
 import { CertificationsForm } from './forms/CertificationsForm';
+import { ProjectsForm } from './forms/ProjectsForm'; // Assuming ProjectsForm exists
+import { LanguagesForm } from './forms/LanguagesForm'; // Assuming LanguagesForm exists
 import { ResumeData } from '@/types/resume';
-import { User, Briefcase, GraduationCap, Code, Award, FolderOpen } from 'lucide-react';
+import { User, Briefcase, GraduationCap, Code, Award, FolderOpen, FileText, Languages } from 'lucide-react';
 
 // Placeholder for the actual validation and organization logic.
 // This function should take resumeData and return a structured object
@@ -50,12 +52,12 @@ export function ResumeForm({ resumeData, onUpdate }: ResumeFormProps) {
   return (
     <div className="p-6">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7 text-xs">
           <TabsTrigger value="personal" className="flex items-center space-x-2">
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Personal</span>
           </TabsTrigger>
-          <TabsTrigger value="experience" className="flex items-center space-x-2">
+          <TabsTrigger value="work" className="flex items-center space-x-2">
             <Briefcase className="h-4 w-4" />
             <span className="hidden sm:inline">Experience</span>
           </TabsTrigger>
@@ -71,9 +73,13 @@ export function ResumeForm({ resumeData, onUpdate }: ResumeFormProps) {
             <Award className="h-4 w-4" />
             <span className="hidden sm:inline">Certs</span>
           </TabsTrigger>
-          <TabsTrigger value="additional" className="flex items-center space-x-2">
+          <TabsTrigger value="projects" className="flex items-center space-x-2">
             <FolderOpen className="h-4 w-4" />
-            <span className="hidden sm:inline">More</span>
+            <span className="hidden sm:inline">Projects</span>
+          </TabsTrigger>
+          <TabsTrigger value="languages" className="flex items-center space-x-2">
+            <Languages className="h-4 w-4" />
+            <span className="hidden sm:inline">Languages</span>
           </TabsTrigger>
         </TabsList>
 
@@ -85,7 +91,7 @@ export function ResumeForm({ resumeData, onUpdate }: ResumeFormProps) {
             />
           </TabsContent>
 
-          <TabsContent value="experience" className="space-y-4">
+          <TabsContent value="work" className="space-y-4">
             <WorkExperienceForm
               workExperience={organizedResumeData.workExperience}
               onUpdate={(workExperience) => onUpdate({ workExperience })}
@@ -113,12 +119,18 @@ export function ResumeForm({ resumeData, onUpdate }: ResumeFormProps) {
             />
           </TabsContent>
 
-          <TabsContent value="additional" className="space-y-4">
-            <div className="text-center py-12">
-              <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-500">Additional sections coming soon!</p>
-              <p className="text-sm text-gray-400 mt-2">Projects, Languages, References, and Custom Sections</p>
-            </div>
+          <TabsContent value="projects">
+            <ProjectsForm
+              projects={resumeData.projects}
+              onUpdate={(projects) => onUpdate({ projects })}
+            />
+          </TabsContent>
+
+          <TabsContent value="languages">
+            <LanguagesForm
+              languages={resumeData.languages}
+              onUpdate={(languages) => onUpdate({ languages })}
+            />
           </TabsContent>
         </div>
       </Tabs>
