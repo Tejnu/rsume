@@ -57,45 +57,90 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
 
   const handleDownload = () => {
     const printContent = document.getElementById('resume-preview-content');
-    if (!printContent) return;
+    if (!printContent) {
+      console.error('Resume content not found for download');
+      return;
+    }
 
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    try {
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        console.error('Could not open print window');
+        return;
+      }
 
-    const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-      .map((el) => el.outerHTML)
-      .join('\n');
+      // Get all stylesheets and inline styles
+      const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+        .map((el) => el.outerHTML)
+        .join('\n');
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8" />
-          <title>Resume - ${resumeData.personalInfo.fullName || 'Resume'}</title>
-          ${stylesheets}
-          <style>
-            @page { margin: 0.5in; size: letter; }
-            html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .resume-content { width: 100%; }
-          </style>
-        </head>
-        <body>
-          <div id="resume-preview-content">
-            ${printContent.innerHTML}
-          </div>
-        </body>
-      </html>
-    `);
+      // Get computed styles for better accuracy
+      const computedStyles = window.getComputedStyle(printContent);
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <title>Resume - ${resumeData.personalInfo.fullName || 'Resume'}</title>
+            ${stylesheets}
+            <style>
+              @page { 
+                margin: 0.5in; 
+                size: letter;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              html, body { 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact;
+                margin: 0;
+                padding: 0;
+                font-family: system-ui, -apple-system, sans-serif;
+              }
+              .resume-content { 
+                width: 100%; 
+                max-width: none;
+                margin: 0;
+                padding: 0;
+              }
+              * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+              @media print {
+                body { margin: 0; }
+                .no-print { display: none !important; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="resume-content">
+              ${printContent.innerHTML}
+            </div>
+            <script>
+              window.onload = function() {
+                setTimeout(function() {
+                  window.focus();
+                  window.print();
+                  setTimeout(function() {
+                    window.close();
+                  }, 1000);
+                }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `);
 
-    printWindow.document.close();
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+      printWindow.document.close();
 
-    if (onDownloadPDF) {
-      onDownloadPDF();
+      if (onDownloadPDF) {
+        onDownloadPDF();
+      }
+    } catch (error) {
+      console.error('Error during download:', error);
+      alert('There was an error downloading your resume. Please try again.');
     }
   };
 
