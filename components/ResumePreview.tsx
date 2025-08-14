@@ -21,26 +21,37 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
   const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Safety check for resumeData
+  if (!resumeData) {
+    return (
+      <Card className="bg-white border border-gray-200 shadow-sm sticky top-24 h-fit">
+        <div className="p-6">
+          <div className="text-center text-gray-500">
+            Loading resume preview...
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   const renderTemplate = () => {
-    // Destructure selectedTemplate and resumeData for cleaner access
     const { selectedTemplate } = resumeData;
-    const data = resumeData; // Assuming resumeData is passed directly as 'data' to templates
 
     switch (selectedTemplate) {
       case 'modern':
-        return <ModernTemplate data={data} />;
+        return <ModernTemplate resumeData={resumeData} />;
       case 'classic':
-        return <ClassicTemplate data={data} />;
+        return <ClassicTemplate resumeData={resumeData} />;
       case 'minimal':
-        return <MinimalTemplate data={data} />;
+        return <MinimalTemplate resumeData={resumeData} />;
       case 'creative':
-        return <CreativeTemplate data={data} />;
-      case 'executive': // Added new template case
-        return <ExecutiveTemplate data={data} />;
-      case 'technical': // Added new template case
-        return <TechnicalTemplate data={data} />;
+        return <CreativeTemplate resumeData={resumeData} />;
+      case 'executive':
+        return <ExecutiveTemplate data={resumeData} />;
+      case 'technical':
+        return <TechnicalTemplate data={resumeData} />;
       default:
-        return <ModernTemplate data={data} />;
+        return <ModernTemplate resumeData={resumeData} />;
     }
   };
 
