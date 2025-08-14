@@ -22,11 +22,11 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg" style={{ minHeight: '1056px' }}>
       {/* Header */}
-      <div className="bg-gray-900 text-white p-6">
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6"></div>
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-mono font-bold mb-1">{data.personalInfo.fullName}</h1>
-            <h2 className="text-lg text-green-400 font-mono">{data.personalInfo.title}</h2>
+            <h2 className="text-lg text-pink-200 font-mono">{data.personalInfo.title}</h2></div>
             {data.personalInfo.summary && (
               <p className="text-gray-300 text-sm mt-3 max-w-xl font-mono">{data.personalInfo.summary}</p>
             )}
@@ -60,8 +60,8 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
           <div className="col-span-1 space-y-6">
             {data.skills.length > 0 && (
               <section>
-                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center font-mono">
-                  <Terminal className="h-5 w-5 mr-2 text-green-600" />
+                <h3 className="text-lg font-bold text-purple-600 mb-3 flex items-center font-mono">
+                  <Terminal className="h-5 w-5 mr-2 text-purple-600" /></div>
                   Skills
                 </h3>
                 <div className="space-y-3">
@@ -73,11 +73,11 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
                           <div className={`w-full bg-gray-200 rounded-full h-1.5 mr-2`}>
                             <div
                               className={`h-1.5 rounded-full ${
-                                skill.level === 'expert' ? 'bg-green-600 w-full' :
-                                skill.level === 'advanced' ? 'bg-blue-600 w-4/5' :
-                                skill.level === 'intermediate' ? 'bg-yellow-600 w-3/5' :
-                                'bg-red-600 w-2/5'
-                              }`}
+                                skill.level === 'expert' ? 'bg-purple-600 w-full' :
+                                skill.level === 'advanced' ? 'bg-purple-500 w-4/5' :
+                                skill.level === 'intermediate' ? 'bg-pink-500 w-3/5' :
+                                'bg-pink-400 w-2/5'
+                              }`}</div>
                             />
                           </div>
                           <span className="text-xs capitalize">{skill.level}</span>
@@ -112,13 +112,13 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
             {/* Experience */}
             {data.workExperience.length > 0 && (
               <section>
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center font-mono">
-                  <Code className="h-6 w-6 mr-2 text-blue-600" />
+                <h3 className="text-xl font-bold text-purple-600 mb-4 flex items-center font-mono">
+                  <Code className="h-6 w-6 mr-2 text-purple-600" /></div>
                   Experience
                 </h3>
                 <div className="space-y-5">
                   {data.workExperience.map((exp, index) => (
-                    <div key={index} className="border-l-4 border-blue-500 pl-4 bg-gray-50 p-4 rounded-r">
+                    <div key={index} className="border-l-4 border-purple-500 pl-4 bg-purple-50 p-4 rounded-r"></div>
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <h4 className="text-lg font-semibold text-gray-900 font-mono">{exp.position}</h4>
@@ -143,8 +143,8 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
             {/* Certifications */}
             {data.certifications.length > 0 && (
               <section>
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center font-mono">
-                  <Database className="h-6 w-6 mr-2 text-purple-600" />
+                <h3 className="text-xl font-bold text-purple-600 mb-4 flex items-center font-mono">
+                  <Database className="h-6 w-6 mr-2 text-purple-600" /></div>
                   Certifications
                 </h3>
                 <div className="grid grid-cols-2 gap-3">

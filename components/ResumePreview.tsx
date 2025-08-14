@@ -76,7 +76,7 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
 
       // Get computed styles for better accuracy
       const computedStyles = window.getComputedStyle(printContent);
-      
+
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
@@ -155,7 +155,7 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
               variant="outline"
               size="sm"
               onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-              className="rounded-lg border-gray-300"
+              className="text-xs px-2 py-1 border-purple-300 text-purple-600 hover:bg-purple-50"
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
@@ -165,8 +165,8 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setZoom(Math.min(1.2, zoom + 0.1))}
-              className="rounded-lg border-gray-300"
+              onClick={() => setZoom(Math.min(2, zoom + 0.1))}
+              className="text-xs px-2 py-1 border-purple-300 text-purple-600 hover:bg-purple-50"
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
@@ -178,10 +178,9 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
             >
               <Maximize2 className="h-4 w-4" />
             </Button>
-            <Button
+            <Button 
               onClick={handleDownload}
-              className="bg-black text-white hover:bg-gray-800 rounded-lg"
-              size="sm"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 text-sm px-4 py-2"
             >
               <Download className="h-4 w-4 mr-2" />
               PDF

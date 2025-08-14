@@ -22,7 +22,7 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-2xl" style={{ minHeight: '1056px' }}>
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-8">
+      <div className="bg-gradient-to-r from-purple-600 to-pink-500 text-white p-8">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h1 className="text-4xl font-bold mb-2">{personalInfo.fullName}</h1>
@@ -63,12 +63,12 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
             {/* Experience */}
             {workExperience.length > 0 && (
               <section>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4 border-b-2 border-slate-200 pb-2">
+                <h3 className="text-2xl font-bold text-purple-600 mb-4 border-b-2 border-purple-200 pb-2">
                   Executive Experience
                 </h3>
                 <div className="space-y-6">
                   {workExperience.map((exp, index) => (
-                    <div key={index} className="border-l-4 border-slate-300 pl-6">
+                    <div key={index} className="border-l-4 border-pink-500 pl-6">
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <h4 className="text-lg font-semibold text-slate-900">{exp.position}</h4>
@@ -97,16 +97,16 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
             {/* Skills */}
             {skills.length > 0 && (
               <section>
-                <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
+                <h3 className="text-lg font-bold text-purple-600 mb-3 flex items-center">
                   <Star className="h-5 w-5 mr-2" />
                   Core Competencies
                 </h3>
                 <div className="space-y-2">
                   {skills.map((skill, index) => (
-                    <div key={index} className="bg-slate-50 p-2 rounded">
+                    <div key={index} className="bg-purple-50 p-2 rounded">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-slate-800">{skill.name}</span>
-                        <span className="text-xs text-slate-600 capitalize">{skill.level}</span>
+                        <span className="text-xs text-purple-600 capitalize">{skill.level}</span>
                       </div>
                     </div>
                   ))}
@@ -117,13 +117,13 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
             {/* Education */}
             {education.length > 0 && (
               <section>
-                <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
+                <h3 className="text-lg font-bold text-purple-600 mb-3 flex items-center">
                   <GraduationCap className="h-5 w-5 mr-2" />
                   Education
                 </h3>
                 <div className="space-y-3">
                   {education.map((edu, index) => (
-                    <div key={index} className="border-b border-slate-200 pb-3 last:border-b-0">
+                    <div key={index} className="border-b border-purple-200 pb-3 last:border-b-0">
                       <h4 className="font-semibold text-slate-800 text-sm">{edu.degree}</h4>
                       <p className="text-slate-600 text-xs">{edu.school}</p>
                       {edu.graduationDate && (
@@ -138,7 +138,7 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
             {/* Certifications */}
             {data.certifications.length > 0 && (
               <section>
-                <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
+                <h3 className="text-lg font-bold text-purple-600 mb-3 flex items-center">
                   <Award className="h-5 w-5 mr-2" />
                   Certifications
                 </h3>
