@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ResumeData } from '@/types/resume';
@@ -28,7 +29,7 @@ export function MinimalTemplate({ resumeData }: MinimalTemplateProps) {
     <div className="bg-white text-gray-900 p-8 max-w-4xl mx-auto">
       {/* Header */}
       <header className="mb-12">
-        <h1 className="text-5xl font-light mb-6 tracking-wide text-purple-700">{personalInfo.fullName || 'Your Name'}</h1></div>
+        <h1 className="text-5xl font-light mb-6 tracking-wide text-purple-700">{personalInfo.fullName || 'Your Name'}</h1>
         <div className="text-sm text-gray-600 space-y-1">
           {personalInfo.email && <div>{personalInfo.email}</div>}
           {personalInfo.phone && <div>{personalInfo.phone}</div>}
@@ -48,7 +49,7 @@ export function MinimalTemplate({ resumeData }: MinimalTemplateProps) {
       {/* Work Experience */}
       {workExperience.length > 0 && (
         <section className="mb-12">
-          <h2 className="text-2xl font-light mb-8 tracking-wide text-purple-600">Experience</h2></div>
+          <h2 className="text-2xl font-light mb-8 tracking-wide text-purple-600">Experience</h2>
           <div className="space-y-8">
             {workExperience.map((exp) => (
               <div key={exp.id}>
@@ -73,7 +74,7 @@ export function MinimalTemplate({ resumeData }: MinimalTemplateProps) {
       {/* Education */}
       {education.length > 0 && (
         <section className="mb-12">
-          <h2 className="text-2xl font-light mb-8 tracking-wide text-purple-600">Education</h2></div>
+          <h2 className="text-2xl font-light mb-8 tracking-wide text-purple-600">Education</h2>
           <div className="space-y-6">
             {education.map((edu) => (
               <div key={edu.id}>
@@ -97,7 +98,7 @@ export function MinimalTemplate({ resumeData }: MinimalTemplateProps) {
       {/* Skills */}
       {skills.length > 0 && (
         <section>
-          <h2 className="text-2xl font-light mb-8 tracking-wide text-purple-600">Skills</h2></div>
+          <h2 className="text-2xl font-light mb-8 tracking-wide text-purple-600">Skills</h2>
           <div className="space-y-6">
             {['Expert', 'Advanced', 'Intermediate', 'Beginner'].map(level => {
               const levelSkills = skills.filter(skill => skill.level === level);

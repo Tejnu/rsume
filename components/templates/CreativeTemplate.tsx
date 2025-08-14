@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ResumeData } from '@/types/resume';
@@ -29,7 +30,7 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
     <div className="bg-white text-gray-900 p-0 max-w-4xl mx-auto">
       <div className="grid grid-cols-3 min-h-full">
         {/* Left Sidebar */}
-        <div className="bg-gradient-to-b from-purple-500 to-pink-600 text-white p-8 col-span-1"></div>
+        <div className="bg-gradient-to-b from-purple-500 to-pink-600 text-white p-8 col-span-1">
           <div className="mb-8">
             <h1 className="text-2xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
             <div className="w-12 h-1 bg-yellow-400 mb-6"></div>
@@ -37,7 +38,7 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
 
           {/* Contact Info */}
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4 text-pink-200">CONTACT</h2></div>
+            <h2 className="text-lg font-semibold mb-4 text-pink-200">CONTACT</h2>
             <div className="space-y-3 text-sm">
               {personalInfo.email && (
                 <div className="flex items-start">
@@ -75,7 +76,7 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
           {/* Skills */}
           {skills.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-4 text-pink-200">SKILLS</h2></div>
+              <h2 className="text-lg font-semibold mb-4 text-pink-200">SKILLS</h2>
               <div className="space-y-4">
                 {['Expert', 'Advanced', 'Intermediate', 'Beginner'].map(level => {
                   const levelSkills = skills.filter(skill => skill.level === level);
@@ -92,7 +93,7 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
                             </div>
                             <div className="w-full bg-purple-200 rounded-full h-1">
                               <div 
-                                className="bg-pink-400 h-1 rounded-full"</div>
+                                className="bg-pink-400 h-1 rounded-full"
                                 style={{ 
                                   width: level === 'Expert' ? '100%' : 
                                          level === 'Advanced' ? '75%' : 
@@ -113,7 +114,7 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
           {/* Education */}
           {education.length > 0 && (
             <div>
-              <h2 className="text-lg font-semibold mb-4 text-pink-200">EDUCATION</h2></div>
+              <h2 className="text-lg font-semibold mb-4 text-pink-200">EDUCATION</h2>
               <div className="space-y-4">
                 {education.map((edu) => (
                   <div key={edu.id}>
@@ -136,7 +137,7 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
             <section className="mb-8">
               <h2 className="text-2xl font-bold mb-4 text-purple-600 relative">
                 ABOUT ME
-                <div className="absolute bottom-0 left-0 w-16 h-1 bg-pink-400"></div></div>
+                <div className="absolute bottom-0 left-0 w-16 h-1 bg-pink-400"></div>
               </h2>
               <p className="text-gray-700 leading-relaxed mt-6">{personalInfo.summary}</p>
             </section>
@@ -147,14 +148,13 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
             <section>
               <h2 className="text-2xl font-bold mb-4 text-purple-600 relative">
                 EXPERIENCE
-                <div className="absolute bottom-0 left-0 w-16 h-1 bg-pink-400"></div></div>
+                <div className="absolute bottom-0 left-0 w-16 h-1 bg-pink-400"></div>
               </h2>
               <div className="space-y-6 mt-6">
                 {workExperience.map((exp, index) => (
                   <div key={exp.id} className="relative">
                     <div className="flex items-start">
                       <div className="flex-shrink-0 w-3 h-3 bg-pink-400 rounded-full mt-2 relative z-10"></div>
-                      </div>
                       {index < workExperience.length - 1 && (
                         <div className="absolute left-1.5 top-5 w-0.5 h-full bg-purple-200"></div>
                       )}

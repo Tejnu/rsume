@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ResumeData } from '@/types/resume';
@@ -28,7 +29,7 @@ export function ClassicTemplate({ resumeData }: ClassicTemplateProps) {
   return (
     <div className="bg-white text-gray-900 p-8 max-w-4xl mx-auto font-serif">
       {/* Header */}
-      <header className="text-center mb-8 border-b-2 border-purple-300 pb-6"></div>
+      <header className="text-center mb-8 border-b-2 border-purple-300 pb-6">
         <h1 className="text-4xl font-bold mb-3">{personalInfo.fullName || 'Your Name'}</h1>
         <div className="flex justify-center flex-wrap gap-6 text-sm text-gray-600">
           {personalInfo.email && (
@@ -68,7 +69,7 @@ export function ClassicTemplate({ resumeData }: ClassicTemplateProps) {
       {personalInfo.summary && (
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-3 text-center text-purple-600">PROFESSIONAL SUMMARY</h2>
-          <div className="border-t border-b border-purple-300 py-4"></div>
+          <div className="border-t border-b border-purple-300 py-4">
             <p className="text-gray-700 leading-relaxed text-center italic">{personalInfo.summary}</p>
           </div>
         </section>
@@ -77,7 +78,7 @@ export function ClassicTemplate({ resumeData }: ClassicTemplateProps) {
       {/* Work Experience */}
       {workExperience.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4 text-center text-purple-600">PROFESSIONAL EXPERIENCE</h2></div>
+          <h2 className="text-2xl font-bold mb-4 text-center text-purple-600">PROFESSIONAL EXPERIENCE</h2>
           <div className="space-y-6">
             {workExperience.map((exp) => (
               <div key={exp.id}>
@@ -103,7 +104,7 @@ export function ClassicTemplate({ resumeData }: ClassicTemplateProps) {
       {/* Education */}
       {education.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4 text-center text-purple-600">EDUCATION</h2></div>
+          <h2 className="text-2xl font-bold mb-4 text-center text-purple-600">EDUCATION</h2>
           <div className="space-y-4">
             {education.map((edu) => (
               <div key={edu.id}>
@@ -128,7 +129,7 @@ export function ClassicTemplate({ resumeData }: ClassicTemplateProps) {
       {/* Skills */}
       {skills.length > 0 && (
         <section>
-          <h2 className="text-2xl font-bold mb-4 text-center text-purple-600">SKILLS</h2></div>
+          <h2 className="text-2xl font-bold mb-4 text-center text-purple-600">SKILLS</h2>
           <div className="text-center">
             {['Expert', 'Advanced', 'Intermediate', 'Beginner'].map(level => {
               const levelSkills = skills.filter(skill => skill.level === level);

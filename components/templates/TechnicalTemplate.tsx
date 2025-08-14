@@ -1,7 +1,8 @@
+
 'use client';
 
 import { ResumeData } from '@/types/resume';
-import { Mail, Phone, MapPin, Code, Terminal, Database, Zap } from 'lucide-react';
+import { Mail, Phone, MapPin, Code, Terminal, Database } from 'lucide-react';
 
 interface TechnicalTemplateProps {
   data: ResumeData;
@@ -22,11 +23,11 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg" style={{ minHeight: '1056px' }}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6"></div>
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-mono font-bold mb-1">{data.personalInfo.fullName}</h1>
-            <h2 className="text-lg text-pink-200 font-mono">{data.personalInfo.title}</h2></div>
+            <h2 className="text-lg text-pink-200 font-mono">{data.personalInfo.title}</h2>
             {data.personalInfo.summary && (
               <p className="text-gray-300 text-sm mt-3 max-w-xl font-mono">{data.personalInfo.summary}</p>
             )}
@@ -61,7 +62,7 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
             {data.skills.length > 0 && (
               <section>
                 <h3 className="text-lg font-bold text-purple-600 mb-3 flex items-center font-mono">
-                  <Terminal className="h-5 w-5 mr-2 text-purple-600" /></div>
+                  <Terminal className="h-5 w-5 mr-2 text-purple-600" />
                   Skills
                 </h3>
                 <div className="space-y-3">
@@ -77,7 +78,7 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
                                 skill.level === 'advanced' ? 'bg-purple-500 w-4/5' :
                                 skill.level === 'intermediate' ? 'bg-pink-500 w-3/5' :
                                 'bg-pink-400 w-2/5'
-                              }`}</div>
+                              }`}
                             />
                           </div>
                           <span className="text-xs capitalize">{skill.level}</span>
@@ -113,12 +114,12 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
             {data.workExperience.length > 0 && (
               <section>
                 <h3 className="text-xl font-bold text-purple-600 mb-4 flex items-center font-mono">
-                  <Code className="h-6 w-6 mr-2 text-purple-600" /></div>
+                  <Code className="h-6 w-6 mr-2 text-purple-600" />
                   Experience
                 </h3>
                 <div className="space-y-5">
                   {data.workExperience.map((exp, index) => (
-                    <div key={index} className="border-l-4 border-purple-500 pl-4 bg-purple-50 p-4 rounded-r"></div>
+                    <div key={index} className="border-l-4 border-purple-500 pl-4 bg-purple-50 p-4 rounded-r">
                       <div className="flex justify-between items-start mb-2">
                         <div>
                           <h4 className="text-lg font-semibold text-gray-900 font-mono">{exp.position}</h4>
@@ -141,10 +142,10 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
             )}
 
             {/* Certifications */}
-            {data.certifications.length > 0 && (
+            {data.certifications && data.certifications.length > 0 && (
               <section>
                 <h3 className="text-xl font-bold text-purple-600 mb-4 flex items-center font-mono">
-                  <Database className="h-6 w-6 mr-2 text-purple-600" /></div>
+                  <Database className="h-6 w-6 mr-2 text-purple-600" />
                   Certifications
                 </h3>
                 <div className="grid grid-cols-2 gap-3">

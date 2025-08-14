@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ResumeData } from '@/types/resume';
@@ -29,7 +30,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
     <div className="bg-white text-gray-900 p-8 max-w-4xl mx-auto">
       {/* Header */}
       <header className="mb-8">
-        <div className="text-white p-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500"></div>
+        <div className="text-white p-6 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
           <h1 className="text-3xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
           <div className="flex flex-wrap gap-4 text-sm">
             {personalInfo.email && (
@@ -69,7 +70,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
       {/* Professional Summary */}
       {personalInfo.summary && (
         <section className="mb-8">
-          <h2 className="text-xl font-bold text-purple-600 mb-3 border-b-2 border-purple-200 pb-1"></div>
+          <h2 className="text-xl font-bold text-purple-600 mb-3 border-b-2 border-purple-200 pb-1">
             Professional Summary
           </h2>
           <p className="text-gray-700 leading-relaxed">{personalInfo.summary}</p>
@@ -84,7 +85,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
           </h2>
           <div className="space-y-6">
             {workExperience.map((exp) => (
-              <div key={exp.id} className="border-l-4 border-purple-400 pl-4"></div>
+              <div key={exp.id} className="border-l-4 border-purple-400 pl-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="font-semibold text-lg">{exp.position}</h3>
@@ -111,7 +112,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
           </h2>
           <div className="space-y-4">
             {education.map((edu) => (
-              <div key={edu.id} className="border-l-4 border-purple-400 pl-4"></div>
+              <div key={edu.id} className="border-l-4 border-purple-400 pl-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-semibold">{edu.degree}</h3>
@@ -152,7 +153,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
                           level === 'Advanced' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' :
                           level === 'Intermediate' ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white' :
                           'bg-purple-200 text-purple-800'
-                        }`}</div>
+                        }`}
                       >
                         {skill.name}
                       </span>

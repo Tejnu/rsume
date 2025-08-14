@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ResumeData } from '@/types/resume';
@@ -136,7 +137,7 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
             )}
 
             {/* Certifications */}
-            {data.certifications.length > 0 && (
+            {data.certifications && data.certifications.length > 0 && (
               <section>
                 <h3 className="text-lg font-bold text-purple-600 mb-3 flex items-center">
                   <Award className="h-5 w-5 mr-2" />
