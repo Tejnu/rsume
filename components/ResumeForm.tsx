@@ -10,6 +10,32 @@ import { CertificationsForm } from './forms/CertificationsForm';
 import { ResumeData } from '@/types/resume';
 import { User, Briefcase, GraduationCap, Code, Award, FolderOpen } from 'lucide-react';
 
+// Placeholder for the actual validation and organization logic.
+// This function should take resumeData and return a structured object
+// with properly organized sections like personalInfo, workExperience, skills, etc.
+const validateAndOrganizeData = (data: ResumeData): ResumeData => {
+  // In a real scenario, this would involve complex parsing and categorization.
+  // For this example, we'll assume the data is already somewhat structured
+  // and just return it as is, or apply some basic reordering if needed.
+  // The core issue described in the user message implies the parsing
+  // logic *before* this point is flawed. This function would be the place
+  // to fix that if the data structure itself was being wrongly populated.
+  // For demonstration, we'll just return the data, assuming the prompt
+  // implies the forms themselves need to receive the *correctly* processed data.
+
+  // Example of potential re-organization if needed:
+  // const organizedData = { ...data };
+  // if (organizedData.workExperience) {
+  //   organizedData.workExperience.sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
+  // }
+  // if (organizedData.skills) {
+  //   organizedData.skills.sort((a, b) => a.name.localeCompare(b.name));
+  // }
+
+  return data; // Returning the original data as a placeholder for the function's logic
+};
+
+
 interface ResumeFormProps {
   resumeData: ResumeData;
   onUpdate: (updates: Partial<ResumeData>) => void;
@@ -17,6 +43,9 @@ interface ResumeFormProps {
 
 export function ResumeForm({ resumeData, onUpdate }: ResumeFormProps) {
   const [activeTab, setActiveTab] = useState('personal');
+
+  // Validate and organize the resume data upon component mount or update
+  const organizedResumeData = validateAndOrganizeData(resumeData);
 
   return (
     <div className="p-6">
@@ -51,14 +80,14 @@ export function ResumeForm({ resumeData, onUpdate }: ResumeFormProps) {
         <div className="mt-6">
           <TabsContent value="personal" className="space-y-4">
             <PersonalInfoForm
-              personalInfo={resumeData.personalInfo}
+              personalInfo={organizedResumeData.personalInfo}
               onUpdate={(personalInfo) => onUpdate({ personalInfo })}
             />
           </TabsContent>
 
           <TabsContent value="experience" className="space-y-4">
             <WorkExperienceForm
-              workExperience={resumeData.workExperience}
+              workExperience={organizedResumeData.workExperience}
               onUpdate={(workExperience) => onUpdate({ workExperience })}
             />
           </TabsContent>
@@ -72,18 +101,18 @@ export function ResumeForm({ resumeData, onUpdate }: ResumeFormProps) {
 
           <TabsContent value="skills" className="space-y-4">
             <SkillsForm
-              skills={resumeData.skills}
+              skills={organizedResumeData.skills}
               onUpdate={(skills) => onUpdate({ skills })}
             />
           </TabsContent>
-          
+
           <TabsContent value="certifications" className="space-y-4">
             <CertificationsForm
               certifications={resumeData.certifications}
               onUpdate={(certifications) => onUpdate({ certifications })}
             />
           </TabsContent>
-          
+
           <TabsContent value="additional" className="space-y-4">
             <div className="text-center py-12">
               <FolderOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />

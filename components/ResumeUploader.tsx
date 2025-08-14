@@ -24,27 +24,82 @@ async function aiStructureFromText(rawText: string): Promise<Partial<ResumeData>
   try {
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     if (!apiKey || !rawText || rawText.length < 20) return null;
+    
     const prompt = {
       contents: [
         {
           role: 'user',
           parts: [
             {
-              text: `Parse this resume text into JSON with fields: { personalInfo?: { fullName?: string, email?: string, phone?: string, location?: string, linkedin?: string, website?: string, summary?: string }, workExperience?: Array<{ id?: string, company?: string, position?: string, startDate?: string, endDate?: string, isCurrentJob?: boolean, description?: string }>, education?: Array<{ id?: string, school?: string, degree?: string, field?: string, graduationDate?: string }>, skills?: string[] }. Return STRICT JSON only. Text:\n${rawText.slice(0, 12000)}`
+              text: `You are an expert resume parser. Carefully analyze this resume text and extract information into the correct sections. Pay special attention to:
+
+1. WORK EXPERIENCE: Only include actual job positions with companies, not education or skills
+2. SKILLS: Only technical skills, software, programming languages, certifications - NOT job titles or company names
+3. EDUCATION: Only schools, degrees, universities - NOT work experience
+4. PERSONAL INFO: Contact details and professional summary only
+
+Parse into this EXACT JSON structure:
+{
+  "personalInfo": {
+    "fullName": "string",
+    "email": "string", 
+    "phone": "string",
+    "location": "string",
+    "linkedin": "string",
+    "website": "string",
+    "summary": "string"
+  },
+  "workExperience": [
+    {
+      "id": "string",
+      "company": "string",
+      "position": "string", 
+      "startDate": "YYYY-MM format",
+      "endDate": "YYYY-MM format or empty if current",
+      "isCurrentJob": false,
+      "description": "string with bullet points of responsibilities and achievements"
+    }
+  ],
+  "education": [
+    {
+      "id": "string",
+      "school": "string",
+      "degree": "string",
+      "field": "string", 
+      "graduationDate": "YYYY-MM format"
+    }
+  ],
+  "skills": ["skill1", "skill2", "skill3"]
+}
+
+IMPORTANT: Return ONLY valid JSON. No markdown, no explanations, no code blocks.
+
+Resume text:
+${rawText.slice(0, 12000)}`
             }
           ]
         }
       ]
     };
+    
     const resp = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(prompt)
     });
     const data = await resp.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    // Clean up the response to extract JSON
+    text = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
     let parsed: any = {};
-    try { parsed = JSON.parse(text); } catch { return null; }
+    try { 
+      parsed = JSON.parse(text); 
+    } catch (parseError) {
+      console.log('JSON parse error:', parseError);
+      return null;
+    }
 
     const result: Partial<ResumeData> = {};
     if (parsed.personalInfo) {
@@ -101,42 +156,88 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
   const urlMatch = text.match(/https?:\/\/[^\s)]+/i);
 
   let fullName = '';
-  for (const l of lines.slice(0, 10)) {
-    if (l && !l.includes('@') && !l.toLowerCase().includes('resume') && !l.toLowerCase().includes('curriculum') && !l.startsWith('http')) {
+  for (const l of lines.slice(0, 5)) {
+    if (l && !l.includes('@') && !l.toLowerCase().includes('resume') && 
+        !l.toLowerCase().includes('curriculum') && !l.startsWith('http') &&
+        !l.match(/\d{4}/) && l.split(' ').length >= 2 && l.split(' ').length <= 4) {
       fullName = l.replace(/[^\p{L}\p{N}\s.'-]/gu, '').trim();
-      if (fullName.split(' ').length >= 2) break;
+      break;
     }
   }
 
-  const summaryCandidates = lines.slice(0, 60).join(' ');
-  const summary = summaryCandidates.split(/(?<=[.!?])\s+/).slice(0, 3).join(' ');
-
-  // Heuristic section parsing
-  const sectionRegex = /(work experience|professional experience|experience|education|skills)/i;
+  // Better section detection
+  const sectionRegex = /(work experience|professional experience|experience|employment|career|education|academic|qualifications|skills|technical skills|competencies|abilities)/i;
   const sections: Record<string, string[]> = {};
   let current = 'intro';
-  for (const l of lines) {
-    if (sectionRegex.test(l)) {
-      current = l.toLowerCase().match(sectionRegex)![0];
-      sections[current] = [];
-    } else {
+  let foundSections = new Set<string>();
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const nextLine = lines[i + 1] || '';
+    
+    // More sophisticated section detection
+    if (sectionRegex.test(line) || (line.length < 50 && line.toUpperCase() === line && line.length > 3)) {
+      let sectionName = 'other';
+      
+      if (/work|professional|experience|employment|career/i.test(line)) {
+        sectionName = 'experience';
+      } else if (/education|academic|qualifications|university|college|school/i.test(line)) {
+        sectionName = 'education';
+      } else if (/skills|technical|competencies|abilities|technologies/i.test(line)) {
+        sectionName = 'skills';
+      }
+      
+      if (!foundSections.has(sectionName)) {
+        current = sectionName;
+        foundSections.add(sectionName);
+        sections[current] = [];
+      }
+    } else if (line.length > 0) {
       if (!sections[current]) sections[current] = [];
-      sections[current].push(l);
+      sections[current].push(line);
     }
   }
 
-  // Parse skills
+  // Find summary from intro section
+  const introLines = sections['intro'] || lines.slice(0, 8);
+  const summary = introLines
+    .filter(l => l.length > 20 && !l.includes('@') && !l.startsWith('http'))
+    .slice(0, 3)
+    .join(' ')
+    .slice(0, 300);
+
+  // Parse skills - improved to avoid job titles and companies
   let skills: Skill[] = [];
   const skillsText = (sections['skills'] || []).join(' ');
   if (skillsText) {
+    const commonSkillKeywords = [
+      'javascript', 'python', 'java', 'react', 'node.js', 'html', 'css', 'sql', 'git', 'aws', 
+      'docker', 'kubernetes', 'angular', 'vue', 'typescript', 'php', 'c++', 'c#', '.net',
+      'mongodb', 'mysql', 'postgresql', 'redis', 'excel', 'powerpoint', 'word', 'photoshop',
+      'illustrator', 'figma', 'sketch', 'project management', 'agile', 'scrum', 'jira',
+      'tensorflow', 'pytorch', 'machine learning', 'data analysis', 'tableau', 'power bi'
+    ];
+    
     const tokens = skillsText
-      .split(/[,•\n;]+/)
+      .split(/[,•\n;|\-\(\)]+/)
       .map(s => s.trim())
-      .filter(s => s.length > 1 && s.length <= 40);
-    skills = Array.from(new Set(tokens)).slice(0, 40).map((name, idx) => ({
+      .filter(s => {
+        if (s.length < 2 || s.length > 30) return false;
+        // Filter out common non-skill words
+        const lower = s.toLowerCase();
+        if (/\b(years?|experience|working|with|of|in|at|the|and|or|for)\b/i.test(s)) return false;
+        if (/\d+\s*(years?|months?|yr|mo)/i.test(s)) return false;
+        if (/(company|corporation|inc|llc|ltd|university|college)/i.test(s)) return false;
+        
+        // Check if it's likely a skill
+        return commonSkillKeywords.some(keyword => lower.includes(keyword)) || 
+               /^[a-zA-Z][a-zA-Z0-9\s\.\+\#\-]{1,25}$/.test(s);
+      });
+      
+    skills = Array.from(new Set(tokens)).slice(0, 20).map((name, idx) => ({
       id: String(Date.now() + idx),
-      name,
-      level: 'Intermediate'
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      level: 'Intermediate' as const
     }));
   }
 
@@ -162,27 +263,102 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     }
   }
 
-  // Parse experience entries
+  // Parse experience entries - improved organization
   const workExperience: WorkExperience[] = [];
-  const expLines = sections['experience'] || sections['work experience'] || sections['professional experience'] || [];
+  const expLines = sections['experience'] || [];
+  
   if (expLines.length) {
-    const chunks = expLines.join('\n').split(/\n\s*\n/);
-    for (let i = 0; i < chunks.length && workExperience.length < 8; i++) {
-      const c = chunks[i];
-      const header = (c.split('\n')[0] || '').trim();
-      const position = (header.match(/^([^@\-•|]+)\s*[\-|•|@]/)?.[1] || header).trim();
-      const company = (c.match(/@\s*([^\n|\-•]+)/)?.[1] || (header.match(/[\-|•|]([^@\n]+)/)?.[1] || '')).trim();
-      const dateRange = (c.match(/((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})\s*[–-]\s*(Present|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}))/i)?.[0] || '')
-        .replace(/[–]/g, '-');
-      const isoDates = dateRange
-        .replace(/Jan[uary]?/ig,'01').replace(/Feb(ruary)?/ig,'02').replace(/Mar(ch)?/ig,'03')
-        .replace(/Apr(il)?/ig,'04').replace(/May/ig,'05').replace(/Jun(e)?/ig,'06')
-        .replace(/Jul(y)?/ig,'07').replace(/Aug(ust)?/ig,'08').replace(/Sep(t)?(ember)?/ig,'09')
-        .replace(/Oct(ober)?/ig,'10').replace(/Nov(ember)?/ig,'11').replace(/Dec(ember)?/ig,'12')
-        .replace(/\s+/g,'-');
-      const [startDate, endDateRaw] = isoDates.split('-').length > 2 ? isoDates.split(' - ') : ['', ''];
-      const description = c.split('\n').slice(1).join('\n');
-      workExperience.push({
+    // Better chunking - split by job entries
+    let currentEntry = '';
+    const jobEntries: string[] = [];
+    
+    for (const line of expLines) {
+      // Detect new job entry (company/position patterns)
+      if (line.match(/^[A-Z][^.!?]*\s*(at|@|\||\-)\s*[A-Z]/i) || 
+          line.match(/^\w+.*\d{4}/i) ||
+          (line.length < 100 && line.split(' ').length <= 8 && /[A-Z]/.test(line))) {
+        
+        if (currentEntry.trim()) {
+          jobEntries.push(currentEntry.trim());
+        }
+        currentEntry = line + '\n';
+      } else {
+        currentEntry += line + '\n';
+      }
+    }
+    
+    if (currentEntry.trim()) {
+      jobEntries.push(currentEntry.trim());
+    }
+
+    for (let i = 0; i < jobEntries.length && workExperience.length < 6; i++) {
+      const entry = jobEntries[i];
+      const lines = entry.split('\n').map(l => l.trim()).filter(Boolean);
+      
+      if (lines.length === 0) continue;
+      
+      const headerLine = lines[0];
+      let position = '', company = '';
+      
+      // Extract position and company
+      if (headerLine.includes(' at ') || headerLine.includes(' @ ')) {
+        const parts = headerLine.split(/ at | @ /i);
+        position = parts[0]?.trim() || '';
+        company = parts[1]?.trim() || '';
+      } else if (headerLine.includes(' - ') || headerLine.includes(' | ')) {
+        const parts = headerLine.split(/ - | \| /);
+        position = parts[0]?.trim() || '';
+        company = parts[1]?.trim() || '';
+      } else {
+        position = headerLine;
+      }
+      
+      // Extract dates
+      const datePattern = /((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})\s*[–\-to]+\s*(Present|Current|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}))/i;
+      const dateMatch = entry.match(datePattern);
+      
+      let startDate = '', endDate = '', isCurrentJob = false;
+      
+      if (dateMatch) {
+        startDate = this.convertDateToISO(dateMatch[1] || '');
+        const endDateText = dateMatch[3] || '';
+        isCurrentJob = /present|current/i.test(endDateText);
+        if (!isCurrentJob) {
+          endDate = this.convertDateToISO(endDateText);
+        }
+      }
+      
+      // Extract description
+      const description = lines.slice(1)
+        .filter(l => !datePattern.test(l))
+        .join('\n')
+        .trim();
+
+      if (position || company) {
+        workExperience.push({
+          id: String(Date.now() + i),
+          company: company || 'Company',
+          position: position || 'Position',
+          startDate,
+          endDate,
+          isCurrentJob,
+          description
+        });
+      }
+    }
+  }
+
+  // Helper function to convert dates
+  const convertDateToISO = (dateStr: string): string => {
+    if (!dateStr) return '';
+    return dateStr
+      .replace(/Jan[uary]?/ig, '01').replace(/Feb[ruary]?/ig, '02').replace(/Mar[ch]?/ig, '03')
+      .replace(/Apr[il]?/ig, '04').replace(/May/ig, '05').replace(/Jun[e]?/ig, '06')
+      .replace(/Jul[y]?/ig, '07').replace(/Aug[ust]?/ig, '08').replace(/Sep[t]?[ember]?/ig, '09')
+      .replace(/Oct[ober]?/ig, '10').replace(/Nov[ember]?/ig, '11').replace(/Dec[ember]?/ig, '12')
+      .replace(/\s+/g, '-')
+      .replace(/(\d{2})-(\d{4})/, '$2-$1');
+  };kExperience.push({
         id: String(Date.now() + i),
         company: company || '',
         position: position || '',
