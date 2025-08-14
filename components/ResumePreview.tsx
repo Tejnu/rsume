@@ -71,135 +71,201 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
         return;
       }
 
-      // Get all stylesheets
-      const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-        .map((el) => el.outerHTML)
+      // Get all stylesheets from the current document
+      const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .map((link) => link.outerHTML)
         .join('\n');
 
-      // Create inline styles for print
-      const printStyles = `
+      // Get all inline styles
+      const inlineStyles = Array.from(document.querySelectorAll('style'))
+        .map((style) => style.outerHTML)
+        .join('\n');
+
+      // Enhanced styles for proper template rendering
+      const enhancedStyles = `
         <style>
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+          
           @page { 
             margin: 0.5in; 
-            size: A4; 
+            size: letter;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
           }
           
           * { 
             -webkit-print-color-adjust: exact !important; 
             color-adjust: exact !important; 
-            print-color-adjust: exact !important; 
+            print-color-adjust: exact !important;
+            box-sizing: border-box;
           }
           
-          body { 
-            font-family: system-ui, -apple-system, sans-serif; 
-            line-height: 1.5; 
-            color: #000; 
-            background: white; 
-            margin: 0; 
-            padding: 0; 
+          html, body { 
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.5;
+            color: #1f2937;
+            background: white;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          /* Tailwind-like utility classes */
+          .text-xs { font-size: 0.75rem; line-height: 1rem; }
+          .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+          .text-base { font-size: 1rem; line-height: 1.5rem; }
+          .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+          .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+          .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+          .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+          
+          .font-light { font-weight: 300; }
+          .font-normal { font-weight: 400; }
+          .font-medium { font-weight: 500; }
+          .font-semibold { font-weight: 600; }
+          .font-bold { font-weight: 700; }
+          
+          .text-gray-600 { color: #4b5563 !important; }
+          .text-gray-700 { color: #374151 !important; }
+          .text-gray-800 { color: #1f2937 !important; }
+          .text-gray-900 { color: #111827 !important; }
+          .text-indigo-600 { color: #4f46e5 !important; }
+          .text-blue-600 { color: #2563eb !important; }
+          .text-purple-600 { color: #9333ea !important; }
+          .text-pink-600 { color: #db2777 !important; }
+          .text-green-600 { color: #059669 !important; }
+          .text-red-600 { color: #dc2626 !important; }
+          
+          .bg-gray-50 { background-color: #f9fafb !important; }
+          .bg-gray-100 { background-color: #f3f4f6 !important; }
+          .bg-indigo-50 { background-color: #eef2ff !important; }
+          .bg-blue-50 { background-color: #eff6ff !important; }
+          .bg-purple-50 { background-color: #faf5ff !important; }
+          .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)) !important; }
+          
+          .border { border: 1px solid #e5e7eb !important; }
+          .border-l-4 { border-left: 4px solid !important; }
+          .border-indigo-500 { border-color: #6366f1 !important; }
+          .border-blue-500 { border-color: #3b82f6 !important; }
+          .border-purple-500 { border-color: #8b5cf6 !important; }
+          
+          .rounded { border-radius: 0.25rem !important; }
+          .rounded-lg { border-radius: 0.5rem !important; }
+          .rounded-xl { border-radius: 0.75rem !important; }
+          
+          .p-1 { padding: 0.25rem !important; }
+          .p-2 { padding: 0.5rem !important; }
+          .p-3 { padding: 0.75rem !important; }
+          .p-4 { padding: 1rem !important; }
+          .p-6 { padding: 1.5rem !important; }
+          .p-8 { padding: 2rem !important; }
+          
+          .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+          .px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+          .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
+          .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+          .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+          
+          .m-0 { margin: 0 !important; }
+          .mb-2 { margin-bottom: 0.5rem !important; }
+          .mb-3 { margin-bottom: 0.75rem !important; }
+          .mb-4 { margin-bottom: 1rem !important; }
+          .mb-6 { margin-bottom: 1.5rem !important; }
+          .mb-8 { margin-bottom: 2rem !important; }
+          
+          .flex { display: flex !important; }
+          .flex-col { flex-direction: column !important; }
+          .items-center { align-items: center !important; }
+          .justify-between { justify-content: space-between !important; }
+          .space-y-2 > * + * { margin-top: 0.5rem !important; }
+          .space-y-3 > * + * { margin-top: 0.75rem !important; }
+          .space-y-4 > * + * { margin-top: 1rem !important; }
+          
+          .grid { display: grid !important; }
+          .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+          .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+          .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+          .gap-2 { gap: 0.5rem !important; }
+          .gap-4 { gap: 1rem !important; }
+          
+          .w-full { width: 100% !important; }
+          .max-w-4xl { max-width: 56rem !important; }
+          .min-h-screen { min-height: 100vh !important; }
+          
+          /* Remove shadows for print */
+          .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl { 
+            box-shadow: none !important; 
           }
           
+          h1, h2, h3, h4, h5, h6 { 
+            margin-top: 0;
+            margin-bottom: 0.5em;
+            font-weight: 600;
+            line-height: 1.2;
+          }
+          
+          h1 { font-size: 1.875rem; }
+          h2 { font-size: 1.5rem; }
+          h3 { font-size: 1.25rem; }
+          
+          p { 
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+          }
+          
+          ul, ol {
+            margin: 0;
+            padding-left: 1.5rem;
+          }
+          
+          li {
+            margin-bottom: 0.25rem;
+          }
+          
+          /* Template-specific enhancements */
           .resume-container { 
             max-width: 8.5in; 
             margin: 0 auto; 
             background: white; 
-            padding: 0.5in; 
+            padding: 0.5in;
+            font-size: 12px;
+            line-height: 1.4;
           }
           
-          h1, h2, h3, h4, h5, h6 { 
-            color: #000 !important; 
-            margin-bottom: 0.5em; 
+          /* Gradient backgrounds for modern template */
+          .bg-gradient-to-r.from-indigo-500.to-purple-600 {
+            background: linear-gradient(to right, #6366f1, #8b5cf6) !important;
+            color: white !important;
           }
           
-          .text-gray-600, .text-gray-700, .text-gray-800 { 
-            color: #374151 !important; 
+          .bg-gradient-to-r.from-blue-500.to-cyan-600 {
+            background: linear-gradient(to right, #3b82f6, #06b6d4) !important;
+            color: white !important;
           }
           
-          .text-indigo-600, .text-blue-600, .text-purple-600 { 
-            color: #4f46e5 !important; 
-          }
-          
-          .bg-gray-50, .bg-gray-100 { 
-            background-color: #f9fafb !important; 
-          }
-          
-          .border { 
-            border: 1px solid #e5e7eb !important; 
-          }
-          
-          .shadow, .shadow-sm, .shadow-lg { 
-            box-shadow: none !important; 
-          }
-          
-          .rounded, .rounded-lg, .rounded-xl { 
-            border-radius: 4px !important; 
+          .bg-gradient-to-r.from-purple-500.to-pink-600 {
+            background: linear-gradient(to right, #8b5cf6, #db2777) !important;
+            color: white !important;
           }
           
           @media print {
+            * { 
+              box-shadow: none !important; 
+              text-shadow: none !important;
+            }
             .no-print { display: none !important; }
             .page-break { page-break-after: always; }
-            * { box-shadow: none !important; }
+            body { margin: 0; padding: 0; }
+            .resume-container { 
+              padding: 0.25in;
+              margin: 0;
+              box-shadow: none !important;
+            }
           }
         </style>
       `;
 
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8" />
-            <title>Resume - ${resumeData.personalInfo.fullName || 'Resume'}</title>
-            ${stylesheets}
-            <style>
-              @page { 
-                margin: 0.5in; 
-                size: letter;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              html, body { 
-                -webkit-print-color-adjust: exact; 
-                print-color-adjust: exact;
-                margin: 0;
-                padding: 0;
-                font-family: system-ui, -apple-system, sans-serif;
-              }
-              .resume-content { 
-                width: 100%; 
-                max-width: none;
-                margin: 0;
-                padding: 0;
-              }
-              * {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-              }
-              @media print {
-                body { margin: 0; }
-                .no-print { display: none !important; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="resume-content">
-              ${printContent.innerHTML}
-            </div>
-            <script>
-              window.onload = function() {
-                setTimeout(function() {
-                  window.focus();
-                  window.print();
-                  setTimeout(function() {
-                    window.close();
-                  }, 1000);
-                }, 500);
-              };
-            </script>
-          </body>
-        </html>
-      `);
-
-      // Create the complete HTML document
       const htmlContent = `
         <!DOCTYPE html>
         <html lang="en">
@@ -207,8 +273,10 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>${resumeData.personalInfo?.fullName || 'Resume'} - Resume</title>
+            <script src="https://cdn.tailwindcss.com"></script>
             ${stylesheets}
-            ${printStyles}
+            ${inlineStyles}
+            ${enhancedStyles}
           </head>
           <body>
             <div class="resume-container">
@@ -216,14 +284,15 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
             </div>
             <script>
               window.onload = function() {
-                // Small delay to ensure styles are loaded
+                // Small delay to ensure all styles and fonts are loaded
                 setTimeout(() => {
+                  window.focus();
                   window.print();
-                  // Close after printing (optional)
+                  // Close after printing
                   setTimeout(() => {
                     window.close();
-                  }, 1000);
-                }, 500);
+                  }, 2000);
+                }, 1000);
               };
             </script>
           </body>
