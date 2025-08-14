@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ResumeData } from '@/types/resume';
@@ -9,36 +8,47 @@ interface ExecutiveTemplateProps {
 }
 
 export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
+  // Safety check for data
+  if (!data) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center text-gray-500">
+        Loading template...
+      </div>
+    );
+  }
+
+  const { personalInfo, workExperience, education, skills } = data;
+
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-2xl" style={{ minHeight: '1056px' }}>
       {/* Header Section */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-8">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h1 className="text-4xl font-bold mb-2">{data.personalInfo.fullName}</h1>
-            <h2 className="text-xl text-slate-200 mb-4">{data.personalInfo.title}</h2>
-            {data.personalInfo.summary && (
-              <p className="text-slate-100 text-sm leading-relaxed max-w-2xl">{data.personalInfo.summary}</p>
+            <h1 className="text-4xl font-bold mb-2">{personalInfo.fullName}</h1>
+            <h2 className="text-xl text-slate-200 mb-4">{personalInfo.title}</h2>
+            {personalInfo.summary && (
+              <p className="text-slate-100 text-sm leading-relaxed max-w-2xl">{personalInfo.summary}</p>
             )}
           </div>
           <div className="ml-8">
             <div className="space-y-2 text-sm">
-              {data.personalInfo.email && (
+              {personalInfo.email && (
                 <div className="flex items-center">
                   <Mail className="h-4 w-4 mr-2 text-slate-300" />
-                  <span>{data.personalInfo.email}</span>
+                  <span>{personalInfo.email}</span>
                 </div>
               )}
-              {data.personalInfo.phone && (
+              {personalInfo.phone && (
                 <div className="flex items-center">
                   <Phone className="h-4 w-4 mr-2 text-slate-300" />
-                  <span>{data.personalInfo.phone}</span>
+                  <span>{personalInfo.phone}</span>
                 </div>
               )}
-              {data.personalInfo.location && (
+              {personalInfo.location && (
                 <div className="flex items-center">
                   <MapPin className="h-4 w-4 mr-2 text-slate-300" />
-                  <span>{data.personalInfo.location}</span>
+                  <span>{personalInfo.location}</span>
                 </div>
               )}
             </div>
@@ -51,13 +61,13 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
           {/* Main Content */}
           <div className="col-span-2 space-y-6">
             {/* Experience */}
-            {data.workExperience.length > 0 && (
+            {workExperience.length > 0 && (
               <section>
                 <h3 className="text-2xl font-bold text-slate-900 mb-4 border-b-2 border-slate-200 pb-2">
                   Executive Experience
                 </h3>
                 <div className="space-y-6">
-                  {data.workExperience.map((exp, index) => (
+                  {workExperience.map((exp, index) => (
                     <div key={index} className="border-l-4 border-slate-300 pl-6">
                       <div className="flex justify-between items-start mb-2">
                         <div>
@@ -85,14 +95,14 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Skills */}
-            {data.skills.length > 0 && (
+            {skills.length > 0 && (
               <section>
                 <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
                   <Star className="h-5 w-5 mr-2" />
                   Core Competencies
                 </h3>
                 <div className="space-y-2">
-                  {data.skills.map((skill, index) => (
+                  {skills.map((skill, index) => (
                     <div key={index} className="bg-slate-50 p-2 rounded">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-slate-800">{skill.name}</span>
@@ -105,14 +115,14 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
             )}
 
             {/* Education */}
-            {data.education.length > 0 && (
+            {education.length > 0 && (
               <section>
                 <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
                   <GraduationCap className="h-5 w-5 mr-2" />
                   Education
                 </h3>
                 <div className="space-y-3">
-                  {data.education.map((edu, index) => (
+                  {education.map((edu, index) => (
                     <div key={index} className="border-b border-slate-200 pb-3 last:border-b-0">
                       <h4 className="font-semibold text-slate-800 text-sm">{edu.degree}</h4>
                       <p className="text-slate-600 text-xs">{edu.school}</p>

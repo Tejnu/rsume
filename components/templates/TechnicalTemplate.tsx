@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ResumeData } from '@/types/resume';
@@ -9,6 +8,17 @@ interface TechnicalTemplateProps {
 }
 
 export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
+  // Safety check for data
+  if (!data) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center text-gray-500">
+        Loading template...
+      </div>
+    );
+  }
+
+  const { personalInfo, workExperience, education, skills } = data;
+
   return (
     <div className="max-w-4xl mx-auto bg-white shadow-lg" style={{ minHeight: '1056px' }}>
       {/* Header */}
@@ -61,7 +71,7 @@ export function TechnicalTemplate({ data }: TechnicalTemplateProps) {
                       <div className="text-xs text-gray-600 mt-1">
                         <div className="flex items-center">
                           <div className={`w-full bg-gray-200 rounded-full h-1.5 mr-2`}>
-                            <div 
+                            <div
                               className={`h-1.5 rounded-full ${
                                 skill.level === 'expert' ? 'bg-green-600 w-full' :
                                 skill.level === 'advanced' ? 'bg-blue-600 w-4/5' :

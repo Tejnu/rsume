@@ -8,6 +8,15 @@ interface CreativeTemplateProps {
 }
 
 export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
+  // Safety check for resumeData
+  if (!resumeData) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center text-gray-500">
+        Loading template...
+      </div>
+    );
+  }
+
   const { personalInfo, workExperience, education, skills } = resumeData;
 
   const formatDate = (dateString: string) => {
