@@ -146,6 +146,17 @@ ${rawText.slice(0, 12000)}`
   }
 }
 
+function convertDateToISO(dateStr: string): string {
+  if (!dateStr) return '';
+  return dateStr
+    .replace(/Jan[uary]?/ig, '01').replace(/Feb[ruary]?/ig, '02').replace(/Mar[ch]?/ig, '03')
+    .replace(/Apr[il]?/ig, '04').replace(/May/ig, '05').replace(/Jun[e]?/ig, '06')
+    .replace(/Jul[y]?/ig, '07').replace(/Aug[ust]?/ig, '08').replace(/Sep[t]?[ember]?/ig, '09')
+    .replace(/Oct[ober]?/ig, '10').replace(/Nov[ember]?/ig, '11').replace(/Dec[ember]?/ig, '12')
+    .replace(/\s+/g, '-')
+    .replace(/(\d{2})-(\d{4})/, '$2-$1');
+}
+
 function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
   const text = rawText.replace(/\r/g, '').trim();
   const lines = text.split(/\n+/).map(l => l.trim()).filter(Boolean);
@@ -320,11 +331,11 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
       let startDate = '', endDate = '', isCurrentJob = false;
       
       if (dateMatch) {
-        startDate = this.convertDateToISO(dateMatch[1] || '');
+        startDate = convertDateToISO(dateMatch[1] || '');
         const endDateText = dateMatch[3] || '';
         isCurrentJob = /present|current/i.test(endDateText);
         if (!isCurrentJob) {
-          endDate = this.convertDateToISO(endDateText);
+          endDate = convertDateToISO(endDateText);
         }
       }
       
@@ -348,17 +359,7 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     }
   }
 
-  // Helper function to convert dates
-  const convertDateToISO = (dateStr: string): string => {
-    if (!dateStr) return '';
-    return dateStr
-      .replace(/Jan[uary]?/ig, '01').replace(/Feb[ruary]?/ig, '02').replace(/Mar[ch]?/ig, '03')
-      .replace(/Apr[il]?/ig, '04').replace(/May/ig, '05').replace(/Jun[e]?/ig, '06')
-      .replace(/Jul[y]?/ig, '07').replace(/Aug[ust]?/ig, '08').replace(/Sep[t]?[ember]?/ig, '09')
-      .replace(/Oct[ober]?/ig, '10').replace(/Nov[ember]?/ig, '11').replace(/Dec[ember]?/ig, '12')
-      .replace(/\s+/g, '-')
-      .replace(/(\d{2})-(\d{4})/, '$2-$1');
-  };
+  
 
   // Fallbacks: if parsing is weak, put raw text into summary and a generic experience entry
   const hasAnyData = (fullName || emailMatch || phoneMatch || linkedinMatch || urlMatch || workExperience.length || education.length || skills.length);
