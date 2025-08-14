@@ -40,6 +40,7 @@ export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isAIProcessing, setIsAIProcessing] = useState(false);
   const [showUploader, setShowUploader] = useState(true);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [showWizard, setShowWizard] = useState(false);
   const [wizardData, setWizardData] = useState<any>(null);
 
@@ -102,25 +103,84 @@ export default function Home() {
   };
 
   const handleFileUpload = async (file: File) => {
-    // This would typically send the file to a backend service for processing
-    console.log('Processing file:', file.name);
+    setPendingFile(file);
     setShowUploader(true);
   };
 
   const handleResumeExtracted = (extractedData: Partial<ResumeData>) => {
+    // Merge deeply for personalInfo to avoid wiping other fields unintentionally
     setResumeData(prev => ({
       ...prev,
-      ...extractedData,
-      selectedTemplate: prev.selectedTemplate // Keep current template
+      personalInfo: {
+        ...prev.personalInfo,
+        ...(extractedData.personalInfo || {})
+      },
+      workExperience: extractedData.workExperience ?? prev.workExperience,
+      education: extractedData.education ?? prev.education,
+      skills: extractedData.skills ?? prev.skills,
+      certifications: extractedData.certifications ?? prev.certifications,
+      projects: extractedData.projects ?? prev.projects,
+      languages: extractedData.languages ?? prev.languages,
+      references: extractedData.references ?? prev.references,
+      customSections: extractedData.customSections ?? prev.customSections,
+      selectedTemplate: prev.selectedTemplate
     }));
     setShowUploader(false);
   };
 
   const handleAIEnhance = async () => {
     setIsAIProcessing(true);
-    // Simulate AI processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsAIProcessing(false);
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+      if (!apiKey) {
+        await new Promise(r => setTimeout(r, 1200));
+        setIsAIProcessing(false);
+        return;
+      }
+      const prompt = {
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: `Improve this resume JSON. Return JSON with optional fields: {personalInfo?:{summary:string}, skillsToAdd?: string[], experienceEnhancements?: Array<{id:string, enhancement:string}>}. Resume: ${JSON.stringify(resumeData).slice(0, 6000)}`
+              }
+            ]
+          }
+        ]
+      };
+      const resp = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(prompt)
+      });
+      const data = await resp.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      let ai: any = {};
+      try { ai = JSON.parse(text); } catch {}
+
+      if (ai.personalInfo?.summary) {
+        updateResumeData({
+          personalInfo: {
+            ...resumeData.personalInfo,
+            summary: ai.personalInfo.summary
+          }
+        });
+      }
+      if (Array.isArray(ai.skillsToAdd) && ai.skillsToAdd.length > 0) {
+        const newSkills = ai.skillsToAdd.slice(0, 10).map((s: string, i: number) => ({ id: String(Date.now() + i), name: s, level: 'Intermediate' as const }));
+        updateResumeData({ skills: [...resumeData.skills, ...newSkills] });
+      }
+      if (Array.isArray(ai.experienceEnhancements)) {
+        const updated = resumeData.workExperience.map(exp => {
+          const enh = ai.experienceEnhancements.find((e: any) => e.id === exp.id);
+          return enh ? { ...exp, description: enh.enhancement } : exp;
+        });
+        updateResumeData({ workExperience: updated });
+      }
+    } finally {
+      setIsAIProcessing(false);
+    }
   };
 
   const handleDownloadPDF = () => {
@@ -307,7 +367,11 @@ export default function Home() {
         {/* Upload Section - Show when no content or explicitly requested */}
         {(!hasContent || showUploader) && (
           <div className="mb-8">
-            <ResumeUploader onResumeExtracted={handleResumeExtracted} />
+            <ResumeUploader 
+              onResumeExtracted={handleResumeExtracted}
+              externalFile={pendingFile}
+              onExternalFileProcessed={() => setPendingFile(null)}
+            />
           </div>
         )}
 

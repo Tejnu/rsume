@@ -16,7 +16,7 @@ interface ResumePreviewProps {
 }
 
 export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps) {
-  const [zoom, setZoom] = useState(0.75);
+  const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const renderTemplate = () => {
@@ -38,41 +38,28 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
     const printContent = document.getElementById('resume-preview-content');
     if (!printContent) return;
 
-    // Create a new window for printing
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
+
+    const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+      .map((el) => el.outerHTML)
+      .join('\n');
 
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="utf-8" />
           <title>Resume - ${resumeData.personalInfo.fullName || 'Resume'}</title>
+          ${stylesheets}
           <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              line-height: 1.5;
-              color: #1f2937;
-              background: white;
-            }
-            @page { 
-              margin: 0.5in; 
-              size: letter; 
-            }
-            .resume-content {
-              width: 100%;
-              max-width: none;
-              margin: 0;
-              padding: 0;
-              background: white;
-            }
-            @media print {
-              body { -webkit-print-color-adjust: exact; }
-            }
+            @page { margin: 0.5in; size: letter; }
+            html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .resume-content { width: 100%; }
           </style>
         </head>
         <body>
-          <div class="resume-content">
+          <div id="resume-preview-content">
             ${printContent.innerHTML}
           </div>
         </body>
@@ -80,9 +67,8 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
     `);
 
     printWindow.document.close();
-    
-    // Wait for content to load, then print
     setTimeout(() => {
+      printWindow.focus();
       printWindow.print();
       printWindow.close();
     }, 500);
@@ -155,8 +141,8 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
             className="bg-white shadow-2xl mx-auto overflow-auto"
             style={{ 
               width: isFullscreen ? '210mm' : '100%',
-              maxWidth: isFullscreen ? '210mm' : '420px',
-              height: isFullscreen ? '297mm' : '560px',
+              maxWidth: isFullscreen ? '210mm' : '820px',
+              height: isFullscreen ? '297mm' : '840px',
               transform: isFullscreen ? 'none' : `scale(${zoom})`,
               transformOrigin: 'top center',
               transition: 'all 0.3s ease'
@@ -166,7 +152,7 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
               id="resume-preview-content"
               className="h-full overflow-auto"
               style={{ 
-                fontSize: isFullscreen ? '12px' : '10px',
+                fontSize: isFullscreen ? '12px' : '12px',
                 lineHeight: '1.4'
               }}
             >

@@ -32,10 +32,7 @@ export function AIAssistant({ resumeData, onApplySuggestion }: AIAssistantProps)
 
   const generateSuggestions = async () => {
     setIsGenerating(true);
-    
-    // Realistic AI processing simulation
-    await new Promise(resolve => setTimeout(resolve, 3500));
-    
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     const newSuggestions: AISuggestion[] = [];
     
     // Analyze resume content for intelligent suggestions
@@ -83,27 +80,64 @@ export function AIAssistant({ resumeData, onApplySuggestion }: AIAssistantProps)
     }
 
     // Intelligent summary enhancement
-    if (summaryLength < 120 || !resumeData.personalInfo.summary) {
-      const experienceLevel = hasWorkExperience ? 
-        (resumeData.workExperience.length >= 3 ? 'Senior' : 'Mid-level') : 'Entry-level';
-      
-      const industryFocus = currentSkills.some(s => ['javascript', 'python', 'react'].some(tech => s.includes(tech))) ? 
-        'Software Development' : 'Technology';
+    try {
+      if (apiKey) {
+        const prompt = {
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: `You are an expert resume coach. Given this resume JSON, return concise JSON with fields: {
+                    skillSuggestions: string[6],
+                    improvedSummary: string,
+                    experienceEnhancements: Array<{id: string, enhancement: string}>
+                  }. Resume JSON: ${JSON.stringify(resumeData).slice(0, 6000)}`
+                }
+              ]
+            }
+          ]
+        };
 
-      const topSkills = resumeData.skills.slice(0, 4).map(s => s.name).join(', ') || 'technical skills';
+        const resp = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(prompt)
+        });
+        const data = await resp.json();
+        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        let modelJson: any = {};
+        try { modelJson = JSON.parse(text); } catch {}
 
-      newSuggestions.push({
-        id: 2,
-        type: 'summary',
-        title: 'Optimize Professional Summary',
-        description: 'AI-crafted summary that highlights your unique value proposition and career achievements',
-        suggestion: `${experienceLevel} ${industryFocus} professional with proven expertise in ${topSkills}. Demonstrated track record of delivering scalable solutions that drive business growth and improve operational efficiency. Passionate about leveraging cutting-edge technologies to solve complex problems and mentor team members. Seeking opportunities to contribute technical leadership and innovation in a dynamic, growth-oriented environment.`,
-        priority: 'high',
-        impact: 'Improves recruiter engagement by 60%',
-        category: 'Content',
-        confidence: 88
-      });
-    }
+        if (Array.isArray(modelJson.skillSuggestions) && modelJson.skillSuggestions.length > 0) {
+          newSuggestions.push({
+            id: 100,
+            type: 'skill',
+            title: 'AI Skill Suggestions',
+            description: 'High-signal skills inferred from your resume',
+            suggestions: modelJson.skillSuggestions.slice(0, 6),
+            priority: 'high',
+            impact: 'Increases job match rate by 35-45%',
+            category: 'Skills',
+            confidence: 90
+          });
+        }
+
+        if (modelJson.improvedSummary) {
+          newSuggestions.push({
+            id: 101,
+            type: 'summary',
+            title: 'AI-Optimized Summary',
+            description: 'Tailored summary based on your experience and skills',
+            suggestion: modelJson.improvedSummary,
+            priority: 'high',
+            impact: 'Improves recruiter engagement by 60%',
+            category: 'Content',
+            confidence: 88
+          });
+        }
+      }
+    } catch {}
 
     // Experience enhancement with quantified metrics
     if (hasWorkExperience) {

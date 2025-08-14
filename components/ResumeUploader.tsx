@@ -1,17 +1,255 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Upload, FileText, CheckCircle, AlertCircle, X, Sparkles } from 'lucide-react';
-import { ResumeData } from '@/types/resume';
+import { ResumeData, Skill, WorkExperience, Education } from '@/types/resume';
+
+// PDF text extraction temporarily disabled to ensure stable build. Prompt users to upload DOCX/TXT instead.
+
+async function extractTextFromDocx(file: File): Promise<string> {
+  const arrayBuffer = await file.arrayBuffer();
+  const mammoth = await import('mammoth');
+  const { value } = await mammoth.extractRawText({ arrayBuffer });
+  return value || '';
+}
+
+function extractTextFromTxt(file: File): Promise<string> {
+  return file.text();
+}
+
+async function aiStructureFromText(rawText: string): Promise<Partial<ResumeData> | null> {
+  try {
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!apiKey || !rawText || rawText.length < 20) return null;
+    const prompt = {
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              text: `Parse this resume text into JSON with fields: { personalInfo?: { fullName?: string, email?: string, phone?: string, location?: string, linkedin?: string, website?: string, summary?: string }, workExperience?: Array<{ id?: string, company?: string, position?: string, startDate?: string, endDate?: string, isCurrentJob?: boolean, description?: string }>, education?: Array<{ id?: string, school?: string, degree?: string, field?: string, graduationDate?: string }>, skills?: string[] }. Return STRICT JSON only. Text:\n${rawText.slice(0, 12000)}`
+            }
+          ]
+        }
+      ]
+    };
+    const resp = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(prompt)
+    });
+    const data = await resp.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let parsed: any = {};
+    try { parsed = JSON.parse(text); } catch { return null; }
+
+    const result: Partial<ResumeData> = {};
+    if (parsed.personalInfo) {
+      result.personalInfo = {
+        fullName: parsed.personalInfo.fullName || '',
+        email: parsed.personalInfo.email || '',
+        phone: parsed.personalInfo.phone || '',
+        location: parsed.personalInfo.location || '',
+        linkedin: parsed.personalInfo.linkedin || '',
+        website: parsed.personalInfo.website || '',
+        summary: parsed.personalInfo.summary || ''
+      } as any;
+    }
+    if (Array.isArray(parsed.skills)) {
+      result.skills = parsed.skills.slice(0, 40).map((name: string, i: number) => ({
+        id: String(Date.now() + i),
+        name,
+        level: 'Intermediate' as const
+      }));
+    }
+    if (Array.isArray(parsed.workExperience)) {
+      result.workExperience = parsed.workExperience.slice(0, 10).map((w: any, i: number) => ({
+        id: w.id || String(Date.now() + i),
+        company: w.company || '',
+        position: w.position || '',
+        startDate: w.startDate || '',
+        endDate: w.endDate || '',
+        isCurrentJob: Boolean(w.isCurrentJob),
+        description: w.description || ''
+      }));
+    }
+    if (Array.isArray(parsed.education)) {
+      result.education = parsed.education.slice(0, 10).map((e: any, i: number) => ({
+        id: e.id || String(Date.now() + i),
+        school: e.school || '',
+        degree: e.degree || '',
+        field: e.field || '',
+        graduationDate: e.graduationDate || ''
+      }));
+    }
+    return result;
+  } catch {
+    return null;
+  }
+}
+
+function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
+  const text = rawText.replace(/\r/g, '').trim();
+  const lines = text.split(/\n+/).map(l => l.trim()).filter(Boolean);
+
+  const emailMatch = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  const phoneMatch = text.match(/\+?\d[\d\s().-]{7,}\d/);
+  const linkedinMatch = text.match(/https?:\/\/\S*linkedin\.com\S*/i);
+  const urlMatch = text.match(/https?:\/\/[^\s)]+/i);
+
+  let fullName = '';
+  for (const l of lines.slice(0, 10)) {
+    if (l && !l.includes('@') && !l.toLowerCase().includes('resume') && !l.toLowerCase().includes('curriculum') && !l.startsWith('http')) {
+      fullName = l.replace(/[^\p{L}\p{N}\s.'-]/gu, '').trim();
+      if (fullName.split(' ').length >= 2) break;
+    }
+  }
+
+  const summaryCandidates = lines.slice(0, 60).join(' ');
+  const summary = summaryCandidates.split(/(?<=[.!?])\s+/).slice(0, 3).join(' ');
+
+  // Heuristic section parsing
+  const sectionRegex = /(work experience|professional experience|experience|education|skills)/i;
+  const sections: Record<string, string[]> = {};
+  let current = 'intro';
+  for (const l of lines) {
+    if (sectionRegex.test(l)) {
+      current = l.toLowerCase().match(sectionRegex)![0];
+      sections[current] = [];
+    } else {
+      if (!sections[current]) sections[current] = [];
+      sections[current].push(l);
+    }
+  }
+
+  // Parse skills
+  let skills: Skill[] = [];
+  const skillsText = (sections['skills'] || []).join(' ');
+  if (skillsText) {
+    const tokens = skillsText
+      .split(/[,•\n;]+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 1 && s.length <= 40);
+    skills = Array.from(new Set(tokens)).slice(0, 40).map((name, idx) => ({
+      id: String(Date.now() + idx),
+      name,
+      level: 'Intermediate'
+    }));
+  }
+
+  // Parse education entries
+  const education: Education[] = [];
+  const eduLines = sections['education'] || [];
+  if (eduLines.length) {
+    const chunks = eduLines.join('\n').split(/\n\s*\n/);
+    for (let i = 0; i < chunks.length && education.length < 6; i++) {
+      const c = chunks[i];
+      const school = (c.match(/^(.*?)(?:,|\n|$)/)?.[1] || '').trim();
+      if (!school) continue;
+      const degree = (c.match(/(Bachelor|Master|B\.?Sc\.?|M\.?Sc\.?|Ph\.?D\.?|Diploma|Degree)[^\n,]*/i)?.[0] || '').trim();
+      const field = (c.match(/(Computer|Engineering|Science|Arts|Business|Technology|Design)[^\n,]*/i)?.[0] || '').trim();
+      const year = (c.match(/(19|20)\d{2}[-–]?(0[1-9]|1[0-2])?/g)?.pop() || '').replace(/[–]/g, '-');
+      education.push({
+        id: String(Date.now() + i),
+        school,
+        degree,
+        field,
+        graduationDate: year,
+      });
+    }
+  }
+
+  // Parse experience entries
+  const workExperience: WorkExperience[] = [];
+  const expLines = sections['experience'] || sections['work experience'] || sections['professional experience'] || [];
+  if (expLines.length) {
+    const chunks = expLines.join('\n').split(/\n\s*\n/);
+    for (let i = 0; i < chunks.length && workExperience.length < 8; i++) {
+      const c = chunks[i];
+      const header = (c.split('\n')[0] || '').trim();
+      const position = (header.match(/^([^@\-•|]+)\s*[\-|•|@]/)?.[1] || header).trim();
+      const company = (c.match(/@\s*([^\n|\-•]+)/)?.[1] || (header.match(/[\-|•|]([^@\n]+)/)?.[1] || '')).trim();
+      const dateRange = (c.match(/((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})\s*[–-]\s*(Present|((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}))/i)?.[0] || '')
+        .replace(/[–]/g, '-');
+      const isoDates = dateRange
+        .replace(/Jan[uary]?/ig,'01').replace(/Feb(ruary)?/ig,'02').replace(/Mar(ch)?/ig,'03')
+        .replace(/Apr(il)?/ig,'04').replace(/May/ig,'05').replace(/Jun(e)?/ig,'06')
+        .replace(/Jul(y)?/ig,'07').replace(/Aug(ust)?/ig,'08').replace(/Sep(t)?(ember)?/ig,'09')
+        .replace(/Oct(ober)?/ig,'10').replace(/Nov(ember)?/ig,'11').replace(/Dec(ember)?/ig,'12')
+        .replace(/\s+/g,'-');
+      const [startDate, endDateRaw] = isoDates.split('-').length > 2 ? isoDates.split(' - ') : ['', ''];
+      const description = c.split('\n').slice(1).join('\n');
+      workExperience.push({
+        id: String(Date.now() + i),
+        company: company || '',
+        position: position || '',
+        startDate: startDate || '',
+        endDate: endDateRaw?.includes('Present') ? '' : (endDateRaw || ''),
+        isCurrentJob: /Present/i.test(dateRange),
+        description: description || ''
+      });
+    }
+  }
+
+  // Fallbacks: if parsing is weak, put raw text into summary and a generic experience entry
+  const hasAnyData = (fullName || emailMatch || phoneMatch || linkedinMatch || urlMatch || workExperience.length || education.length || skills.length);
+  let fallbackSummary = summary || lines.slice(0, 12).join(' ');
+  if (!fallbackSummary) {
+    fallbackSummary = text.split(/\n{2,}/)[0]?.slice(0, 1200) || '';
+  }
+
+  const normalizedWork = workExperience.length > 0 ? workExperience : (
+    fallbackSummary
+      ? [{
+          id: String(Date.now()),
+          company: '',
+          position: 'Experience',
+          startDate: '',
+          endDate: '',
+          isCurrentJob: true,
+          description: lines
+            .filter(l => /^[-•*]/.test(l) || l.length > 0)
+            .slice(0, 20)
+            .join('\n')
+        } as WorkExperience]
+      : []
+  );
+
+  const customSections = [
+    {
+      id: String(Date.now() + 999),
+      title: 'Imported Resume (Raw)',
+      content: text.slice(0, 4000)
+    }
+  ];
+
+  return {
+    personalInfo: {
+      fullName: fullName || '',
+      email: emailMatch?.[0] || '',
+      phone: phoneMatch?.[0] || '',
+      location: '',
+      linkedin: linkedinMatch?.[0] || '',
+      website: urlMatch && (!linkedinMatch || urlMatch[0] !== linkedinMatch[0]) ? urlMatch[0] : '',
+      summary: fallbackSummary
+    },
+    workExperience: normalizedWork,
+    education,
+    skills,
+    customSections
+  } as Partial<ResumeData>;
+}
 
 interface ResumeUploaderProps {
   onResumeExtracted: (resumeData: Partial<ResumeData>) => void;
+  externalFile?: File | null;
+  onExternalFileProcessed?: () => void;
 }
 
-export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
+export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFileProcessed }: ResumeUploaderProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
@@ -26,16 +264,18 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
     setErrorMessage('');
 
     try {
-      // Validate file type
+      // Validate file type (fall back to extension when type is empty)
       const allowedTypes = [
         'application/pdf',
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'text/plain'
       ];
-
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error('Please upload a PDF, DOC, DOCX, or TXT file');
+      const lowerName = (file.name || '').toLowerCase();
+      const ext = lowerName.split('.').pop() || '';
+      const typeOk = allowedTypes.includes(file.type) || ['pdf','doc','docx','txt'].includes(ext);
+      if (!typeOk) {
+        throw new Error('Please upload a PDF, DOCX or TXT file');
       }
 
       // Validate file size (10MB limit)
@@ -43,7 +283,7 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
         throw new Error('File size must be less than 10MB');
       }
 
-      // Realistic AI processing steps with progress updates
+      // Realistic processing steps with progress updates
       const steps = [
         { message: 'Initializing AI document parser...', progress: 10, delay: 600 },
         { message: 'Extracting text content...', progress: 25, delay: 1200 },
@@ -61,122 +301,51 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
         setProgress(step.progress);
       }
 
-      // Generate comprehensive extracted resume data
-      const extractedData: Partial<ResumeData> = {
-        personalInfo: {
-          fullName: 'Alexandra Chen',
-          email: 'alexandra.chen@email.com',
-          phone: '+1 (555) 987-6543',
-          location: 'Seattle, WA',
-          linkedin: 'https://linkedin.com/in/alexandrachen',
-          website: 'https://alexandrachen.dev',
-          summary: 'Senior Full Stack Engineer with 8+ years of expertise in React, Node.js, and cloud architecture. Proven track record of leading high-performing teams and delivering scalable applications that serve millions of users. Specialized in building microservices architectures that improved system reliability by 99.9% and reduced deployment time by 75%. Passionate about mentoring developers and driving technical innovation in fast-paced environments.'
-        },
-        workExperience: [
-          {
-            id: '1',
-            company: 'Microsoft',
-            position: 'Senior Software Engineer',
-            startDate: '2021-03',
-            endDate: '',
-            isCurrentJob: true,
-            description: '• Lead development of Azure DevOps features serving 10M+ developers worldwide with 99.99% uptime\n• Architected microservices infrastructure reducing API response time by 60% and supporting 50M+ daily requests\n• Mentored team of 12 engineers across 3 time zones, achieving 95% sprint completion rate and 100% retention\n• Implemented automated testing pipelines reducing production bugs by 80% and deployment time by 70%\n• Collaborated with product managers to define technical roadmap, delivering 15+ major features ahead of schedule\n• Optimized database queries and caching strategies, improving application performance by 45% and reducing costs by $200K annually'
-          },
-          {
-            id: '2',
-            company: 'Stripe',
-            position: 'Full Stack Engineer',
-            startDate: '2019-01',
-            endDate: '2021-02',
-            isCurrentJob: false,
-            description: '• Built and maintained payment processing systems handling $50B+ in annual transaction volume\n• Developed React-based dashboard used by 100K+ merchants, improving user satisfaction scores by 40%\n• Implemented real-time fraud detection algorithms reducing false positives by 35% and saving $5M annually\n• Led migration from monolithic to microservices architecture, improving system scalability by 300%\n• Collaborated with cross-functional teams to launch Stripe Terminal, contributing to $100M+ revenue growth\n• Established code review standards and best practices, improving code quality metrics by 50%'
-          },
-          {
-            id: '3',
-            company: 'Airbnb',
-            position: 'Software Engineer',
-            startDate: '2017-06',
-            endDate: '2018-12',
-            isCurrentJob: false,
-            description: '• Developed booking and reservation systems processing 2M+ transactions daily with 99.8% reliability\n• Built responsive web applications using React and Redux, supporting 15+ languages and 190+ countries\n• Implemented A/B testing framework that increased conversion rates by 25% and generated $50M+ additional revenue\n• Optimized search algorithms improving property discovery relevance by 40% and user engagement by 30%\n• Collaborated with data science team to build recommendation engine increasing booking completion by 20%\n• Maintained high code quality standards with 90%+ test coverage and comprehensive documentation'
-          }
-        ],
-        education: [
-          {
-            id: '1',
-            school: 'Stanford University',
-            degree: 'Master of Science',
-            field: 'Computer Science',
-            graduationDate: '2017-06',
-            gpa: '3.8'
-          },
-          {
-            id: '2',
-            school: 'University of California, Berkeley',
-            degree: 'Bachelor of Science',
-            field: 'Computer Science',
-            graduationDate: '2015-05',
-            gpa: '3.7'
-          }
-        ],
-        skills: [
-          { id: '1', name: 'JavaScript', level: 'Expert' as const },
-          { id: '2', name: 'TypeScript', level: 'Expert' as const },
-          { id: '3', name: 'React', level: 'Expert' as const },
-          { id: '4', name: 'Node.js', level: 'Expert' as const },
-          { id: '5', name: 'Python', level: 'Advanced' as const },
-          { id: '6', name: 'AWS', level: 'Advanced' as const },
-          { id: '7', name: 'Docker', level: 'Advanced' as const },
-          { id: '8', name: 'Kubernetes', level: 'Advanced' as const },
-          { id: '9', name: 'PostgreSQL', level: 'Advanced' as const },
-          { id: '10', name: 'Redis', level: 'Intermediate' as const },
-          { id: '11', name: 'GraphQL', level: 'Advanced' as const },
-          { id: '12', name: 'MongoDB', level: 'Intermediate' as const },
-          { id: '13', name: 'Next.js', level: 'Advanced' as const },
-          { id: '14', name: 'Terraform', level: 'Intermediate' as const }
-        ],
-        certifications: [
-          {
-            id: '1',
-            name: 'AWS Certified Solutions Architect - Professional',
-            issuer: 'Amazon Web Services',
-            dateObtained: '2023-08',
-            expirationDate: '2026-08',
-            credentialId: 'AWS-PSA-2023-7891'
-          },
-          {
-            id: '2',
-            name: 'Certified Kubernetes Administrator',
-            issuer: 'Cloud Native Computing Foundation',
-            dateObtained: '2022-11',
-            expirationDate: '2025-11',
-            credentialId: 'CKA-2022-4567'
-          }
-        ],
-        projects: [
-          {
-            id: '1',
-            name: 'DevTools Analytics Platform',
-            description: 'Built comprehensive analytics platform for developer tools usage, processing 100M+ events daily with real-time dashboards and ML-powered insights',
-            technologies: ['React', 'Node.js', 'PostgreSQL', 'Redis', 'AWS', 'Docker'],
-            startDate: '2023-01',
-            endDate: '2023-08',
-            isOngoing: false,
-            url: 'https://github.com/alexandrachen/devtools-analytics'
-          }
-        ],
-        languages: [
-          { id: '1', name: 'English', proficiency: 'Native' as const },
-          { id: '2', name: 'Mandarin', proficiency: 'Fluent' as const },
-          { id: '3', name: 'Spanish', proficiency: 'Conversational' as const }
-        ],
-        references: [],
-        customSections: []
-      };
+      // Extract actual text from the uploaded file
+      let rawText = '';
+      const isPdf = file.type === 'application/pdf' || ext === 'pdf';
+      const isDocx = file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || ext === 'docx';
+      const isTxt = file.type === 'text/plain' || ext === 'txt';
+
+      if (isPdf) {
+        const body = new FormData();
+        body.append('file', file);
+        const resp = await fetch('/api/parse-pdf', { method: 'POST', body });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data?.error || 'Failed to parse PDF');
+        rawText = data.text || '';
+      } else if (isDocx) {
+        rawText = await extractTextFromDocx(file);
+      } else if (isTxt) {
+        rawText = await extractTextFromTxt(file);
+      } else if (file.type === 'application/msword') {
+        throw new Error('Legacy .doc files are not supported in-browser. Please upload a PDF, DOCX, or TXT.');
+      }
+
+      // Heuristic parse first
+      let extractedData: Partial<ResumeData> = buildResumeDataFromText(rawText || '');
+
+      // AI structuring to improve mapping
+      const aiData = await aiStructureFromText(rawText);
+      if (aiData) {
+        extractedData = {
+          ...extractedData,
+          personalInfo: {
+            ...extractedData.personalInfo,
+            ...(aiData.personalInfo || {})
+          } as any,
+          workExperience: aiData.workExperience?.length ? aiData.workExperience : extractedData.workExperience,
+          education: aiData.education?.length ? aiData.education : extractedData.education,
+          skills: aiData.skills?.length ? aiData.skills : extractedData.skills,
+        } as Partial<ResumeData>;
+      }
 
       setStatus('success');
       setCurrentStep('Resume successfully imported!');
       onResumeExtracted(extractedData);
+      if (onExternalFileProcessed) {
+        onExternalFileProcessed();
+      }
       
       // Reset after success
       setTimeout(() => {
@@ -194,6 +363,13 @@ export function ResumeUploader({ onResumeExtracted }: ResumeUploaderProps) {
       setIsProcessing(false);
     }
   };
+
+  useEffect(() => {
+    if (externalFile) {
+      processResumeFile(externalFile);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [externalFile]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();

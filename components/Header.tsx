@@ -52,12 +52,11 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
-                <FileText className="h-5 w-5 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center">
-                <Sparkles className="h-2 w-2 text-white" />
-              </div>
+              <img
+                src="/1752047483145.jpeg"
+                alt="Alumna logo"
+                className="w-10 h-10 rounded-xl object-cover shadow-lg"
+              />
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent">
@@ -80,7 +79,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center space-x-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-300 rounded-xl"
+              className="flex items-center space-x-2 rounded-xl"
             >
               <Upload className="h-4 w-4" />
               <span>Import Resume</span>
@@ -89,7 +88,10 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
             <Button
               onClick={onAIEnhance}
               disabled={isAIProcessing}
-              className="btn-primary flex items-center space-x-2"
+              className="flex items-center space-x-2 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl"
+              style={{
+                background: 'linear-gradient(90deg, var(--figma-primary) 0%, var(--figma-secondary) 100%)'
+              }}
             >
               {isAIProcessing ? (
                 <div className="loading-spinner h-4 w-4" />

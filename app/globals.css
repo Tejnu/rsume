@@ -78,12 +78,29 @@
   }
   body {
     @apply bg-background text-foreground;
-    background: linear-gradient(135deg, #fafbfc 0%, #f4f6f8 100%);
+    background: linear-gradient(180deg, var(--figma-neutral-100) 0%, var(--figma-neutral-200) 100%);
   }
 }
 
 /* Alumna Brand Colors from Figma */
 :root {
+  /* Figma-derived variables (mapped) */
+  --figma-primary: #8B5CF6; /* Purple gradient start */
+  --figma-primary-light: #A78BFA;
+  --figma-primary-dark: #6D28D9;
+  --figma-secondary: #F472B6; /* Pink gradient end */
+  --figma-success: #059669;
+  --figma-success-dark: #047857;
+  --figma-warning: #F59E0B; /* keep consistent with provided divider set */
+  --figma-warning-dark: #D97706;
+  --figma-error: #dc2626;
+  --figma-accent: #7C3AED;
+  --figma-accent-dark: #6D28D9;
+  --figma-neutral-100: #FFFFFF; /* Light background top */
+  --figma-neutral-200: #F8F0F8; /* Light background bottom */
+  --figma-neutral-300: #E5E7EB; /* Divider */
+  --figma-neutral-600: #000000; /* Text black */
+  --figma-neutral-700: #111827;
   /* Primary Brand Colors */
   --alumna-primary: #6366f1;
   --alumna-primary-light: #818cf8;
@@ -121,7 +138,7 @@
 /* Alumna Component Styles */
 .btn-primary {
   @apply text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl;
-  background: linear-gradient(135deg, var(--alumna-primary) 0%, var(--alumna-primary-dark) 100%);
+  background: linear-gradient(90deg, var(--figma-primary) 0%, var(--figma-secondary) 100%);
   box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
 }
 
@@ -225,7 +242,7 @@
 
 /* Header Styles */
 .header-gradient {
-  background: linear-gradient(135deg, var(--alumna-primary) 0%, var(--alumna-secondary) 100%);
+  background: linear-gradient(90deg, var(--figma-primary) 0%, var(--figma-secondary) 100%);
 }
 
 /* AI Enhancement Styles */

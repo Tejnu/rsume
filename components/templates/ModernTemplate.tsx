@@ -20,7 +20,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
     <div className="bg-white text-gray-900 p-8 max-w-4xl mx-auto">
       {/* Header */}
       <header className="mb-8">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6 rounded-lg">
+        <div className="text-white p-6 rounded-lg" style={{background: 'linear-gradient(90deg, var(--figma-primary) 0%, var(--figma-secondary) 100%)'}}>
           <h1 className="text-3xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
           <div className="flex flex-wrap gap-4 text-sm">
             {personalInfo.email && (
