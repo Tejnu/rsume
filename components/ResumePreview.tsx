@@ -56,14 +56,14 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
   };
 
   const handleDownload = () => {
-    const element = document.getElementById('resume-preview-content'); // Corrected ID
+    const element = document.getElementById('resume-preview-content');
     if (!element) {
       console.error('Resume content not found for download');
       alert('Resume content not found. Please try again.');
       return;
     }
 
-    // Create a complete HTML document with all styles
+    // Create a complete HTML document with all styles preserved
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       console.error('Could not open print window - popup blocked');
@@ -71,59 +71,71 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
       return;
     }
 
-    // Get all stylesheets from the current document
-    const stylesheets = Array.from(document.styleSheets)
-      .map((styleSheet) => {
+    // Capture computed styles for the template
+    const computedStyles = window.getComputedStyle(element);
+    const templateStyles = Array.from(computedStyles).map(property => {
+      return `${property}: ${computedStyles.getPropertyValue(property)};`;
+    }).join('\n');
+
+    // Get all external stylesheets (like Tailwind)
+    let externalStyles = '';
+    try {
+      const stylesheets = Array.from(document.styleSheets);
+      for (const stylesheet of stylesheets) {
         try {
-          // Check if cssRules is accessible and not null
-          if (styleSheet.cssRules) {
-            return Array.from(styleSheet.cssRules)
+          if (stylesheet.cssRules) {
+            externalStyles += Array.from(stylesheet.cssRules)
               .map(rule => rule.cssText)
-              .join('\n');
+              .join('\n') + '\n';
           }
         } catch (e) {
-          // Handle potential cross-origin errors or other issues
-          console.warn("Could not access stylesheet rules:", styleSheet.href, e);
-          return '';
+          console.warn("Could not access stylesheet:", stylesheet.href);
         }
-        return ''; // Return empty if rules are not accessible
-      })
-      .join('\n');
+      }
+    } catch (e) {
+      console.warn("Error accessing stylesheets:", e);
+    }
 
-    // Get all inline styles from <style> tags
+    // Get all inline styles from current document
     const inlineStyles = Array.from(document.querySelectorAll('style'))
-      .map((style) => style.outerHTML)
+      .map(style => style.innerHTML)
       .join('\n');
 
-    // Enhanced styles for proper template rendering
+    // Comprehensive template styling for design preservation
     const enhancedStyles = `
         <style>
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap');
+          
           @page {
             margin: 0.5in;
             size: letter;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
 
           * {
             -webkit-print-color-adjust: exact !important;
             color-adjust: exact !important;
             print-color-adjust: exact !important;
-            box-sizing: border-box;
+            box-sizing: border-box !important;
           }
 
           html, body {
             margin: 0;
             padding: 0;
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.5;
             color: #1f2937;
             background: white;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
+
+          /* Template-specific font families */
+          .font-serif { font-family: 'Playfair Display', Georgia, serif !important; }
+          .font-sans { font-family: 'Inter', system-ui, sans-serif !important; }
+          .font-mono { font-family: 'Monaco', 'Menlo', 'Consolas', monospace !important; }
 
           /* Tailwind-like utility classes */
           .text-xs { font-size: 0.75rem; line-height: 1rem; }
@@ -247,7 +259,7 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
             line-height: 1.4;
           }
 
-          /* Gradient backgrounds for modern template */
+          /* Enhanced gradient backgrounds for all templates */
           .bg-gradient-to-r.from-indigo-500.to-purple-600 {
             background: linear-gradient(to right, #6366f1, #8b5cf6) !important;
             color: white !important;
@@ -261,6 +273,96 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
           .bg-gradient-to-r.from-purple-500.to-pink-600 {
             background: linear-gradient(to right, #8b5cf6, #db2777) !important;
             color: white !important;
+          }
+
+          .bg-gradient-to-r.from-emerald-500.to-teal-600 {
+            background: linear-gradient(to right, #10b981, #0d9488) !important;
+            color: white !important;
+          }
+
+          .bg-gradient-to-r.from-orange-500.to-red-600 {
+            background: linear-gradient(to right, #f97316, #dc2626) !important;
+            color: white !important;
+          }
+
+          /* Template-specific design elements */
+          .border-l-4.border-indigo-500 { border-left: 4px solid #6366f1 !important; }
+          .border-l-4.border-purple-500 { border-left: 4px solid #8b5cf6 !important; }
+          .border-l-4.border-blue-500 { border-left: 4px solid #3b82f6 !important; }
+          .border-l-4.border-emerald-500 { border-left: 4px solid #10b981 !important; }
+
+          /* Creative template specific styles */
+          .creative-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+          }
+
+          .creative-section {
+            border-left: 3px solid #667eea !important;
+            padding-left: 1rem !important;
+          }
+
+          /* Executive template specific styles */
+          .executive-header {
+            background: #1f2937 !important;
+            color: white !important;
+          }
+
+          .executive-section {
+            border-bottom: 2px solid #e5e7eb !important;
+            padding-bottom: 1rem !important;
+          }
+
+          /* Technical template specific styles */
+          .technical-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 2fr !important;
+            gap: 2rem !important;
+          }
+
+          .technical-sidebar {
+            background: #f8fafc !important;
+            padding: 1.5rem !important;
+          }
+
+          /* Skill bars and progress elements */
+          .skill-bar {
+            height: 8px !important;
+            background: #e5e7eb !important;
+            border-radius: 4px !important;
+            overflow: hidden !important;
+          }
+
+          .skill-progress {
+            height: 100% !important;
+            background: linear-gradient(to right, #6366f1, #8b5cf6) !important;
+            transition: none !important;
+          }
+
+          /* Icons and decorative elements */
+          .icon-circle {
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: #6366f1 !important;
+            color: white !important;
+          }
+
+          /* Contact information styling */
+          .contact-item {
+            display: flex !important;
+            align-items: center !important;
+            margin-bottom: 0.5rem !important;
+          }
+
+          .contact-icon {
+            width: 16px !important;
+            height: 16px !important;
+            margin-right: 0.5rem !important;
+            color: #6b7280 !important;
           }
 
           @media print {
@@ -287,26 +389,83 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>${resumeData.personalInfo?.fullName || 'Resume'} - Resume</title>
+          
+          <!-- Tailwind CSS -->
           <script src="https://cdn.tailwindcss.com"></script>
-          ${stylesheets}
-          ${inlineStyles}
+          <script>
+            tailwind.config = {
+              theme: {
+                extend: {
+                  fontFamily: {
+                    'inter': ['Inter', 'system-ui', 'sans-serif'],
+                    'playfair': ['Playfair Display', 'Georgia', 'serif'],
+                  },
+                  colors: {
+                    'gradient-start': '#6366f1',
+                    'gradient-end': '#8b5cf6',
+                  }
+                }
+              }
+            }
+          </script>
+          
+          <!-- External Styles -->
+          <style>
+            ${externalStyles}
+          </style>
+          
+          <!-- Inline Styles -->
+          <style>
+            ${inlineStyles}
+          </style>
+          
+          <!-- Enhanced Template Styles -->
           ${enhancedStyles}
+          
+          <style>
+            /* Override any conflicting styles */
+            #resume-preview-content {
+              ${templateStyles}
+            }
+            
+            /* Ensure proper rendering */
+            .resume-container * {
+              position: relative !important;
+              z-index: auto !important;
+            }
+          </style>
         </head>
-        <body>
-          <div class="resume-container">
+        <body class="bg-white">
+          <div class="resume-container max-w-4xl mx-auto bg-white" style="min-height: 11in;">
             ${element.innerHTML}
           </div>
+          
           <script>
+            // Ensure all fonts and styles are loaded before printing
             window.onload = function() {
-              // Small delay to ensure all styles and fonts are loaded
-              setTimeout(() => {
-                window.focus();
-                window.print();
-                // Close after printing
+              const fonts = [
+                new FontFace('Inter', 'url(https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900)'),
+                new FontFace('Playfair Display', 'url(https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800)')
+              ];
+              
+              Promise.allSettled(fonts.map(font => font.load())).then(() => {
                 setTimeout(() => {
-                  window.close();
-                }, 2000);
-              }, 1000);
+                  window.focus();
+                  window.print();
+                  setTimeout(() => {
+                    window.close();
+                  }, 2000);
+                }, 1500);
+              }).catch(() => {
+                // Fallback if fonts fail to load
+                setTimeout(() => {
+                  window.focus();
+                  window.print();
+                  setTimeout(() => {
+                    window.close();
+                  }, 2000);
+                }, 1500);
+              });
             };
           </script>
         </body>

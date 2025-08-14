@@ -31,35 +31,62 @@ async function aiStructureFromText(rawText: string): Promise<Partial<ResumeData>
           role: 'user',
           parts: [
             {
-              text: `You are an expert resume parser. Analyze this resume text and extract information accurately. Follow these rules:
+              text: `You are an expert resume parser with advanced categorization abilities. Analyze this resume text and extract information with precise categorization. Follow these enhanced rules:
 
-1. WORK EXPERIENCE: 
-   - Extract job positions with company names and dates
-   - Look for: "Position at Company", "Company - Position", "Position | Company"
-   - Common patterns: Software Engineer at Google, Marketing Manager - Microsoft
-   - Include start/end dates (MM/YYYY format preferred)
-   - Extract job descriptions and responsibilities
-   - DO NOT confuse education with work experience
+SMART CATEGORIZATION RULES:
+1. WORK EXPERIENCE (High Priority):
+   - Job titles followed by company names or vice versa
+   - Patterns: "Software Engineer at Google", "Microsoft - Senior Developer", "Project Manager | ABC Corp"
+   - Date ranges: "2020-2023", "Jan 2020 - Present", "2019 to 2022"
+   - Responsibilities starting with action verbs: "Managed", "Developed", "Led", "Implemented"
+   - DO NOT include internships in education section
+   - Include contract work, freelancing, consulting
 
-2. SKILLS: 
-   - Technical skills: programming languages, frameworks, tools
-   - Software: Microsoft Office, Adobe Creative Suite, etc.
-   - Certifications and technical competencies
-   - EXCLUDE: job titles, company names, degrees, soft skills
+2. SKILLS (Technical Focus):
+   - Programming: JavaScript, Python, Java, C++, React, Angular, Node.js
+   - Tools: Git, Docker, AWS, Azure, Jenkins, Kubernetes
+   - Software: Photoshop, AutoCAD, Salesforce, SAP, Excel
+   - Technologies: Machine Learning, AI, Blockchain, IoT
+   - EXCLUDE: soft skills like "communication", "leadership", "teamwork"
+   - EXCLUDE: job titles and company names
 
-3. EDUCATION: 
-   - Universities, colleges, schools, institutions
-   - Degree types: Bachelor's, Master's, PhD, Associate, Certificate
-   - Fields of study: Computer Science, Business, Engineering, etc.
-   - Graduation dates and GPAs if mentioned
+3. EDUCATION (Academic Only):
+   - Degrees: Bachelor's, Master's, PhD, Associate, Diploma, Certificate
+   - Institutions: University, College, Institute, School
+   - Fields: Computer Science, Engineering, Business, Medicine
+   - Academic achievements: GPA, Dean's List, Magna Cum Laude
+   - DO NOT include professional certifications here
 
-4. PERSONAL INFO: 
-   - Full name (usually at the top)
-   - Email address, phone number
-   - LinkedIn profile, personal website, GitHub
-   - Location/address, professional summary
+4. CERTIFICATIONS (Professional Credentials):
+   - Professional certifications: AWS Certified, Google Cloud, PMP, CISSP
+   - Industry credentials: CPA, PE, RN, CompTIA
+   - Training certificates: Udemy, Coursera, edX completions
+   - Separate from education degrees
 
-Parse into this EXACT JSON structure:
+5. PROJECTS (Personal/Professional):
+   - Personal projects, portfolio items
+   - Open source contributions
+   - Research projects
+   - Mobile apps, websites, systems built
+
+6. PERSONAL INFO (Contact Details):
+   - Name (usually first line, properly capitalized)
+   - Email (contains @ symbol)
+   - Phone (numeric patterns)
+   - Address/Location
+   - LinkedIn, GitHub, portfolio URLs
+   - Professional summary/objective
+
+ENHANCED PARSING INSTRUCTIONS:
+- Use context clues and section headers to categorize correctly
+- Look for keywords like "Experience:", "Skills:", "Education:", "Projects:"
+- Consider chronological order for work experience
+- Identify technical vs non-technical content
+- Parse bullet points and format descriptions properly
+- Extract dates in consistent YYYY-MM format
+- Identify current positions vs past roles
+
+Return EXACT JSON structure with smart categorization:
 {
   "personalInfo": {
     "fullName": "string",
@@ -77,8 +104,8 @@ Parse into this EXACT JSON structure:
       "position": "string", 
       "startDate": "YYYY-MM format",
       "endDate": "YYYY-MM format or empty if current",
-      "isCurrentJob": false,
-      "description": "string with bullet points of responsibilities and achievements"
+      "isCurrentJob": boolean,
+      "description": "string with bullet points and achievements"
     }
   ],
   "education": [
@@ -90,20 +117,28 @@ Parse into this EXACT JSON structure:
       "graduationDate": "YYYY-MM format"
     }
   ],
-  "skills": ["skill1", "skill2", "skill3"],
-  "certifications": ["cert1", "cert2"],
+  "skills": ["technical_skill1", "technical_skill2", "tool3"],
+  "certifications": [
+    {
+      "id": "string",
+      "name": "certification_name",
+      "issuer": "issuing_organization",
+      "dateObtained": "YYYY-MM format"
+    }
+  ],
   "projects": [
     {
       "id": "string",
-      "name": "string",
-      "description": "string"
+      "name": "project_name",
+      "description": "project_description",
+      "technologies": ["tech1", "tech2"]
     }
   ]
 }
 
-IMPORTANT: Return ONLY valid JSON. No markdown, no explanations, no code blocks.
+CRITICAL: Return ONLY valid JSON. No explanations, no markdown, no code blocks.
 
-Resume text:
+Resume text to analyze:
 ${rawText.slice(0, 12000)}`
             }
           ]
@@ -204,7 +239,17 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
   const lowerText = text.toLowerCase();
 
-  // Extract personal information with better patterns
+  // Enhanced section detection patterns
+  const sectionPatterns = {
+    experience: /(?:work\s+)?(?:professional\s+)?experience|employment\s+(?:history|background)|career\s+(?:history|summary)|work\s+history/i,
+    education: /education|academic\s+(?:background|qualifications)|qualifications|degrees?/i,
+    skills: /(?:technical\s+)?skills|core\s+competencies|proficienc(?:y|ies)|technologies|expertise/i,
+    projects: /projects?|portfolio|personal\s+projects|key\s+projects/i,
+    certifications: /certifications?|licenses?|credentials|professional\s+development/i,
+    summary: /(?:professional\s+)?(?:summary|profile|objective|about)/i
+  };
+
+  // Extract personal information with enhanced patterns
   const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
   const phoneMatch = text.match(/(\+?1?[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})/);
   const linkedinMatch = text.match(/(https?:\/\/)?(www\.)?linkedin\.com\/in\/[^\s\n]+/i);
@@ -243,18 +288,34 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
     }
   }
 
-  // Enhanced skills extraction with common technical terms
+  // Enhanced skills extraction with smart categorization
   const skillPatterns = [
-    /(?:skills?|technologies?|programming languages?|tools?|technical skills?)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
-    /(?:proficient in|experienced with|knowledge of)[:\s]*([^\n]*)/i
+    /(?:technical\s+)?skills?[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
+    /(?:technologies|programming\s+languages?|tools?)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
+    /(?:proficient\s+(?:in|with)|experienced\s+(?:in|with)|knowledge\s+of)[:\s]*([^\n]*)/i,
+    /(?:core\s+competencies|technical\s+expertise)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i
   ];
 
   const skills: Skill[] = [];
-  const commonSkills = [
-    'JavaScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'Ruby', 'Go', 'Swift', 'Kotlin',
-    'React', 'Angular', 'Vue.js', 'Node.js', 'Express', 'Django', 'Flask', 'Spring',
-    'HTML', 'CSS', 'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis',
-    'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'Git', 'Linux', 'Windows'
+  const technicalSkills = [
+    // Programming Languages
+    'JavaScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'Ruby', 'Go', 'Swift', 'Kotlin', 'TypeScript', 'Scala', 'Rust', 'R',
+    // Frontend Technologies
+    'React', 'Angular', 'Vue.js', 'HTML', 'CSS', 'SASS', 'LESS', 'Bootstrap', 'Tailwind CSS', 'jQuery',
+    // Backend Technologies
+    'Node.js', 'Express', 'Django', 'Flask', 'Spring', 'Laravel', 'ASP.NET', 'Ruby on Rails',
+    // Databases
+    'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Oracle', 'SQLite', 'Cassandra', 'DynamoDB',
+    // Cloud & DevOps
+    'AWS', 'Azure', 'GCP', 'Google Cloud', 'Docker', 'Kubernetes', 'Jenkins', 'CI/CD', 'Terraform',
+    // Tools & Software
+    'Git', 'GitHub', 'GitLab', 'Jira', 'Linux', 'Windows', 'macOS', 'Figma', 'Photoshop', 'Illustrator',
+    // Data & Analytics
+    'Machine Learning', 'AI', 'Data Science', 'Tableau', 'Power BI', 'Excel', 'Pandas', 'NumPy',
+    // Mobile Development
+    'iOS', 'Android', 'React Native', 'Flutter', 'Xamarin',
+    // Other Technical
+    'GraphQL', 'REST API', 'Microservices', 'Blockchain', 'IoT', 'Agile', 'Scrum'
   ];
 
   // Look for skills section
@@ -290,86 +351,112 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
     });
   }
 
-  // Enhanced work experience extraction
+  // Enhanced work experience extraction with smart pattern matching
   const workExperience: WorkExperience[] = [];
-  const expSectionPattern = /(?:work\s+)?experience|employment\s+history|professional\s+experience/i;
-  const expSectionMatch = text.search(expSectionPattern);
+  const expSectionStart = text.search(sectionPatterns.experience);
+  
+  if (expSectionStart > -1) {
+    let expSection = text.substring(expSectionStart);
+    
+    // Find the end of experience section (start of next major section)
+    const nextSectionMatch = expSection.search(/(?:education|skills|projects|certifications)/i);
+    if (nextSectionMatch > -1) {
+      expSection = expSection.substring(0, nextSectionMatch);
+    }
 
-  if (expSectionMatch > -1) {
-    const expSection = text.substring(expSectionMatch);
-    const expLines = expSection.split('\n').slice(1); // Skip the section header
-
+    const expLines = expSection.split('\n').map(l => l.trim()).filter(l => l);
+    
     let currentJob: Partial<WorkExperience> = {};
     let descriptions: string[] = [];
 
-    for (let i = 0; i < expLines.length && workExperience.length < 5; i++) {
+    // Enhanced job title/company patterns
+    const jobPatterns = [
+      /^(.+?)\s+(?:at|@)\s+(.+?)(?:\s*[|•]\s*(.+?))?$/i,           // "Position at Company | Location"
+      /^(.+?)\s*[-–—]\s*(.+?)(?:\s*[|•]\s*(.+?))?$/i,              // "Position - Company | Location"
+      /^(.+?),\s*(.+?)(?:\s*[|•]\s*(.+?))?$/i,                     // "Position, Company | Location"
+      /^(.+?)\s*\|\s*(.+?)(?:\s*[|•]\s*(.+?))?$/i                  // "Position | Company | Location"
+    ];
+
+    // Enhanced date patterns
+    const datePatterns = [
+      /(\w+\s+\d{4})\s*[-–—]\s*(\w+\s+\d{4}|present|current)/i,   // "Jan 2020 - Dec 2023"
+      /(\d{1,2}\/\d{4})\s*[-–—]\s*(\d{1,2}\/\d{4}|present|current)/i, // "01/2020 - 12/2023"
+      /(\d{4})\s*[-–—]\s*(\d{4}|present|current)/i,               // "2020 - 2023"
+      /(present|current)/i                                         // Just "Present"
+    ];
+
+    for (let i = 0; i < expLines.length && workExperience.length < 10; i++) {
       const line = expLines[i].trim();
-      if (!line) continue;
+      if (!line || line.length < 3) continue;
 
-      // Check for job title/company patterns
-      const jobPattern = /^(.+?)\s+(?:at|@|-|–|—)\s+(.+?)(?:\s+\|\s+(.+?))?$/;
-      const datePattern = /(\d{1,2}\/\d{4}|\d{4}|[A-Za-z]+\s+\d{4})/;
+      // Check if this line matches job title/company pattern
+      let jobMatch = null;
+      for (const pattern of jobPatterns) {
+        jobMatch = line.match(pattern);
+        if (jobMatch) break;
+      }
 
-      const jobMatch = line.match(jobPattern);
-      const hasDate = datePattern.test(line);
+      // Check if this line contains dates
+      let dateMatch = null;
+      for (const pattern of datePatterns) {
+        dateMatch = line.match(pattern);
+        if (dateMatch) break;
+      }
 
-      if (jobMatch && line.length < 100) {
+      if (jobMatch && line.length < 120) {
         // Save previous job if exists
-        if (currentJob.position || currentJob.company) {
+        if (currentJob.position && currentJob.company) {
           workExperience.push({
             id: String(Date.now() + workExperience.length),
-            company: currentJob.company || '',
-            position: currentJob.position || '',
-            startDate: currentJob.startDate || '',
-            endDate: currentJob.endDate || '',
+            company: currentJob.company,
+            position: currentJob.position,
+            startDate: convertDateToISO(currentJob.startDate || ''),
+            endDate: currentJob.isCurrentJob ? '' : convertDateToISO(currentJob.endDate || ''),
             isCurrentJob: currentJob.isCurrentJob || false,
-            description: descriptions.join('\n')
+            description: descriptions.join('\n').substring(0, 500)
           });
         }
 
-        // Start new job
+        // Start new job entry
         currentJob = {
           position: jobMatch[1].trim(),
           company: jobMatch[2].trim(),
-          startDate: jobMatch[3] || '',
+          location: jobMatch[3]?.trim() || '',
+          startDate: '',
           endDate: '',
           isCurrentJob: false
         };
         descriptions = [];
-      } else if (hasDate && line.length < 50) {
-        // This might be a date line
-        const dates = line.match(/(\d{1,2}\/\d{4}|\d{4}|[A-Za-z]+\s+\d{4})/g);
-        if (dates && dates.length >= 1) {
-          currentJob.startDate = dates[0];
-          if (dates.length > 1) {
-            currentJob.endDate = dates[1];
+        
+      } else if (dateMatch) {
+        // Parse date information
+        if (currentJob.position || currentJob.company) {
+          currentJob.startDate = dateMatch[1] || '';
+          if (dateMatch[2]) {
+            const endDateStr = dateMatch[2].toLowerCase();
+            currentJob.isCurrentJob = endDateStr.includes('present') || endDateStr.includes('current');
+            currentJob.endDate = currentJob.isCurrentJob ? '' : dateMatch[2];
           }
-          currentJob.isCurrentJob = line.toLowerCase().includes('present') || line.toLowerCase().includes('current');
         }
-      } else if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
-        // This is likely a job description bullet point
-        descriptions.push(line);
-      } else if (line.length > 20 && line.length < 200 && !line.includes('@') && !phoneMatch?.[0]?.includes(line)) {
-        // This might be a job description
-        descriptions.push(line);
-      }
-
-      // Break if we hit education or another section
-      if (line.toLowerCase().includes('education') || line.toLowerCase().includes('skills')) {
-        break;
+        
+      } else if (line.match(/^[•\-\*]\s/) || (line.length > 15 && line.length < 300)) {
+        // This looks like a job description or responsibility
+        if (currentJob.position || currentJob.company) {
+          descriptions.push(line.replace(/^[•\-\*]\s*/, '• '));
+        }
       }
     }
 
     // Don't forget the last job
-    if (currentJob.position || currentJob.company) {
+    if (currentJob.position && currentJob.company) {
       workExperience.push({
         id: String(Date.now() + workExperience.length),
-        company: currentJob.company || '',
-        position: currentJob.position || '',
-        startDate: currentJob.startDate || '',
-        endDate: currentJob.endDate || '',
+        company: currentJob.company,
+        position: currentJob.position,
+        startDate: convertDateToISO(currentJob.startDate || ''),
+        endDate: currentJob.isCurrentJob ? '' : convertDateToISO(currentJob.endDate || ''),
         isCurrentJob: currentJob.isCurrentJob || false,
-        description: descriptions.join('\n')
+        description: descriptions.join('\n').substring(0, 500)
       });
     }
   }
