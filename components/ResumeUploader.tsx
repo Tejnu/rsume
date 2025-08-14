@@ -31,31 +31,33 @@ async function aiStructureFromText(rawText: string): Promise<Partial<ResumeData>
           role: 'user',
           parts: [
             {
-              text: `You are an expert resume parser with advanced pattern recognition. Analyze this resume text with extreme precision and extract information into the correct sections. Follow these CRITICAL rules:
+              text: `You are an expert resume parser. Analyze this resume text and extract information accurately. Follow these rules:
 
 1. WORK EXPERIENCE: 
-   - Extract ONLY actual job positions with real company names
-   - Look for patterns like "Position at Company", "Company - Position", "Position | Company"
-   - Company names often contain: Inc, LLC, Corp, Ltd, Co., Company, Group, Solutions, Technologies, Services
-   - Position titles often contain: Manager, Director, Developer, Engineer, Analyst, Specialist, Coordinator, Lead, Senior
-   - Include employment dates in MM/YYYY or Month YYYY format
-   - DO NOT include education institutions as companies
+   - Extract job positions with company names and dates
+   - Look for: "Position at Company", "Company - Position", "Position | Company"
+   - Common patterns: Software Engineer at Google, Marketing Manager - Microsoft
+   - Include start/end dates (MM/YYYY format preferred)
+   - Extract job descriptions and responsibilities
+   - DO NOT confuse education with work experience
 
 2. SKILLS: 
-   - Extract ONLY technical skills, software, programming languages, frameworks, certifications
-   - Include: JavaScript, Python, React, SQL, AWS, Docker, Git, Excel, Photoshop, etc.
-   - EXCLUDE: Job titles, company names, soft skills, education degrees
+   - Technical skills: programming languages, frameworks, tools
+   - Software: Microsoft Office, Adobe Creative Suite, etc.
+   - Certifications and technical competencies
+   - EXCLUDE: job titles, company names, degrees, soft skills
 
 3. EDUCATION: 
-   - Extract ONLY educational institutions (universities, colleges, schools)
-   - Include degree types (Bachelor's, Master's, PhD, Certificate)
-   - Include fields of study
-   - DO NOT include work experience or training programs
+   - Universities, colleges, schools, institutions
+   - Degree types: Bachelor's, Master's, PhD, Associate, Certificate
+   - Fields of study: Computer Science, Business, Engineering, etc.
+   - Graduation dates and GPAs if mentioned
 
 4. PERSONAL INFO: 
-   - Extract contact details: name, email, phone, LinkedIn, website
-   - Include professional summary/objective
-   - Look for location/address information
+   - Full name (usually at the top)
+   - Email address, phone number
+   - LinkedIn profile, personal website, GitHub
+   - Location/address, professional summary
 
 Parse into this EXACT JSON structure:
 {
@@ -416,42 +418,33 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     return { id: String(Date.now() + i), name, description };
   }).slice(0, 10);
 
-  // Parse experience entries - significantly improved
+  // Parse experience entries - improved logic
   const workExperience: WorkExperience[] = [];
   const expLines = sections['work'] || [];
 
   if (expLines.length) {
-    // Advanced job entry detection with better separation logic
+    // Better job entry detection
     const jobEntries: string[] = [];
     let currentEntry = '';
-    let lastWasDateLine = false;
-
+    
     for (let i = 0; i < expLines.length; i++) {
       const line = expLines[i];
       const nextLine = expLines[i + 1] || '';
-      const prevLine = expLines[i - 1] || '';
-
-      // Check if this line contains dates (indicating end of previous job)
-      const isDateLine = /\b(20\d{2}|19\d{2})\b.*?(?:present|current|20\d{2}|19\d{2})\b/i.test(line) ||
-                        /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+20\d{2}/i.test(line);
       
-      // Enhanced patterns for detecting new job entries
+      // Check if this line starts a new job entry
       const isNewJobEntry = 
-        // Start a new entry if we just had a date line and this looks like a job title/company
-        (lastWasDateLine && /^[A-Z][^.!?]*$/i.test(line) && !line.includes('•')) ||
         // Position at Company format
         /^[A-Z][^.!?]*\s+(at|@|\|)\s+[A-Z][A-Za-z\s&.,'-]+$/i.test(line) ||
-        // Company Name, Position format
+        // Company - Position format
+        /^[A-Z][A-Za-z\s&.,'-]+\s+[-–]\s+[A-Z][^.!?]*$/i.test(line) ||
+        // Company, Position format
         /^[A-Z][A-Za-z\s&.,'-]+,\s+[A-Z][^.!?]*$/i.test(line) ||
-        // Position - Company format
-        /^[A-Z][^.!?]*\s+[-–]\s+[A-Z][A-Za-z\s&.,'-]+$/i.test(line) ||
-        // Company followed by position on next line
-        (/^[A-Z][A-Za-z\s&.,'-]+(?:Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services|Consulting|Agency|Pty|Limited)?\.?$/i.test(line) && 
+        // Company name patterns (with indicators)
+        (/^[A-Z][A-Za-z\s&.,'-]*(?:Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services|Consulting|Agency|Pty|Limited)\.?$/i.test(line) && 
          nextLine && /^[A-Z][^.!?]*$/.test(nextLine) && !nextLine.includes('•')) ||
-        // Deloitte specific patterns (handle consulting firm structure)
-        (/^Deloitte/i.test(line) && nextLine && /^(Analyst|Consultant|Senior|Manager|Director|Partner)/i.test(nextLine)) ||
-        // Job simulation patterns
-        /simulation|virtual|internship|program/i.test(line) && /^[A-Z]/i.test(line);
+        // Job title patterns followed by company
+        (/^(?:Senior|Junior|Lead|Chief|Head of|VP|Vice President|President|Director|Manager|Analyst|Engineer|Developer|Designer|Specialist|Coordinator|Assistant|Intern)/i.test(line) && 
+         !line.includes('•') && line.length < 80);
 
       // If this is a new job entry and we have content, save the current entry
       if (isNewJobEntry && currentEntry.trim()) {
@@ -460,16 +453,14 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
       } else {
         currentEntry += line + '\n';
       }
-
-      lastWasDateLine = isDateLine;
     }
 
     if (currentEntry.trim()) {
       jobEntries.push(currentEntry.trim());
     }
 
-    // Enhanced parsing for each job entry
-    for (let i = 0; i < jobEntries.length && workExperience.length < 8; i++) {
+    // Parse each job entry
+    for (let i = 0; i < Math.min(jobEntries.length, 6); i++) {
       const entry = jobEntries[i];
       const entryLines = entry.split('\n').map(l => l.trim()).filter(Boolean);
 
@@ -479,102 +470,88 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
       let description = '';
 
       // Enhanced company and position extraction
-      for (let j = 0; j < Math.min(3, entryLines.length); j++) {
-        const line = entryLines[j];
+      const firstLine = entryLines[0];
+      const secondLine = entryLines[1] || '';
 
-        // Check for common patterns
-        if (line.includes(' at ') || line.includes(' @ ')) {
-          const parts = line.split(/ at | @ /i);
-          position = parts[0]?.trim() || '';
-          company = parts[1]?.trim().replace(/[,.]$/, '') || '';
-          break;
-        } else if (line.includes(' - ') && !line.includes('•')) {
-          const parts = line.split(' - ');
-          if (parts.length === 2) {
-            position = parts[0]?.trim() || '';
-            company = parts[1]?.trim().replace(/[,.]$/, '') || '';
-            break;
-          }
-        } else if (line.includes(', ') && !line.includes('•')) {
-          const parts = line.split(', ');
-          if (parts.length === 2 && !parts[1].toLowerCase().includes('university') && !parts[1].toLowerCase().includes('college') && !parts[1].toLowerCase().includes('institute')) {
-            company = parts[0]?.trim() || '';
-            position = parts[1]?.trim().replace(/[,.]$/, '') || '';
-            break;
-          }
+      // Pattern matching for first line
+      if (firstLine.includes(' at ') || firstLine.includes(' @ ')) {
+        const parts = firstLine.split(/ at | @ /i);
+        position = parts[0]?.trim() || '';
+        company = parts[1]?.trim().replace(/[,.]$/, '') || '';
+      } else if (firstLine.includes(' - ') && !firstLine.includes('•')) {
+        const parts = firstLine.split(' - ');
+        if (parts.length === 2) {
+          company = parts[0]?.trim() || '';
+          position = parts[1]?.trim().replace(/[,.]$/, '') || '';
         }
+      } else if (firstLine.includes(', ') && !firstLine.includes('•')) {
+        const parts = firstLine.split(', ');
+        if (parts.length === 2) {
+          company = parts[0]?.trim() || '';
+          position = parts[1]?.trim().replace(/[,.]$/, '') || '';
+        }
+      } else {
+        // Check if first line is company or position based on patterns
+        const hasCompanyIndicators = /\b(Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services|Consulting|Agency)\b/i.test(firstLine);
+        const hasPositionIndicators = /\b(Manager|Director|Developer|Engineer|Analyst|Specialist|Coordinator|Assistant|Lead|Senior|Junior|Intern|Chief|VP|President)\b/i.test(firstLine);
 
-        // Try to identify company vs position based on common indicators
-        if (!company && !position) {
-          const hasCompanyIndicators = /\b(Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services|Consulting|Agency)\b/i.test(line);
-          const hasPositionIndicators = /\b(Manager|Director|Developer|Engineer|Analyst|Specialist|Coordinator|Assistant|Lead|Senior|Junior|Intern)\b/i.test(line);
-
-          if (hasCompanyIndicators && !hasPositionIndicators) {
-            company = line.replace(/[,.]$/, '');
-          } else if (hasPositionIndicators && !hasCompanyIndicators) {
-            position = line.replace(/[,.]$/, '');
-          } else if (j === 0) {
-            // First line more likely to be position/title
-            position = line.replace(/[,.]$/, '');
-          } else if (j === 1 && !position) {
-            company = line.replace(/[,.]$/, '');
-          }
+        if (hasCompanyIndicators && !hasPositionIndicators) {
+          company = firstLine.replace(/[,.]$/, '');
+          position = secondLine.replace(/[,.]$/, '') || 'Position';
+        } else if (hasPositionIndicators && !hasCompanyIndicators) {
+          position = firstLine.replace(/[,.]$/, '');
+          company = secondLine.replace(/[,.]$/, '') || 'Company';
+        } else {
+          // Default: first line is position, second is company
+          position = firstLine.replace(/[,.]$/, '');
+          company = secondLine.replace(/[,.]$/, '') || 'Company';
         }
       }
 
-      // Enhanced date extraction
+      // Enhanced date extraction with multiple patterns
       const datePatterns = [
-        /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})\s*[–\-to]+\s*(Present|Current|(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}))/i,
-        /(\d{1,2}\/\d{4})\s*[–\-to]+\s*(Present|Current|\d{1,2}\/\d{4})/i,
-        /(\d{4})\s*[–\-to]+\s*(Present|Current|\d{4})/i
+        /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4})\s*[-–to]+\s*(Present|Current|(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+\d{4}))/i,
+        /(\d{1,2}\/\d{4})\s*[-–to]+\s*(Present|Current|\d{1,2}\/\d{4})/i,
+        /(\d{4})\s*[-–to]+\s*(Present|Current|\d{4})/i,
+        /(20\d{2})\s*[-–to]+\s*(Present|Current|20\d{2})/i
       ];
 
       for (const pattern of datePatterns) {
         const dateMatch = entry.match(pattern);
         if (dateMatch) {
           startDate = convertDateToISO(dateMatch[1] || '');
-          const endDateText = dateMatch[3] || dateMatch[2] || '';
+          const endDateText = dateMatch[2] || '';
           isCurrentJob = /present|current/i.test(endDateText);
-          if (!isCurrentJob) {
+          if (!isCurrentJob && endDateText) {
             endDate = convertDateToISO(endDateText);
           }
           break;
         }
       }
 
-      // Extract description (everything that's not header or dates)
-      const descriptionLines = entryLines.filter(line => {
-        // Skip header lines and date lines
-        const isHeader = line === entryLines[0] || line === entryLines[1];
+      // Extract description - skip header lines and date lines
+      const descriptionLines = entryLines.slice(2).filter(line => {
         const hasDate = datePatterns.some(pattern => pattern.test(line));
-        return !isHeader && !hasDate && !line.includes(' at ') && !line.includes(' - ') && !line.includes(', ');
+        return !hasDate && line.length > 5;
       });
 
       description = descriptionLines.join('\n').trim();
 
-      // Fallback: if we couldn't parse company/position clearly
-      if (!company && !position && entryLines[0]) {
-        const firstLine = entryLines[0];
-        if (/\b(Inc|LLC|Corp|Ltd|Co\.|Company|Group)\b/i.test(firstLine)) {
-          company = firstLine;
-          position = entryLines[1] || 'Position';
-        } else {
-          position = firstLine;
-          company = entryLines[1] || 'Company';
-        }
+      // Ensure we have at least position or company
+      if (!position && !company) {
+        position = firstLine || 'Position';
+        company = secondLine || 'Company';
       }
 
-      if (position || company) {
-        workExperience.push({
-          id: String(Date.now() + i),
-          company: company || 'Company',
-          position: position || 'Position',
-          startDate,
-          endDate,
-          isCurrentJob,
-          description
-        });
-      }
+      workExperience.push({
+        id: String(Date.now() + i),
+        company: company || 'Company',
+        position: position || 'Position',
+        startDate: startDate || '',
+        endDate: endDate || '',
+        isCurrentJob,
+        description: description || ''
+      });
     }
   }
 

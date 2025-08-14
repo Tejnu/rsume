@@ -59,23 +59,89 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
     const printContent = document.getElementById('resume-preview-content');
     if (!printContent) {
       console.error('Resume content not found for download');
+      alert('Resume content not found. Please try again.');
       return;
     }
 
     try {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
-        console.error('Could not open print window');
+        console.error('Could not open print window - popup blocked');
+        alert('Please allow popups for this site to download your resume.');
         return;
       }
 
-      // Get all stylesheets and inline styles
+      // Get all stylesheets
       const stylesheets = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
         .map((el) => el.outerHTML)
         .join('\n');
 
-      // Get computed styles for better accuracy
-      const computedStyles = window.getComputedStyle(printContent);
+      // Create inline styles for print
+      const printStyles = `
+        <style>
+          @page { 
+            margin: 0.5in; 
+            size: A4; 
+          }
+          
+          * { 
+            -webkit-print-color-adjust: exact !important; 
+            color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+          }
+          
+          body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            line-height: 1.5; 
+            color: #000; 
+            background: white; 
+            margin: 0; 
+            padding: 0; 
+          }
+          
+          .resume-container { 
+            max-width: 8.5in; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 0.5in; 
+          }
+          
+          h1, h2, h3, h4, h5, h6 { 
+            color: #000 !important; 
+            margin-bottom: 0.5em; 
+          }
+          
+          .text-gray-600, .text-gray-700, .text-gray-800 { 
+            color: #374151 !important; 
+          }
+          
+          .text-indigo-600, .text-blue-600, .text-purple-600 { 
+            color: #4f46e5 !important; 
+          }
+          
+          .bg-gray-50, .bg-gray-100 { 
+            background-color: #f9fafb !important; 
+          }
+          
+          .border { 
+            border: 1px solid #e5e7eb !important; 
+          }
+          
+          .shadow, .shadow-sm, .shadow-lg { 
+            box-shadow: none !important; 
+          }
+          
+          .rounded, .rounded-lg, .rounded-xl { 
+            border-radius: 4px !important; 
+          }
+          
+          @media print {
+            .no-print { display: none !important; }
+            .page-break { page-break-after: always; }
+            * { box-shadow: none !important; }
+          }
+        </style>
+      `;
 
       printWindow.document.write(`
         <!DOCTYPE html>
@@ -133,6 +199,38 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
         </html>
       `);
 
+      // Create the complete HTML document
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${resumeData.personalInfo?.fullName || 'Resume'} - Resume</title>
+            ${stylesheets}
+            ${printStyles}
+          </head>
+          <body>
+            <div class="resume-container">
+              ${printContent.innerHTML}
+            </div>
+            <script>
+              window.onload = function() {
+                // Small delay to ensure styles are loaded
+                setTimeout(() => {
+                  window.print();
+                  // Close after printing (optional)
+                  setTimeout(() => {
+                    window.close();
+                  }, 1000);
+                }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.write(htmlContent);
       printWindow.document.close();
 
       if (onDownloadPDF) {
