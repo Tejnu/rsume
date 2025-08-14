@@ -21,9 +21,11 @@ export function CertificationsForm({ certifications, onUpdate }: CertificationsF
       id: Date.now().toString(),
       name: '',
       issuer: '',
+      date: '',
       dateObtained: '',
       expirationDate: '',
       credentialId: '',
+      url: ''
     };
     onUpdate([...certifications, newCertification]);
     setExpandedItems([...expandedItems, newCertification.id]);
@@ -124,12 +126,12 @@ export function CertificationsForm({ certifications, onUpdate }: CertificationsF
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor={`dateObtained-${cert.id}`}>Date Obtained</Label>
+                      <Label htmlFor={`date-${cert.id}`}>Date Obtained</Label>
                       <Input
-                        id={`dateObtained-${cert.id}`}
+                        id={`date-${cert.id}`}
                         type="month"
-                        value={cert.dateObtained}
-                        onChange={(e) => updateCertification(cert.id, { dateObtained: e.target.value })}
+                        value={cert.date || cert.dateObtained || ''}
+                        onChange={(e) => updateCertification(cert.id, { date: e.target.value, dateObtained: e.target.value })}
                         className="mt-1"
                       />
                     </div>
@@ -138,22 +140,34 @@ export function CertificationsForm({ certifications, onUpdate }: CertificationsF
                       <Input
                         id={`expirationDate-${cert.id}`}
                         type="month"
-                        value={cert.expirationDate}
+                        value={cert.expirationDate || ''}
                         onChange={(e) => updateCertification(cert.id, { expirationDate: e.target.value })}
                         className="mt-1"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor={`credentialId-${cert.id}`}>Credential ID (Optional)</Label>
-                    <Input
-                      id={`credentialId-${cert.id}`}
-                      value={cert.credentialId}
-                      onChange={(e) => updateCertification(cert.id, { credentialId: e.target.value })}
-                      placeholder="ABC123DEF456"
-                      className="mt-1"
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor={`credentialId-${cert.id}`}>Credential ID (Optional)</Label>
+                      <Input
+                        id={`credentialId-${cert.id}`}
+                        value={cert.credentialId || ''}
+                        onChange={(e) => updateCertification(cert.id, { credentialId: e.target.value })}
+                        placeholder="ABC123DEF456"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor={`url-${cert.id}`}>Certificate URL (Optional)</Label>
+                      <Input
+                        id={`url-${cert.id}`}
+                        value={cert.url || ''}
+                        onChange={(e) => updateCertification(cert.id, { url: e.target.value })}
+                        placeholder="https://..."
+                        className="mt-1"
+                      />
+                    </div>
                   </div>
                 </CardContent>
               )}

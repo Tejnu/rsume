@@ -208,7 +208,14 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
   const linkedinMatch = text.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+/i);
   const urlMatch = text.match(/(?:https?:\/\/)?(?:www\.)?[\w-]+\.(?:com|net|org|io|dev|co)(?:\/[\w-]*)?/i);
 
-  // Enhanced name extraction
+  // Extract location information
+  const locationMatch = text.match(/(.*?)(?:,\s*)?(?:Australia|India|USA|UK|Canada|Singapore|Germany|France|Japan|China|United States|New Zealand|South Africa)/i);
+  let location = '';
+  if (locationMatch) {
+    location = locationMatch[0].trim();
+  }
+
+  // Enhanced name extraction - look for the first meaningful line that looks like a name
   let fullName = '';
   for (const l of lines.slice(0, 8)) {
     if (l && !l.includes('@') && !l.toLowerCase().includes('resume') && 
@@ -310,24 +317,87 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
     }));
   }
 
-  // Parse education entries
+  // Parse education entries with better school detection
   const education: Education[] = [];
   const eduLines = sections['education'] || [];
   if (eduLines.length) {
-    const chunks = eduLines.join('\n').split(/\n\s*\n/);
+    // Split education entries by empty lines or clear separators
+    const chunks = eduLines.join('\n').split(/\n\s*\n|\n(?=\d{4})/);
     for (let i = 0; i < chunks.length && education.length < 6; i++) {
-      const c = chunks[i];
-      const school = (c.match(/^(.*?)(?:,|\n|$)/)?.[1] || '').trim();
+      const c = chunks[i].trim();
+      if (!c) continue;
+      
+      // Enhanced school name detection
+      const schoolPatterns = [
+        /^(.*?(?:University|College|Institute|School|Academy)[^\n,]*)/i,
+        /^([A-Z][A-Za-z\s&,'-]+(?:University|College|Institute|School|Academy))/i,
+        /^(.*?)(?:,|\n)/
+      ];
+      
+      let school = '';
+      for (const pattern of schoolPatterns) {
+        const match = c.match(pattern);
+        if (match && match[1] && match[1].length > 3) {
+          school = match[1].trim();
+          break;
+        }
+      }
+      
+      if (!school) {
+        // Take the first meaningful line as school name
+        const firstLine = c.split('\n')[0];
+        if (firstLine && firstLine.length > 3) {
+          school = firstLine.trim();
+        }
+      }
+      
       if (!school) continue;
-      const degree = (c.match(/(Bachelor|Master|B\.?Sc\.?|M\.?Sc\.?|Ph\.?D\.?|Diploma|Certificate|Associate's|High School Diploma)[^\n,]*/i)?.[0] || '').trim();
-      const field = (c.match(/(Computer Science|Engineering|Information Technology|Business Administration|Arts|Science|Mathematics|Physics|Chemistry|Biology|Economics|Psychology|Design|Marketing|Finance)[^\n,]*/i)?.[0] || '').trim();
-      const year = (c.match(/(19|20)\d{2}[-–]?(0[1-9]|1[0-2])?/g)?.pop() || '').replace(/[–]/g, '-');
+      
+      // Enhanced degree detection
+      const degreePatterns = [
+        /(Bachelor[^,\n]*|Master[^,\n]*|B\.?Sc\.?[^,\n]*|M\.?Sc\.?[^,\n]*|Ph\.?D\.?[^,\n]*|Diploma[^,\n]*|Certificate[^,\n]*|Associate's[^,\n]*|High School Diploma)/i,
+        /(B\.?A\.?|B\.?S\.?|M\.?A\.?|M\.?S\.?|MBA|PhD)[^,\n]*/i
+      ];
+      
+      let degree = '';
+      for (const pattern of degreePatterns) {
+        const match = c.match(pattern);
+        if (match) {
+          degree = match[0].trim();
+          break;
+        }
+      }
+      
+      // Enhanced field detection
+      const fieldPatterns = [
+        /(Computer Science|Information Technology|Software Engineering|Computer Engineering|Data Science|Artificial Intelligence|Machine Learning|Cybersecurity)/i,
+        /(Business Administration|Management|Marketing|Finance|Economics|Accounting)/i,
+        /(Engineering|Mechanical Engineering|Electrical Engineering|Civil Engineering)/i,
+        /(Arts|Science|Mathematics|Physics|Chemistry|Biology|Psychology|Design)/i,
+        /in\s+([A-Z][A-Za-z\s]+?)(?:,|\n|$)/i,
+        /of\s+([A-Z][A-Za-z\s]+?)(?:,|\n|$)/i
+      ];
+      
+      let field = '';
+      for (const pattern of fieldPatterns) {
+        const match = c.match(pattern);
+        if (match) {
+          field = match[1] || match[0];
+          field = field.replace(/^(in|of)\s+/i, '').trim();
+          break;
+        }
+      }
+      
+      // Enhanced date extraction
+      const dateMatches = c.match(/(20\d{2}|19\d{2})/g);
+      const year = dateMatches ? dateMatches[dateMatches.length - 1] : '';
+      
       education.push({
         id: String(Date.now() + i),
-        school,
-        degree,
-        field,
-        graduationDate: year,
+        school: school.replace(/[,.]$/, ''),
+        degree: degree.replace(/[,.]$/, ''),
+        field: field.replace(/[,.]$/, ''),
+        graduationDate: year ? `${year}-06` : '',
       });
     }
   }
@@ -351,37 +421,47 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
   const expLines = sections['work'] || [];
 
   if (expLines.length) {
-    // Advanced job entry detection
-    let currentEntry = '';
+    // Advanced job entry detection with better separation logic
     const jobEntries: string[] = [];
+    let currentEntry = '';
+    let lastWasDateLine = false;
 
     for (let i = 0; i < expLines.length; i++) {
       const line = expLines[i];
       const nextLine = expLines[i + 1] || '';
+      const prevLine = expLines[i - 1] || '';
 
+      // Check if this line contains dates (indicating end of previous job)
+      const isDateLine = /\b(20\d{2}|19\d{2})\b.*?(?:present|current|20\d{2}|19\d{2})\b/i.test(line) ||
+                        /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+20\d{2}/i.test(line);
+      
       // Enhanced patterns for detecting new job entries
       const isNewJobEntry = 
+        // Start a new entry if we just had a date line and this looks like a job title/company
+        (lastWasDateLine && /^[A-Z][^.!?]*$/i.test(line) && !line.includes('•')) ||
         // Position at Company format
         /^[A-Z][^.!?]*\s+(at|@|\|)\s+[A-Z][A-Za-z\s&.,'-]+$/i.test(line) ||
         // Company Name, Position format
         /^[A-Z][A-Za-z\s&.,'-]+,\s+[A-Z][^.!?]*$/i.test(line) ||
         // Position - Company format
-        /^[A-Z][^.!?]*\s+-\s+[A-Z][A-Za-z\s&.,'-]+$/i.test(line) ||
+        /^[A-Z][^.!?]*\s+[-–]\s+[A-Z][A-Za-z\s&.,'-]+$/i.test(line) ||
         // Company followed by position on next line
-        (/^[A-Z][A-Za-z\s&.,'-]+(?:Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services|Consulting|Agency)?\.?$/i.test(line) && 
+        (/^[A-Z][A-Za-z\s&.,'-]+(?:Inc|LLC|Corp|Ltd|Co\.|Company|Group|Solutions|Technologies|Services|Consulting|Agency|Pty|Limited)?\.?$/i.test(line) && 
          nextLine && /^[A-Z][^.!?]*$/.test(nextLine) && !nextLine.includes('•')) ||
-        // Line with dates indicating job period
-        /\d{4}.*(?:present|current|\d{4})/i.test(line) ||
-        // Standalone company or position that looks like a header
-        (line.length < 80 && line.split(' ').length <= 8 && /^[A-Z]/.test(line) && 
-         !line.includes('•') && !line.includes('-') && !line.includes('('));
+        // Deloitte specific patterns (handle consulting firm structure)
+        (/^Deloitte/i.test(line) && nextLine && /^(Analyst|Consultant|Senior|Manager|Director|Partner)/i.test(nextLine)) ||
+        // Job simulation patterns
+        /simulation|virtual|internship|program/i.test(line) && /^[A-Z]/i.test(line);
 
+      // If this is a new job entry and we have content, save the current entry
       if (isNewJobEntry && currentEntry.trim()) {
         jobEntries.push(currentEntry.trim());
         currentEntry = line + '\n';
       } else {
         currentEntry += line + '\n';
       }
+
+      lastWasDateLine = isDateLine;
     }
 
     if (currentEntry.trim()) {
@@ -536,7 +616,7 @@ function buildResumeDataFromText(rawText: string): Partial<ResumeData> {
       fullName: fullName || '',
       email: emailMatch?.[0] || '',
       phone: phoneMatch?.[0] || '',
-      location: '',
+      location: location || '',
       linkedin: linkedinMatch?.[0] || '',
       website: urlMatch && (!linkedinMatch || urlMatch[0] !== linkedinMatch[0]) ? urlMatch[0] : '',
       summary: fallbackSummary

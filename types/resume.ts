@@ -54,6 +54,9 @@ export interface Certification {
   name: string;
   issuer: string;
   date: string;
+  dateObtained?: string;
+  expirationDate?: string;
+  credentialId?: string;
   url?: string;
 }
 
