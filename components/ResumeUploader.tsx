@@ -340,9 +340,29 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
         } as Partial<ResumeData>;
       }
 
+      // Ensure we have valid data structure
+      const finalData: Partial<ResumeData> = {
+        personalInfo: {
+          fullName: extractedData.personalInfo?.fullName || '',
+          email: extractedData.personalInfo?.email || '',
+          phone: extractedData.personalInfo?.phone || '',
+          location: extractedData.personalInfo?.location || '',
+          linkedin: extractedData.personalInfo?.linkedin || '',
+          website: extractedData.personalInfo?.website || '',
+          summary: extractedData.personalInfo?.summary || ''
+        },
+        workExperience: extractedData.workExperience || [],
+        education: extractedData.education || [],
+        skills: extractedData.skills || [],
+        certifications: extractedData.certifications || [],
+        projects: extractedData.projects || [],
+        languages: extractedData.languages || [],
+        references: extractedData.references || [],
+        customSections: extractedData.customSections || []
+      };
       setStatus('success');
       setCurrentStep('Resume successfully imported!');
-      onResumeExtracted(extractedData);
+      onResumeExtracted(finalData);
       if (onExternalFileProcessed) {
         onExternalFileProcessed();
       }

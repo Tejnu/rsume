@@ -20,7 +20,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
     <div className="bg-white text-gray-900 p-8 max-w-4xl mx-auto">
       {/* Header */}
       <header className="mb-8">
-        <div className="text-white p-6 rounded-lg" style={{background: 'linear-gradient(90deg, var(--figma-primary) 0%, var(--figma-secondary) 100%)'}}>
+        <div className="text-white p-6 rounded-lg bg-black">
           <h1 className="text-3xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
           <div className="flex flex-wrap gap-4 text-sm">
             {personalInfo.email && (
@@ -60,7 +60,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
       {/* Professional Summary */}
       {personalInfo.summary && (
         <section className="mb-8">
-          <h2 className="text-xl font-bold text-blue-800 mb-3 border-b-2 border-blue-200 pb-1">
+          <h2 className="text-xl font-bold text-black mb-3 border-b-2 border-gray-300 pb-1">
             Professional Summary
           </h2>
           <p className="text-gray-700 leading-relaxed">{personalInfo.summary}</p>
@@ -70,16 +70,16 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
       {/* Work Experience */}
       {workExperience.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 border-b-2 border-blue-200 pb-1">
+          <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
             Work Experience
           </h2>
           <div className="space-y-6">
             {workExperience.map((exp) => (
-              <div key={exp.id} className="border-l-4 border-blue-300 pl-4">
+              <div key={exp.id} className="border-l-4 border-gray-400 pl-4">
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className="font-semibold text-lg">{exp.position}</h3>
-                    <p className="text-blue-600 font-medium">{exp.company}</p>
+                    <p className="text-gray-700 font-medium">{exp.company}</p>
                   </div>
                   <div className="text-sm text-gray-600">
                     {formatDate(exp.startDate)} - {exp.isCurrentJob ? 'Present' : formatDate(exp.endDate)}
@@ -97,16 +97,16 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
       {/* Education */}
       {education.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-xl font-bold text-blue-800 mb-4 border-b-2 border-blue-200 pb-1">
+          <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
             Education
           </h2>
           <div className="space-y-4">
             {education.map((edu) => (
-              <div key={edu.id} className="border-l-4 border-green-300 pl-4">
+              <div key={edu.id} className="border-l-4 border-gray-400 pl-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-semibold">{edu.degree}</h3>
-                    <p className="text-green-600 font-medium">{edu.school}</p>
+                    <p className="text-gray-700 font-medium">{edu.school}</p>
                     {edu.field && <p className="text-sm text-gray-600">{edu.field}</p>}
                     {edu.gpa && <p className="text-sm text-gray-600">GPA: {edu.gpa}</p>}
                   </div>
@@ -123,7 +123,7 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
       {/* Skills */}
       {skills.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold text-blue-800 mb-4 border-b-2 border-blue-200 pb-1">
+          <h2 className="text-xl font-bold text-black mb-4 border-b-2 border-gray-300 pb-1">
             Skills
           </h2>
           <div className="grid grid-cols-2 gap-4">
@@ -139,10 +139,10 @@ export function ModernTemplate({ resumeData }: ModernTemplateProps) {
                       <span
                         key={skill.id}
                         className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          level === 'Expert' ? 'bg-purple-100 text-purple-800' :
-                          level === 'Advanced' ? 'bg-green-100 text-green-800' :
-                          level === 'Intermediate' ? 'bg-blue-100 text-blue-800' :
-                          'bg-yellow-100 text-yellow-800'
+                          level === 'Expert' ? 'bg-black text-white' :
+                          level === 'Advanced' ? 'bg-gray-700 text-white' :
+                          level === 'Intermediate' ? 'bg-gray-500 text-white' :
+                          'bg-gray-300 text-gray-800'
                         }`}
                       >
                         {skill.name}

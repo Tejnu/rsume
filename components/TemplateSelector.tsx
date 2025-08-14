@@ -70,20 +70,20 @@ export function TemplateSelector({ selectedTemplate, onTemplateChange }: Templat
               key={template.id}
               className={`relative p-6 cursor-pointer transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
                 isSelected
-                  ? 'ring-2 ring-indigo-500 shadow-xl bg-gradient-to-br from-indigo-50 to-purple-50'
-                  : 'border-gray-200 hover:border-indigo-300 bg-white'
+                  ? 'ring-2 ring-black shadow-xl bg-gray-50'
+                  : 'border-gray-200 hover:border-black bg-white'
               }`}
               onClick={() => onTemplateChange(template.id)}
             >
               {/* Selection Indicator */}
               {isSelected && (
-                <div className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg">
+                <div className="absolute -top-2 -right-2 w-6 h-6 bg-black rounded-full flex items-center justify-center shadow-lg">
                   <CheckCircle className="h-4 w-4 text-white" />
                 </div>
               )}
               
               {/* Template Icon */}
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${template.color} flex items-center justify-center mb-4 shadow-lg`}>
+              <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center mb-4 shadow-lg">
                 <IconComponent className="h-6 w-6 text-white" />
               </div>
               
@@ -102,7 +102,7 @@ export function TemplateSelector({ selectedTemplate, onTemplateChange }: Templat
                       variant="secondary" 
                       className={`text-xs ${
                         isSelected 
-                          ? 'bg-indigo-100 text-indigo-700' 
+                          ? 'bg-gray-100 text-gray-700' 
                           : 'bg-gray-100 text-gray-600'
                       }`}
                     >
@@ -116,7 +116,7 @@ export function TemplateSelector({ selectedTemplate, onTemplateChange }: Templat
               <div className={`absolute inset-0 rounded-lg transition-opacity duration-300 ${
                 isSelected 
                   ? 'opacity-0' 
-                  : 'opacity-0 hover:opacity-5 bg-gradient-to-br from-indigo-500 to-purple-600'
+                  : 'opacity-0 hover:opacity-5 bg-black'
               }`} />
             </Card>
           );
@@ -124,10 +124,10 @@ export function TemplateSelector({ selectedTemplate, onTemplateChange }: Templat
       </div>
       
       {/* Template Preview Note */}
-      <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+      <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
         <div className="flex items-center space-x-2">
-          <Sparkles className="h-5 w-5 text-indigo-600" />
-          <p className="text-sm text-indigo-800">
+          <Sparkles className="h-5 w-5 text-black" />
+          <p className="text-sm text-gray-800">
             <span className="font-medium">Pro Tip:</span> All templates are ATS-friendly and optimized for both human recruiters and applicant tracking systems.
           </p>
         </div>

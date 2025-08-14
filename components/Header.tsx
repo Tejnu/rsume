@@ -46,7 +46,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
   };
 
   return (
-    <header className="bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm sticky top-0 z-50">
+    <header className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo and Brand */}
@@ -55,14 +55,14 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
               <img
                 src="/1752047483145.jpeg"
                 alt="Alumna logo"
-                className="w-10 h-10 rounded-xl object-cover shadow-lg"
+                className="w-16 h-16 rounded-xl object-cover shadow-lg"
               />
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-emerald-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold text-black">
                 Alumna
               </h1>
-              <p className="text-xs text-gray-500 hidden sm:block">AI-Powered Resume Builder</p>
+              <p className="text-sm text-gray-600 hidden sm:block">AI-Powered Resume Builder</p>
             </div>
           </div>
 
@@ -79,7 +79,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
-              className="flex items-center space-x-2 rounded-xl"
+              className="flex items-center space-x-2 rounded-xl border-gray-300 text-gray-700 hover:bg-gray-50"
             >
               <Upload className="h-4 w-4" />
               <span>Import Resume</span>
@@ -88,10 +88,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
             <Button
               onClick={onAIEnhance}
               disabled={isAIProcessing}
-              className="flex items-center space-x-2 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl"
-              style={{
-                background: 'linear-gradient(90deg, var(--figma-primary) 0%, var(--figma-secondary) 100%)'
-              }}
+              className="flex items-center space-x-2 bg-black text-white font-semibold px-6 py-3 rounded-xl hover:bg-gray-800"
             >
               {isAIProcessing ? (
                 <div className="loading-spinner h-4 w-4" />
@@ -104,7 +101,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
             <Button
               variant="outline"
               onClick={handleShare}
-              className="flex items-center space-x-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-300 rounded-xl"
+              className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
             >
               <Share className="h-4 w-4" />
               <span>Share</span>
@@ -112,7 +109,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
 
             <Button
               onClick={onDownloadPDF}
-              className="btn-secondary flex items-center space-x-2"
+              className="bg-gray-800 text-white hover:bg-gray-900 flex items-center space-x-2 rounded-xl"
             >
               <Download className="h-4 w-4" />
               <span>Download PDF</span>
@@ -134,7 +131,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="lg:hidden mt-4 pt-4 border-t border-gray-100 animate-fade-in">
+          <div className="lg:hidden mt-4 pt-4 border-t border-gray-200 animate-fade-in">
             <div className="flex flex-col space-y-3">
               <Input
                 ref={fileInputRef}
@@ -147,7 +144,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
               <Button
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full justify-start border-indigo-200 text-indigo-700 hover:bg-indigo-50 rounded-xl"
+                className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Import Resume
@@ -156,7 +153,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
               <Button
                 onClick={onAIEnhance}
                 disabled={isAIProcessing}
-                className="btn-primary w-full justify-start"
+                className="bg-black text-white hover:bg-gray-800 w-full justify-start rounded-xl"
               >
                 {isAIProcessing ? (
                   <div className="loading-spinner h-4 w-4 mr-2" />
@@ -169,7 +166,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
               <Button
                 variant="outline"
                 onClick={handleShare}
-                className="w-full justify-start border-emerald-200 text-emerald-700 hover:bg-emerald-50 rounded-xl"
+                className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
               >
                 <Share className="h-4 w-4 mr-2" />
                 Share
@@ -177,7 +174,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
 
               <Button
                 onClick={onDownloadPDF}
-                className="btn-secondary w-full justify-start"
+                className="bg-gray-800 text-white hover:bg-gray-900 w-full justify-start rounded-xl"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Download PDF

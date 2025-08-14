@@ -108,23 +108,21 @@ export default function Home() {
   };
 
   const handleResumeExtracted = (extractedData: Partial<ResumeData>) => {
-    // Merge deeply for personalInfo to avoid wiping other fields unintentionally
-    setResumeData(prev => ({
-      ...prev,
-      personalInfo: {
-        ...prev.personalInfo,
-        ...(extractedData.personalInfo || {})
-      },
-      workExperience: extractedData.workExperience ?? prev.workExperience,
-      education: extractedData.education ?? prev.education,
-      skills: extractedData.skills ?? prev.skills,
-      certifications: extractedData.certifications ?? prev.certifications,
-      projects: extractedData.projects ?? prev.projects,
-      languages: extractedData.languages ?? prev.languages,
-      references: extractedData.references ?? prev.references,
-      customSections: extractedData.customSections ?? prev.customSections,
-      selectedTemplate: prev.selectedTemplate
-    }));
+    // Replace all data with extracted data, keeping only the selected template
+    const newResumeData: ResumeData = {
+      personalInfo: extractedData.personalInfo || initialResumeData.personalInfo,
+      workExperience: extractedData.workExperience || [],
+      education: extractedData.education || [],
+      skills: extractedData.skills || [],
+      certifications: extractedData.certifications || [],
+      projects: extractedData.projects || [],
+      languages: extractedData.languages || [],
+      references: extractedData.references || [],
+      customSections: extractedData.customSections || [],
+      selectedTemplate: resumeData.selectedTemplate // Keep current template selection
+    };
+    
+    setResumeData(newResumeData);
     setShowUploader(false);
   };
 
@@ -355,7 +353,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <Header 
         onFileUpload={handleFileUpload}
         onAIEnhance={handleAIEnhance}
@@ -392,7 +390,7 @@ export default function Home() {
               </TabsList>
               
               <TabsContent value="form">
-                <Card className="bg-white shadow-sm border">
+                <Card className="bg-white shadow-sm border border-gray-200">
                   <ResumeForm
                     resumeData={resumeData}
                     onUpdate={updateResumeData}
