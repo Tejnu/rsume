@@ -1,0 +1,151 @@
+
+'use client';
+
+import { ResumeData } from '@/types/resume';
+import { Mail, Phone, MapPin, Calendar, GraduationCap, Award, Star } from 'lucide-react';
+
+interface ExecutiveTemplateProps {
+  data: ResumeData;
+}
+
+export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
+  return (
+    <div className="max-w-4xl mx-auto bg-white shadow-2xl" style={{ minHeight: '1056px' }}>
+      {/* Header Section */}
+      <div className="bg-gradient-to-r from-slate-900 to-slate-700 text-white p-8">
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <h1 className="text-4xl font-bold mb-2">{data.personalInfo.fullName}</h1>
+            <h2 className="text-xl text-slate-200 mb-4">{data.personalInfo.title}</h2>
+            {data.personalInfo.summary && (
+              <p className="text-slate-100 text-sm leading-relaxed max-w-2xl">{data.personalInfo.summary}</p>
+            )}
+          </div>
+          <div className="ml-8">
+            <div className="space-y-2 text-sm">
+              {data.personalInfo.email && (
+                <div className="flex items-center">
+                  <Mail className="h-4 w-4 mr-2 text-slate-300" />
+                  <span>{data.personalInfo.email}</span>
+                </div>
+              )}
+              {data.personalInfo.phone && (
+                <div className="flex items-center">
+                  <Phone className="h-4 w-4 mr-2 text-slate-300" />
+                  <span>{data.personalInfo.phone}</span>
+                </div>
+              )}
+              {data.personalInfo.location && (
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-2 text-slate-300" />
+                  <span>{data.personalInfo.location}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="p-8">
+        <div className="grid grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="col-span-2 space-y-6">
+            {/* Experience */}
+            {data.workExperience.length > 0 && (
+              <section>
+                <h3 className="text-2xl font-bold text-slate-900 mb-4 border-b-2 border-slate-200 pb-2">
+                  Executive Experience
+                </h3>
+                <div className="space-y-6">
+                  {data.workExperience.map((exp, index) => (
+                    <div key={index} className="border-l-4 border-slate-300 pl-6">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900">{exp.position}</h4>
+                          <p className="text-slate-700 font-medium">{exp.company}</p>
+                        </div>
+                        <div className="text-right text-sm text-slate-600">
+                          <div className="flex items-center">
+                            <Calendar className="h-4 w-4 mr-1" />
+                            {exp.startDate} - {exp.endDate || 'Present'}
+                          </div>
+                          {exp.location && <div className="mt-1">{exp.location}</div>}
+                        </div>
+                      </div>
+                      {exp.description && (
+                        <p className="text-slate-700 text-sm leading-relaxed">{exp.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Skills */}
+            {data.skills.length > 0 && (
+              <section>
+                <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
+                  <Star className="h-5 w-5 mr-2" />
+                  Core Competencies
+                </h3>
+                <div className="space-y-2">
+                  {data.skills.map((skill, index) => (
+                    <div key={index} className="bg-slate-50 p-2 rounded">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-slate-800">{skill.name}</span>
+                        <span className="text-xs text-slate-600 capitalize">{skill.level}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Education */}
+            {data.education.length > 0 && (
+              <section>
+                <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
+                  <GraduationCap className="h-5 w-5 mr-2" />
+                  Education
+                </h3>
+                <div className="space-y-3">
+                  {data.education.map((edu, index) => (
+                    <div key={index} className="border-b border-slate-200 pb-3 last:border-b-0">
+                      <h4 className="font-semibold text-slate-800 text-sm">{edu.degree}</h4>
+                      <p className="text-slate-600 text-xs">{edu.school}</p>
+                      {edu.graduationDate && (
+                        <p className="text-slate-500 text-xs">{edu.graduationDate}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Certifications */}
+            {data.certifications.length > 0 && (
+              <section>
+                <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center">
+                  <Award className="h-5 w-5 mr-2" />
+                  Certifications
+                </h3>
+                <div className="space-y-2">
+                  {data.certifications.map((cert, index) => (
+                    <div key={index} className="text-sm">
+                      <p className="font-medium text-slate-800">{cert.name}</p>
+                      <p className="text-slate-600 text-xs">{cert.issuer}</p>
+                      {cert.date && <p className="text-slate-500 text-xs">{cert.date}</p>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

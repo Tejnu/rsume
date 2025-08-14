@@ -93,4 +93,4 @@ export interface CustomSection {
   content: string;
 }
 
-export type ResumeTemplate = 'modern' | 'classic' | 'minimal' | 'creative';
+export type ResumeTemplate = 'modern' | 'classic' | 'minimal' | 'creative' | 'executive' | 'technical' | 'academic' | 'startup';

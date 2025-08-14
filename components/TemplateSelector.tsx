@@ -3,7 +3,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ResumeTemplate } from '@/types/resume';
-import { CheckCircle, Sparkles, Award, Zap, Target } from 'lucide-react';
+import { CheckCircle, Sparkles, Award, Zap, Target, Code } from 'lucide-react';
 
 interface TemplateSelectorProps {
   selectedTemplate: string;
@@ -17,38 +17,58 @@ const templates: {
   icon: React.ComponentType<any>;
   color: string;
   features: string[];
+  isNew?: boolean;
 }[] = [
   {
     id: 'modern',
-    name: 'Modern',
-    description: 'Clean design with gradient accents and modern typography',
+    name: 'Modern Executive',
+    description: 'Clean design with gradient accents and modern typography for leadership roles',
     icon: Sparkles,
     color: 'from-indigo-500 to-purple-600',
-    features: ['ATS Optimized', 'Color Accents', 'Modern Layout']
+    features: ['ATS Optimized', 'Color Accents', 'Executive Style'],
+    isNew: true
   },
   {
     id: 'classic',
-    name: 'Classic',
-    description: 'Traditional professional layout with timeless appeal',
+    name: 'Professional Classic',
+    description: 'Traditional professional layout perfect for corporate environments',
     icon: Award,
     color: 'from-blue-500 to-cyan-600',
-    features: ['Professional', 'Traditional', 'Conservative']
+    features: ['Corporate Ready', 'Traditional', 'Conservative']
   },
   {
     id: 'minimal',
-    name: 'Minimal',
-    description: 'Clean and simple with focus on content and readability',
+    name: 'Clean Minimal',
+    description: 'Ultra-clean design focusing purely on content and readability',
     icon: Target,
     color: 'from-gray-500 to-slate-600',
-    features: ['Clean Design', 'Readable', 'Minimalist']
+    features: ['Content Focus', 'Readable', 'Minimalist']
   },
   {
     id: 'creative',
-    name: 'Creative',
-    description: 'Bold design with distinctive styling and visual impact',
+    name: 'Creative Impact',
+    description: 'Bold design for creative professionals and portfolio showcases',
     icon: Zap,
     color: 'from-purple-500 to-pink-600',
-    features: ['Eye-catching', 'Creative', 'Distinctive']
+    features: ['Portfolio Ready', 'Creative Fields', 'Visual Impact']
+  },
+  {
+    id: 'executive',
+    name: 'Executive Elite',
+    description: 'Premium design for C-level executives and senior leadership',
+    icon: Award,
+    color: 'from-slate-700 to-slate-900',
+    features: ['Leadership Focus', 'Premium Design', 'Executive Level'],
+    isNew: true
+  },
+  {
+    id: 'technical',
+    name: 'Tech Pro',
+    description: 'Developer-focused template with technical styling and code aesthetics',
+    icon: Code,
+    color: 'from-emerald-600 to-teal-700',
+    features: ['Developer Ready', 'Technical Focus', 'Code Aesthetic'],
+    isNew: true
   }
 ];
 
@@ -60,7 +80,7 @@ export function TemplateSelector({ selectedTemplate, onTemplateChange }: Templat
         <p className="text-gray-600">Select a professional template that matches your industry and personal style</p>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         {templates.map((template) => {
           const IconComponent = template.icon;
           const isSelected = selectedTemplate === template.id;
@@ -79,6 +99,13 @@ export function TemplateSelector({ selectedTemplate, onTemplateChange }: Templat
               {isSelected && (
                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-black rounded-full flex items-center justify-center shadow-lg">
                   <CheckCircle className="h-4 w-4 text-white" />
+                </div>
+              )}
+              
+              {/* New Badge */}
+              {template.isNew && !isSelected && (
+                <div className="absolute -top-2 -left-2 px-2 py-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold rounded-full shadow-lg">
+                  NEW
                 </div>
               )}
               

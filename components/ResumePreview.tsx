@@ -5,6 +5,8 @@ import { ModernTemplate } from './templates/ModernTemplate';
 import { ClassicTemplate } from './templates/ClassicTemplate';
 import { MinimalTemplate } from './templates/MinimalTemplate';
 import { CreativeTemplate } from './templates/CreativeTemplate';
+import { ExecutiveTemplate } from './templates/ExecutiveTemplate'; // Added
+import { TechnicalTemplate } from './templates/TechnicalTemplate'; // Added
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, Maximize2, ZoomIn, ZoomOut } from 'lucide-react';
@@ -20,17 +22,25 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const renderTemplate = () => {
-    switch (resumeData.selectedTemplate) {
+    // Destructure selectedTemplate and resumeData for cleaner access
+    const { selectedTemplate } = resumeData;
+    const data = resumeData; // Assuming resumeData is passed directly as 'data' to templates
+
+    switch (selectedTemplate) {
       case 'modern':
-        return <ModernTemplate resumeData={resumeData} />;
+        return <ModernTemplate data={data} />;
       case 'classic':
-        return <ClassicTemplate resumeData={resumeData} />;
+        return <ClassicTemplate data={data} />;
       case 'minimal':
-        return <MinimalTemplate resumeData={resumeData} />;
+        return <MinimalTemplate data={data} />;
       case 'creative':
-        return <CreativeTemplate resumeData={resumeData} />;
+        return <CreativeTemplate data={data} />;
+      case 'executive': // Added new template case
+        return <ExecutiveTemplate data={data} />;
+      case 'technical': // Added new template case
+        return <TechnicalTemplate data={data} />;
       default:
-        return <ModernTemplate resumeData={resumeData} />;
+        return <ModernTemplate data={data} />;
     }
   };
 
@@ -136,10 +146,10 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
               </Button>
             </div>
           )}
-          
-          <div 
+
+          <div
             className="bg-white shadow-2xl mx-auto overflow-auto"
-            style={{ 
+            style={{
               width: isFullscreen ? '210mm' : '100%',
               maxWidth: isFullscreen ? '210mm' : '820px',
               height: isFullscreen ? '297mm' : '840px',
@@ -148,10 +158,10 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
               transition: 'all 0.3s ease'
             }}
           >
-            <div 
+            <div
               id="resume-preview-content"
               className="h-full overflow-auto"
-              style={{ 
+              style={{
                 fontSize: isFullscreen ? '12px' : '12px',
                 lineHeight: '1.4'
               }}
