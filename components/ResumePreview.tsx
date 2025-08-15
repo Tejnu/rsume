@@ -55,130 +55,63 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
     }
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     const element = document.getElementById('resume-preview-content');
     if (!element) return;
 
-    // Create a new window for printing with all styles preserved
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+    try {
+      // Dynamic import of html2pdf
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      // Clone the element to avoid modifying the original
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      
+      // Create a temporary container with proper styling
+      const container = document.createElement('div');
+      container.style.width = '8.5in';
+      container.style.minHeight = '11in';
+      container.style.margin = '0';
+      container.style.padding = '0.5in';
+      container.style.backgroundColor = 'white';
+      container.style.fontFamily = 'Inter, sans-serif';
+      container.style.fontSize = '12px';
+      container.style.lineHeight = '1.4';
+      container.style.color = '#000';
+      container.appendChild(clonedElement);
+      
+      // Temporarily add to DOM for rendering
+      container.style.position = 'fixed';
+      container.style.top = '-9999px';
+      container.style.left = '-9999px';
+      document.body.appendChild(container);
 
-    // Get all stylesheets from the current document
-    const stylesheets = Array.from(document.styleSheets);
-    let cssText = '';
-
-    // Extract CSS from stylesheets
-    stylesheets.forEach(stylesheet => {
-      try {
-        if (stylesheet.cssRules) {
-          Array.from(stylesheet.cssRules).forEach(rule => {
-            cssText += rule.cssText + '\n';
-          });
+      const options = {
+        margin: [0.5, 0.5, 0.5, 0.5],
+        filename: `${resumeData.personalInfo.fullName || 'Resume'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait' 
         }
-      } catch (e) {
-        // Handle cross-origin restrictions
-        console.log('Could not access stylesheet:', e);
-      }
-    });
+      };
 
-    // Get all style tags
-    const styleTags = Array.from(document.querySelectorAll('style'));
-    styleTags.forEach(styleTag => {
-      cssText += styleTag.innerHTML + '\n';
-    });
-
-    // Get computed styles for the resume element
-    const computedStyles = window.getComputedStyle(element);
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Resume - ${resumeData.personalInfo.fullName}</title>
-          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-          <style>
-            ${cssText}
-
-            /* Print-specific styles */
-            @media print {
-              @page {
-                margin: 0.5in;
-                size: letter;
-              }
-              body {
-                margin: 0;
-                padding: 0;
-                font-family: 'Inter', sans-serif;
-                color: #000 !important;
-                background: #fff !important;
-              }
-              * {
-                -webkit-print-color-adjust: exact !important;
-                color-adjust: exact !important;
-                box-shadow: none !important;
-              }
-              .no-print {
-                display: none !important;
-              }
-              h1, h2, h3 {
-                page-break-after: avoid;
-                color: inherit !important;
-              }
-              p, li {
-                orphans: 2;
-                widows: 2;
-              }
-              .bg-gradient-to-r,
-              .bg-gradient-to-br,
-              .bg-blue-600,
-              .bg-indigo-600,
-              .bg-purple-600,
-              .bg-emerald-600,
-              .bg-orange-600,
-              .bg-red-600 {
-                background: #2563eb !important;
-                color: white !important;
-              }
-              .text-blue-600,
-              .text-indigo-600,
-              .text-purple-600,
-              .text-emerald-600,
-              .text-orange-600,
-              .text-red-600 {
-                color: #2563eb !important;
-              }
-            }
-
-            /* Ensure template styles are preserved */
-            #resume-content {
-              width: 8.5in;
-              min-height: 11in;
-              margin: 0 auto;
-              background: white;
-              font-size: 11px;
-              line-height: 1.4;
-              color: #000;
-            }
-          </style>
-        </head>
-        <body>
-          <div id="resume-content">
-            ${element.innerHTML}
-          </div>
-          <script>
-            window.onload = function() {
-              setTimeout(function() {
-                window.print();
-                window.close();
-              }, 500);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-
-    printWindow.document.close();
+      await html2pdf().set(options).from(container).save();
+      
+      // Clean up
+      document.body.removeChild(container);
+      
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      // Fallback to print dialog
+      window.print();
+    }
   };
 
 

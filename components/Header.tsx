@@ -53,7 +53,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
           <div className="flex items-center space-x-4">
             <div className="relative">
               <img
-                src="/1752047483145.jpeg"
+                src="/alumna-logo.png"
                 alt="Alumna logo"
                 className="w-16 h-16 rounded-xl object-cover shadow-lg"
               />
