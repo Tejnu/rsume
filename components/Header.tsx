@@ -53,7 +53,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
           <div className="flex items-center space-x-4">
             <div className="relative">
               <img
-                src="/alumna-logo.png"
+                src="/LOGOwithouttagline-01_1755244238390.png"
                 alt="Alumna logo"
                 className="w-16 h-16 rounded-xl object-cover shadow-lg"
                 onError={(e) => {

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ResumeData } from '@/types/resume';
@@ -26,52 +25,30 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-lg" style={{ minHeight: '1056px' }}>
-      {/* Header */}
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
-            {personalInfo.title && <p className="text-xl mb-4">{personalInfo.title}</p>}
-            <div className="flex flex-wrap gap-4 text-sm">
-              {personalInfo.email && (
-                <div className="flex items-center">
-                  <Mail className="h-4 w-4 mr-1" />
-                  {personalInfo.email}
-                </div>
-              )}
-              {personalInfo.phone && (
-                <div className="flex items-center">
-                  <Phone className="h-4 w-4 mr-1" />
-                  {personalInfo.phone}
-                </div>
-              )}
-              {personalInfo.location && (
-                <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {personalInfo.location}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="text-right text-sm">
-            {personalInfo.website && (
-              <div className="flex items-center justify-end mb-1">
-                <Globe className="h-4 w-4 mr-1" />
-                {personalInfo.website}
-              </div>
+    <div className="max-w-4xl mx-auto bg-white min-h-full">
+      <div className="p-6">
+        {/* Header */}
+        <div className="border-l-4 border-blue-500 pl-6 mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 font-mono">{personalInfo.fullName}</h1>
+          <p className="text-lg text-blue-600 mb-4 font-semibold font-mono">{personalInfo.title}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+            {personalInfo.email && (
+              <span className="flex items-center">
+                <Mail className="h-4 w-4 mr-2" />
+                {personalInfo.email}
+              </span>
             )}
-            {personalInfo.linkedin && (
-              <div className="flex items-center justify-end mb-1">
-                <Linkedin className="h-4 w-4 mr-1" />
-                LinkedIn
-              </div>
+            {personalInfo.phone && (
+              <span className="flex items-center">
+                <Phone className="h-4 w-4 mr-2" />
+                {personalInfo.phone}
+              </span>
             )}
-            {personalInfo.github && (
-              <div className="flex items-center justify-end">
-                <Github className="h-4 w-4 mr-1" />
-                GitHub
-              </div>
+            {personalInfo.location && (
+              <span className="flex items-center">
+                <MapPin className="h-4 w-4 mr-2" />
+                {personalInfo.location}
+              </span>
             )}
           </div>
         </div>
@@ -99,7 +76,7 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
               {['Expert', 'Advanced', 'Intermediate', 'Beginner'].map(level => {
                 const levelSkills = skills.filter(skill => skill.level === level);
                 if (levelSkills.length === 0) return null;
-                
+
                 return (
                   <div key={level} className="mb-4">
                     <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wider">{level}</h3>
@@ -174,17 +151,17 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
                     <h3 className="text-lg font-bold text-gray-900">{project.name}</h3>
                     {(project.startDate || project.endDate) && (
                       <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                        {project.startDate && formatDate(project.startDate)} 
+                        {project.startDate && formatDate(project.startDate)}
                         {project.startDate && project.endDate && ' - '}
                         {project.endDate && formatDate(project.endDate)}
                       </span>
                     )}
                   </div>
-                  
+
                   {project.description && (
                     <p className="text-gray-700 text-sm mb-3">{project.description}</p>
                   )}
-                  
+
                   {project.technologies && project.technologies.length > 0 && (
                     <div className="mb-2">
                       <p className="text-xs font-semibold text-gray-600 mb-2">TECHNOLOGIES:</p>
@@ -197,7 +174,7 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
                       </div>
                     </div>
                   )}
-                  
+
                   {project.url && (
                     <a href={project.url} className="text-sm text-purple-600 hover:underline" target="_blank" rel="noopener noreferrer">
                       {project.url}

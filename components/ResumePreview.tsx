@@ -71,45 +71,68 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
       
       // Create a temporary container with proper styling for PDF
       const container = document.createElement('div');
-      container.style.width = '8.5in';
-      container.style.minHeight = '11in';
+      container.style.width = '210mm';
+      container.style.minHeight = '297mm';
       container.style.margin = '0';
-      container.style.padding = '0.5in';
+      container.style.padding = '15mm';
       container.style.backgroundColor = 'white';
       container.style.fontFamily = 'Inter, system-ui, sans-serif';
-      container.style.fontSize = '12px';
-      container.style.lineHeight = '1.4';
-      container.style.color = '#000';
+      container.style.fontSize = '11px';
+      container.style.lineHeight = '1.5';
+      container.style.color = '#000000';
       container.style.position = 'fixed';
       container.style.top = '-9999px';
       container.style.left = '-9999px';
       container.style.zIndex = '-1';
+      container.style.boxSizing = 'border-box';
       
       // Apply PDF-specific styles to cloned element
       clonedElement.style.transform = 'none';
       clonedElement.style.width = '100%';
       clonedElement.style.height = 'auto';
       clonedElement.style.overflow = 'visible';
+      clonedElement.style.margin = '0';
+      clonedElement.style.padding = '0';
+      
+      // Fix any potential styling issues for PDF
+      const allElements = clonedElement.querySelectorAll('*');
+      allElements.forEach((el: any) => {
+        const computedStyle = window.getComputedStyle(el);
+        if (computedStyle.backgroundColor === 'rgba(0, 0, 0, 0)') {
+          el.style.backgroundColor = 'transparent';
+        }
+        if (computedStyle.color === 'rgba(0, 0, 0, 0)') {
+          el.style.color = '#000000';
+        }
+        // Ensure proper text rendering
+        el.style.webkitFontSmoothing = 'antialiased';
+        el.style.mozOsxFontSmoothing = 'grayscale';
+      });
       
       container.appendChild(clonedElement);
       document.body.appendChild(container);
 
       const options = {
-        margin: [0.5, 0.5, 0.5, 0.5],
+        margin: 0,
         filename: `${resumeData.personalInfo?.fullName || 'Resume'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'jpeg', quality: 1.0 },
         html2canvas: { 
-          scale: 2,
+          scale: 3,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#ffffff',
           letterRendering: true,
-          logging: false
+          logging: false,
+          width: 794, // A4 width in pixels at 96 DPI
+          height: 1123, // A4 height in pixels at 96 DPI
+          scrollX: 0,
+          scrollY: 0
         },
         jsPDF: { 
-          unit: 'in', 
-          format: 'letter', 
-          orientation: 'portrait' 
+          unit: 'mm', 
+          format: 'a4', 
+          orientation: 'portrait',
+          compress: true
         }
       };
 
