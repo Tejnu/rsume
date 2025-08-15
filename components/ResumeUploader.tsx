@@ -293,34 +293,37 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
     }
   }
 
-  // Enhanced skills extraction with smart categorization
+  // Enhanced skills extraction with comprehensive patterns
   const skillPatterns = [
     /(?:technical\s+)?skills?[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
     /(?:technologies|programming\s+languages?|tools?)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
     /(?:proficient\s+(?:in|with)|experienced\s+(?:in|with)|knowledge\s+of)[:\s]*([^\n]*)/i,
-    /(?:core\s+competencies|technical\s+expertise)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i
+    /(?:core\s+competencies|technical\s+expertise)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
+    /(?:software|platforms|frameworks)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i
   ];
 
   const skills: Skill[] = [];
   const technicalSkills = [
     // Programming Languages
-    'JavaScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'Ruby', 'Go', 'Swift', 'Kotlin', 'TypeScript', 'Scala', 'Rust', 'R',
+    'JavaScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'Ruby', 'Go', 'Swift', 'Kotlin', 'TypeScript', 'Scala', 'Rust', 'R', 'MATLAB', 'Perl',
     // Frontend Technologies
-    'React', 'Angular', 'Vue.js', 'HTML', 'CSS', 'SASS', 'LESS', 'Bootstrap', 'Tailwind CSS', 'jQuery',
+    'React', 'Angular', 'Vue.js', 'HTML', 'CSS', 'SASS', 'LESS', 'Bootstrap', 'Tailwind CSS', 'jQuery', 'Webpack', 'Vite', 'Next.js', 'Nuxt.js',
     // Backend Technologies
-    'Node.js', 'Express', 'Django', 'Flask', 'Spring', 'Laravel', 'ASP.NET', 'Ruby on Rails',
+    'Node.js', 'Express', 'Django', 'Flask', 'Spring', 'Laravel', 'ASP.NET', 'Ruby on Rails', 'FastAPI', 'Gin', 'Echo',
     // Databases
-    'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Oracle', 'SQLite', 'Cassandra', 'DynamoDB',
+    'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Oracle', 'SQLite', 'Cassandra', 'DynamoDB', 'Firebase', 'Supabase',
     // Cloud & DevOps
-    'AWS', 'Azure', 'GCP', 'Google Cloud', 'Docker', 'Kubernetes', 'Jenkins', 'CI/CD', 'Terraform',
+    'AWS', 'Azure', 'GCP', 'Google Cloud', 'Docker', 'Kubernetes', 'Jenkins', 'CI/CD', 'Terraform', 'Ansible', 'Helm',
     // Tools & Software
-    'Git', 'GitHub', 'GitLab', 'Jira', 'Linux', 'Windows', 'macOS', 'Figma', 'Photoshop', 'Illustrator',
+    'Git', 'GitHub', 'GitLab', 'Jira', 'Linux', 'Windows', 'macOS', 'Figma', 'Photoshop', 'Illustrator', 'Sketch', 'InVision',
     // Data & Analytics
-    'Machine Learning', 'AI', 'Data Science', 'Tableau', 'Power BI', 'Excel', 'Pandas', 'NumPy',
+    'Machine Learning', 'AI', 'Data Science', 'Tableau', 'Power BI', 'Excel', 'Pandas', 'NumPy', 'TensorFlow', 'PyTorch',
     // Mobile Development
-    'iOS', 'Android', 'React Native', 'Flutter', 'Xamarin',
+    'iOS', 'Android', 'React Native', 'Flutter', 'Xamarin', 'Ionic', 'Cordova',
+    // Testing & Quality
+    'Jest', 'Cypress', 'Selenium', 'Unit Testing', 'Integration Testing', 'TDD', 'BDD',
     // Other Technical
-    'GraphQL', 'REST API', 'Microservices', 'Blockchain', 'IoT', 'Agile', 'Scrum'
+    'GraphQL', 'REST API', 'Microservices', 'Blockchain', 'IoT', 'Agile', 'Scrum', 'Kanban', 'SOLID', 'Design Patterns'
   ];
 
   // Look for skills section
@@ -345,8 +348,8 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
 
   // If no skills found in dedicated section, look for common technical terms
   if (skills.length === 0) {
-    commonSkills.forEach((skill, idx) => {
-      if (text.includes(skill) && skills.length < 10) {
+    technicalSkills.forEach((skill, idx) => {
+      if (text.toLowerCase().includes(skill.toLowerCase()) && skills.length < 15) {
         skills.push({
           id: String(Date.now() + idx),
           name: skill,
