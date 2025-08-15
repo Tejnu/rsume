@@ -60,6 +60,34 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
     if (!element) return;
 
     try {
+      // Import html2pdf dynamically
+      const html2pdf = (await import('html2pdf.js')).default;
+      
+      // Configure options for better PDF output
+      const options = {
+        margin: 0.5,
+        filename: `${resumeData.personalInfo?.fullName || 'resume'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true,
+          letterRendering: true,
+          allowTaint: true
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'letter', 
+          orientation: 'portrait' 
+        }
+      };
+
+      // Generate and download PDF with template styling preserved
+      await html2pdf().set(options).from(element).save();
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+
+    try {
       // Dynamic import of html2pdf
       const html2pdf = (await import('html2pdf.js')).default;
       

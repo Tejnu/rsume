@@ -299,7 +299,7 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
     /(?:technologies|programming\s+languages?|tools?)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
     /(?:proficient\s+(?:in|with)|experienced\s+(?:in|with)|knowledge\s+of)[:\s]*([^\n]*)/i,
     /(?:core\s+competencies|technical\s+expertise)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
-    /(?:software|platforms|frameworks)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i
+    /(?:software|platforms|frameworks)[:\s]*([^\n]*(?:\n(?!\n)[^\n]*)*)/i,
   ];
 
   const skills: Skill[] = [];
@@ -362,10 +362,10 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
   // Enhanced work experience extraction with smart pattern matching
   const workExperience: WorkExperience[] = [];
   const expSectionStart = text.search(sectionPatterns.experience);
-  
+
   if (expSectionStart > -1) {
     let expSection = text.substring(expSectionStart);
-    
+
     // Find the end of experience section (start of next major section)
     const nextSectionMatch = expSection.search(/(?:education|skills|projects|certifications)/i);
     if (nextSectionMatch > -1) {
@@ -373,7 +373,7 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
     }
 
     const expLines = expSection.split('\n').map(l => l.trim()).filter(l => l);
-    
+
     let currentJob: Partial<WorkExperience> = {};
     let descriptions: string[] = [];
 
@@ -435,7 +435,7 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
           isCurrentJob: false
         };
         descriptions = [];
-        
+
       } else if (dateMatch) {
         // Parse date information
         if (currentJob.position || currentJob.company) {
@@ -446,7 +446,7 @@ function buildResumeDataFromText(text: string): Partial<ResumeData> {
             currentJob.endDate = currentJob.isCurrentJob ? '' : dateMatch[2];
           }
         }
-        
+
       } else if (line.match(/^[•\-\*]\s/) || (line.length > 15 && line.length < 300)) {
         // This looks like a job description or responsibility
         if (currentJob.position || currentJob.company) {

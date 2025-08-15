@@ -75,7 +75,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
               onChange={handleFileUpload}
               className="hidden"
             />
-            
+
             <Button
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
@@ -140,7 +140,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
                 onChange={handleFileUpload}
                 className="hidden"
               />
-              
+
               <Button
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
