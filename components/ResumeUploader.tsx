@@ -22,7 +22,7 @@ function extractTextFromTxt(file: File): Promise<string> {
 
 async function aiStructureFromText(rawText: string): Promise<Partial<ResumeData> | null> {
   try {
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    const apiKey = "AIzaSyCz2zg2PZ_QkmN8F18ov_RnhVP0T0PKM4A";
     if (!apiKey || !rawText || rawText.length < 20) return null;
 
     const prompt = {
