@@ -31,67 +31,74 @@ async function aiStructureFromText(rawText: string): Promise<Partial<ResumeData>
           role: 'user',
           parts: [
             {
-              text: `You are an expert resume parser with advanced categorization abilities. Analyze this resume text and extract information with precise categorization. Follow these enhanced rules:
+              text: `**CRITICAL PARSING RULES:**
 
-SMART CATEGORIZATION RULES:
-1. WORK EXPERIENCE (High Priority):
-   - Job titles followed by company names or vice versa
-   - Patterns: "Software Engineer at Google", "Microsoft - Senior Developer", "Project Manager | ABC Corp"
-   - Date ranges: "2020-2023", "Jan 2020 - Present", "2019 to 2022"
-   - Responsibilities starting with action verbs: "Managed", "Developed", "Led", "Implemented"
-   - DO NOT include internships in education section
-   - Include contract work, freelancing, consulting
+You are an expert resume parser. Follow these STRICT categorization rules:
 
-2. SKILLS (Technical Focus):
-   - Programming: JavaScript, Python, Java, C++, React, Angular, Node.js
-   - Tools: Git, Docker, AWS, Azure, Jenkins, Kubernetes
-   - Software: Photoshop, AutoCAD, Salesforce, SAP, Excel
-   - Technologies: Machine Learning, AI, Blockchain, IoT
-   - EXCLUDE: soft skills like "communication", "leadership", "teamwork"
-   - EXCLUDE: job titles and company names
+**1. WORK EXPERIENCE (HIGHEST PRIORITY):**
+- Patterns: "Title at Company", "Company - Title", "Title | Company"
+- Date formats: "2020-2023", "Jan 2020 - Present", "2019 to 2022"
+- Action verbs: "Managed", "Developed", "Led", "Implemented", "Created"
+- Include: Full-time, part-time, contract, freelance, consulting
+- Exclude: Academic internships (those go in education)
 
-3. EDUCATION (Academic Only):
-   - Degrees: Bachelor's, Master's, PhD, Associate, Diploma, Certificate
-   - Institutions: University, College, Institute, School
-   - Fields: Computer Science, Engineering, Business, Medicine
-   - Academic achievements: GPA, Dean's List, Magna Cum Laude
-   - DO NOT include professional certifications here
+**2. SKILLS (TECHNICAL ONLY):**
+- Programming: JavaScript, Python, Java, C++, C#, PHP, Ruby, Go, Swift, Kotlin, TypeScript, R, Scala, Rust
+- Frontend: React, Angular, Vue.js, HTML, CSS, SASS, Bootstrap, Tailwind, jQuery
+- Backend: Node.js, Express, Django, Flask, Spring, Laravel, ASP.NET
+- Databases: SQL, MySQL, PostgreSQL, MongoDB, Redis, Oracle, SQLite
+- Cloud/DevOps: AWS, Azure, GCP, Docker, Kubernetes, Jenkins, CI/CD, Terraform
+- Tools: Git, GitHub, GitLab, Jira, Linux, Figma, Photoshop
+- Technologies: Machine Learning, AI, Blockchain, IoT, Microservices, REST API, GraphQL
+- **EXCLUDE:** Soft skills (communication, leadership, teamwork, problem-solving)
+- **EXCLUDE:** Job titles, company names, or general terms
 
-4. CERTIFICATIONS (Professional Credentials):
-   - Professional certifications: AWS Certified, Google Cloud, PMP, CISSP
-   - Industry credentials: CPA, PE, RN, CompTIA
-   - Training certificates: Udemy, Coursera, edX completions
-   - Separate from education degrees
+**3. EDUCATION (ACADEMIC DEGREES ONLY):**
+- Degrees: Bachelor's, Master's, PhD, Associate, Diploma, Certificate
+- Institutions: University, College, Institute, School, Academy
+- Fields: Computer Science, Engineering, Business, Medicine, Arts
+- Include: GPA, honors, thesis topics
+- **EXCLUDE:** Professional certifications, online courses, workshops
 
-5. PROJECTS (Personal/Professional):
-   - Personal projects, portfolio items
-   - Open source contributions
-   - Research projects
-   - Mobile apps, websites, systems built
+**4. CERTIFICATIONS (PROFESSIONAL CREDENTIALS):**
+- Professional: AWS Certified, Google Cloud, Microsoft Azure, PMP, CISSP, CPA
+- Industry: CompTIA, Cisco, Oracle, Salesforce, Adobe Certified
+- Training: Coursera certificates, Udemy completions, edX credentials
+- **SEPARATE from education degrees**
 
-6. PERSONAL INFO (Contact Details):
-   - Name (usually first line, properly capitalized)
-   - Email (contains @ symbol)
-   - Phone (numeric patterns)
-   - Address/Location
-   - LinkedIn, GitHub, portfolio URLs
-   - Professional summary/objective
+**5. PROJECTS (PERSONAL/PROFESSIONAL WORK):**
+- Personal projects, portfolio items, side projects
+- Open source contributions, GitHub repositories
+- Research projects, thesis work
+- Mobile apps, websites, software systems built
+- Include technologies used and brief descriptions
 
-ENHANCED PARSING INSTRUCTIONS:
-- Use context clues and section headers to categorize correctly
-- Look for keywords like "Experience:", "Skills:", "Education:", "Projects:"
-- Consider chronological order for work experience
-- Identify technical vs non-technical content
-- Parse bullet points and format descriptions properly
-- Extract dates in consistent YYYY-MM format
-- Identify current positions vs past roles
+**6. PERSONAL INFO:**
+- Name: Usually first 1-2 lines, properly capitalized
+- Email: Contains @ symbol
+- Phone: Numeric patterns with/without formatting
+- Location: City, State/Country format
+- LinkedIn: linkedin.com/in/username
+- GitHub: github.com/username
+- Portfolio: Personal website URLs
+- Summary: Professional objective or summary paragraph
 
-Return EXACT JSON structure with smart categorization:
+**PARSING INSTRUCTIONS:**
+- Use section headers as primary guides: "Experience", "Skills", "Education", "Projects"
+- Chronological order for work experience (newest first)
+- Technical skills only - filter out soft skills completely
+- Parse bullet points and preserve formatting
+- Extract dates consistently (YYYY-MM format)
+- Identify current vs past positions
+- Smart context analysis for ambiguous items
+
+**OUTPUT FORMAT:**
+Return ONLY valid JSON with this EXACT structure:
 {
   "personalInfo": {
     "fullName": "string",
-    "email": "string", 
-    "phone": "string",
+    "email": "string",
+    "phone": "string", 
     "location": "string",
     "linkedin": "string",
     "website": "string",
@@ -101,45 +108,43 @@ Return EXACT JSON structure with smart categorization:
     {
       "id": "string",
       "company": "string",
-      "position": "string", 
-      "startDate": "YYYY-MM format",
-      "endDate": "YYYY-MM format or empty if current",
+      "position": "string",
+      "startDate": "YYYY-MM",
+      "endDate": "YYYY-MM or empty",
       "isCurrentJob": boolean,
-      "description": "string with bullet points and achievements"
+      "description": "detailed description with achievements"
     }
   ],
   "education": [
     {
-      "id": "string",
+      "id": "string", 
       "school": "string",
       "degree": "string",
-      "field": "string", 
-      "graduationDate": "YYYY-MM format"
+      "field": "string",
+      "graduationDate": "YYYY-MM"
     }
   ],
-  "skills": ["technical_skill1", "technical_skill2", "tool3"],
+  "skills": ["skill1", "skill2", "skill3"],
   "certifications": [
     {
       "id": "string",
-      "name": "certification_name",
+      "name": "certification_name", 
       "issuer": "issuing_organization",
-      "dateObtained": "YYYY-MM format"
+      "dateObtained": "YYYY-MM"
     }
   ],
   "projects": [
     {
       "id": "string",
       "name": "project_name",
-      "description": "project_description",
+      "description": "project_description", 
       "technologies": ["tech1", "tech2"]
     }
   ]
 }
 
-CRITICAL: Return ONLY valid JSON. No explanations, no markdown, no code blocks.
-
-Resume text to analyze:
-${rawText.slice(0, 12000)}`
+**Resume text to analyze:**
+${rawText.slice(0, 15000)}` // Extended limit for better parsing
             }
           ]
         }

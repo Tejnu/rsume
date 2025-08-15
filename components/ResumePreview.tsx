@@ -55,429 +55,130 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
     }
   };
 
-  const handleDownload = () => {
+  const handleDownloadPDF = () => {
     const element = document.getElementById('resume-preview-content');
-    if (!element) {
-      console.error('Resume content not found for download');
-      alert('Resume content not found. Please try again.');
-      return;
-    }
+    if (!element) return;
 
-    // Create a complete HTML document with all styles preserved
+    // Create a new window for printing with all styles preserved
     const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      console.error('Could not open print window - popup blocked');
-      alert('Please allow popups for this site to download your resume.');
-      return;
-    }
+    if (!printWindow) return;
 
-    // Capture computed styles for the template
-    const computedStyles = window.getComputedStyle(element);
-    const templateStyles = Array.from(computedStyles).map(property => {
-      return `${property}: ${computedStyles.getPropertyValue(property)};`;
-    }).join('\n');
+    // Get all stylesheets from the current document
+    const stylesheets = Array.from(document.styleSheets);
+    let cssText = '';
 
-    // Get all external stylesheets (like Tailwind)
-    let externalStyles = '';
-    try {
-      const stylesheets = Array.from(document.styleSheets);
-      for (const stylesheet of stylesheets) {
-        try {
-          if (stylesheet.cssRules) {
-            externalStyles += Array.from(stylesheet.cssRules)
-              .map(rule => rule.cssText)
-              .join('\n') + '\n';
-          }
-        } catch (e) {
-          console.warn("Could not access stylesheet:", stylesheet.href);
+    // Extract CSS from stylesheets
+    stylesheets.forEach(stylesheet => {
+      try {
+        if (stylesheet.cssRules) {
+          Array.from(stylesheet.cssRules).forEach(rule => {
+            cssText += rule.cssText + '\n';
+          });
         }
+      } catch (e) {
+        // Handle cross-origin restrictions
+        console.log('Could not access stylesheet:', e);
       }
-    } catch (e) {
-      console.warn("Error accessing stylesheets:", e);
-    }
+    });
 
-    // Get all inline styles from current document
-    const inlineStyles = Array.from(document.querySelectorAll('style'))
-      .map(style => style.innerHTML)
-      .join('\n');
+    // Get all style tags
+    const styleTags = Array.from(document.querySelectorAll('style'));
+    styleTags.forEach(styleTag => {
+      cssText += styleTag.innerHTML + '\n';
+    });
 
-    // Comprehensive template styling for design preservation
-    const enhancedStyles = `
-        <style>
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap');
-          
-          @page {
-            margin: 0.5in;
-            size: letter;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
+    // Get computed styles for the resume element
+    const computedStyles = window.getComputedStyle(element);
 
-          * {
-            -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            box-sizing: border-box !important;
-          }
-
-          html, body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.5;
-            color: #1f2937;
-            background: white;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-
-          /* Template-specific font families */
-          .font-serif { font-family: 'Playfair Display', Georgia, serif !important; }
-          .font-sans { font-family: 'Inter', system-ui, sans-serif !important; }
-          .font-mono { font-family: 'Monaco', 'Menlo', 'Consolas', monospace !important; }
-
-          /* Tailwind-like utility classes */
-          .text-xs { font-size: 0.75rem; line-height: 1rem; }
-          .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
-          .text-base { font-size: 1rem; line-height: 1.5rem; }
-          .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
-          .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
-          .text-2xl { font-size: 1.5rem; line-height: 2rem; }
-          .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
-
-          .font-light { font-weight: 300; }
-          .font-normal { font-weight: 400; }
-          .font-medium { font-weight: 500; }
-          .font-semibold { font-weight: 600; }
-          .font-bold { font-weight: 700; }
-
-          .text-gray-600 { color: #4b5563 !important; }
-          .text-gray-700 { color: #374151 !important; }
-          .text-gray-800 { color: #1f2937 !important; }
-          .text-gray-900 { color: #111827 !important; }
-          .text-indigo-600 { color: #4f46e5 !important; }
-          .text-blue-600 { color: #2563eb !important; }
-          .text-purple-600 { color: #9333ea !important; }
-          .text-pink-600 { color: #db2777 !important; }
-          .text-green-600 { color: #059669 !important; }
-          .text-red-600 { color: #dc2626 !important; }
-
-          .bg-gray-50 { background-color: #f9fafb !important; }
-          .bg-gray-100 { background-color: #f3f4f6 !important; }
-          .bg-indigo-50 { background-color: #eef2ff !important; }
-          .bg-blue-50 { background-color: #eff6ff !important; }
-          .bg-purple-50 { background-color: #faf5ff !important; }
-          .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)) !important; }
-
-          .border { border: 1px solid #e5e7eb !important; }
-          .border-l-4 { border-left: 4px solid !important; }
-          .border-indigo-500 { border-color: #6366f1 !important; }
-          .border-blue-500 { border-color: #3b82f6 !important; }
-          .border-purple-500 { border-color: #8b5cf6 !important; }
-
-          .rounded { border-radius: 0.25rem !important; }
-          .rounded-lg { border-radius: 0.5rem !important; }
-          .rounded-xl { border-radius: 0.75rem !important; }
-
-          .p-1 { padding: 0.25rem !important; }
-          .p-2 { padding: 0.5rem !important; }
-          .p-3 { padding: 0.75rem !important; }
-          .p-4 { padding: 1rem !important; }
-          .p-6 { padding: 1.5rem !important; }
-          .p-8 { padding: 2rem !important; }
-
-          .px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
-          .px-3 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
-          .px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
-          .py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
-          .py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
-
-          .m-0 { margin: 0 !important; }
-          .mb-2 { margin-bottom: 0.5rem !important; }
-          .mb-3 { margin-bottom: 0.75rem !important; }
-          .mb-4 { margin-bottom: 1rem !important; }
-          .mb-6 { margin-bottom: 1.5rem !important; }
-          .mb-8 { margin-bottom: 2rem !important; }
-
-          .flex { display: flex !important; }
-          .flex-col { flex-direction: column !important; }
-          .items-center { align-items: center !important; }
-          .justify-between { justify-content: space-between !important; }
-          .space-y-2 > * + * { margin-top: 0.5rem !important; }
-          .space-y-3 > * + * { margin-top: 0.75rem !important; }
-          .space-y-4 > * + * { margin-top: 1rem !important; }
-
-          .grid { display: grid !important; }
-          .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
-          .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-          .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-          .gap-2 { gap: 0.5rem !important; }
-          .gap-4 { gap: 1rem !important; }
-
-          .w-full { width: 100% !important; }
-          .max-w-4xl { max-width: 56rem !important; }
-          .min-h-screen { min-height: 100vh !important; }
-
-          /* Remove shadows for print */
-          .shadow, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl {
-            box-shadow: none !important;
-          }
-
-          h1, h2, h3, h4, h5, h6 {
-            margin-top: 0;
-            margin-bottom: 0.5em;
-            font-weight: 600;
-            line-height: 1.2;
-          }
-
-          h1 { font-size: 1.875rem; }
-          h2 { font-size: 1.5rem; }
-          h3 { font-size: 1.25rem; }
-
-          p {
-            margin-top: 0;
-            margin-bottom: 0.5rem;
-          }
-
-          ul, ol {
-            margin: 0;
-            padding-left: 1.5rem;
-          }
-
-          li {
-            margin-bottom: 0.25rem;
-          }
-
-          /* Template-specific enhancements */
-          .resume-container {
-            max-width: 8.5in;
-            margin: 0 auto;
-            background: white;
-            padding: 0.5in;
-            font-size: 12px;
-            line-height: 1.4;
-          }
-
-          /* Enhanced gradient backgrounds for all templates */
-          .bg-gradient-to-r.from-indigo-500.to-purple-600 {
-            background: linear-gradient(to right, #6366f1, #8b5cf6) !important;
-            color: white !important;
-          }
-
-          .bg-gradient-to-r.from-blue-500.to-cyan-600 {
-            background: linear-gradient(to right, #3b82f6, #06b6d4) !important;
-            color: white !important;
-          }
-
-          .bg-gradient-to-r.from-purple-500.to-pink-600 {
-            background: linear-gradient(to right, #8b5cf6, #db2777) !important;
-            color: white !important;
-          }
-
-          .bg-gradient-to-r.from-emerald-500.to-teal-600 {
-            background: linear-gradient(to right, #10b981, #0d9488) !important;
-            color: white !important;
-          }
-
-          .bg-gradient-to-r.from-orange-500.to-red-600 {
-            background: linear-gradient(to right, #f97316, #dc2626) !important;
-            color: white !important;
-          }
-
-          /* Template-specific design elements */
-          .border-l-4.border-indigo-500 { border-left: 4px solid #6366f1 !important; }
-          .border-l-4.border-purple-500 { border-left: 4px solid #8b5cf6 !important; }
-          .border-l-4.border-blue-500 { border-left: 4px solid #3b82f6 !important; }
-          .border-l-4.border-emerald-500 { border-left: 4px solid #10b981 !important; }
-
-          /* Creative template specific styles */
-          .creative-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            color: white !important;
-          }
-
-          .creative-section {
-            border-left: 3px solid #667eea !important;
-            padding-left: 1rem !important;
-          }
-
-          /* Executive template specific styles */
-          .executive-header {
-            background: #1f2937 !important;
-            color: white !important;
-          }
-
-          .executive-section {
-            border-bottom: 2px solid #e5e7eb !important;
-            padding-bottom: 1rem !important;
-          }
-
-          /* Technical template specific styles */
-          .technical-grid {
-            display: grid !important;
-            grid-template-columns: 1fr 2fr !important;
-            gap: 2rem !important;
-          }
-
-          .technical-sidebar {
-            background: #f8fafc !important;
-            padding: 1.5rem !important;
-          }
-
-          /* Skill bars and progress elements */
-          .skill-bar {
-            height: 8px !important;
-            background: #e5e7eb !important;
-            border-radius: 4px !important;
-            overflow: hidden !important;
-          }
-
-          .skill-progress {
-            height: 100% !important;
-            background: linear-gradient(to right, #6366f1, #8b5cf6) !important;
-            transition: none !important;
-          }
-
-          /* Icons and decorative elements */
-          .icon-circle {
-            width: 40px !important;
-            height: 40px !important;
-            border-radius: 50% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            background: #6366f1 !important;
-            color: white !important;
-          }
-
-          /* Contact information styling */
-          .contact-item {
-            display: flex !important;
-            align-items: center !important;
-            margin-bottom: 0.5rem !important;
-          }
-
-          .contact-icon {
-            width: 16px !important;
-            height: 16px !important;
-            margin-right: 0.5rem !important;
-            color: #6b7280 !important;
-          }
-
-          @media print {
-            * {
-              box-shadow: none !important;
-              text-shadow: none !important;
-            }
-            .no-print { display: none !important; }
-            .page-break { page-break-after: always; }
-            body { margin: 0; padding: 0; }
-            .resume-container {
-              padding: 0.25in;
-              margin: 0;
-              box-shadow: none !important;
-            }
-          }
-        </style>
-      `;
-
-    const htmlContent = `
+    printWindow.document.write(`
       <!DOCTYPE html>
-      <html lang="en">
+      <html>
         <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>${resumeData.personalInfo?.fullName || 'Resume'} - Resume</title>
-          
-          <!-- Tailwind CSS -->
-          <script src="https://cdn.tailwindcss.com"></script>
-          <script>
-            tailwind.config = {
-              theme: {
-                extend: {
-                  fontFamily: {
-                    'inter': ['Inter', 'system-ui', 'sans-serif'],
-                    'playfair': ['Playfair Display', 'Georgia', 'serif'],
-                  },
-                  colors: {
-                    'gradient-start': '#6366f1',
-                    'gradient-end': '#8b5cf6',
-                  }
-                }
+          <meta charset="utf-8">
+          <title>Resume - ${resumeData.personalInfo.fullName}</title>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+          <style>
+            ${cssText}
+
+            /* Print-specific styles */
+            @media print {
+              @page {
+                margin: 0.5in;
+                size: letter;
+              }
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Inter', sans-serif;
+                color: #000 !important;
+                background: #fff !important;
+              }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                box-shadow: none !important;
+              }
+              .no-print {
+                display: none !important;
+              }
+              h1, h2, h3 {
+                page-break-after: avoid;
+                color: inherit !important;
+              }
+              p, li {
+                orphans: 2;
+                widows: 2;
+              }
+              .bg-gradient-to-r,
+              .bg-gradient-to-br,
+              .bg-blue-600,
+              .bg-indigo-600,
+              .bg-purple-600,
+              .bg-emerald-600,
+              .bg-orange-600,
+              .bg-red-600 {
+                background: #2563eb !important;
+                color: white !important;
+              }
+              .text-blue-600,
+              .text-indigo-600,
+              .text-purple-600,
+              .text-emerald-600,
+              .text-orange-600,
+              .text-red-600 {
+                color: #2563eb !important;
               }
             }
-          </script>
-          
-          <!-- External Styles -->
-          <style>
-            ${externalStyles}
-          </style>
-          
-          <!-- Inline Styles -->
-          <style>
-            ${inlineStyles}
-          </style>
-          
-          <!-- Enhanced Template Styles -->
-          ${enhancedStyles}
-          
-          <style>
-            /* Override any conflicting styles */
-            #resume-preview-content {
-              ${templateStyles}
-            }
-            
-            /* Ensure proper rendering */
-            .resume-container * {
-              position: relative !important;
-              z-index: auto !important;
+
+            /* Ensure template styles are preserved */
+            #resume-content {
+              width: 8.5in;
+              min-height: 11in;
+              margin: 0 auto;
+              background: white;
+              font-size: 11px;
+              line-height: 1.4;
+              color: #000;
             }
           </style>
         </head>
-        <body class="bg-white">
-          <div class="resume-container max-w-4xl mx-auto bg-white" style="min-height: 11in;">
+        <body>
+          <div id="resume-content">
             ${element.innerHTML}
           </div>
-          
           <script>
-            // Ensure all fonts and styles are loaded before printing
             window.onload = function() {
-              const fonts = [
-                new FontFace('Inter', 'url(https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900)'),
-                new FontFace('Playfair Display', 'url(https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800)')
-              ];
-              
-              Promise.allSettled(fonts.map(font => font.load())).then(() => {
-                setTimeout(() => {
-                  window.focus();
-                  window.print();
-                  setTimeout(() => {
-                    window.close();
-                  }, 2000);
-                }, 1500);
-              }).catch(() => {
-                // Fallback if fonts fail to load
-                setTimeout(() => {
-                  window.focus();
-                  window.print();
-                  setTimeout(() => {
-                    window.close();
-                  }, 2000);
-                }, 1500);
-              });
+              setTimeout(function() {
+                window.print();
+                window.close();
+              }, 500);
             };
           </script>
         </body>
       </html>
-    `;
+    `);
 
-    printWindow.document.write(htmlContent);
     printWindow.document.close();
-
-    if (onDownloadPDF) {
-      onDownloadPDF();
-    }
   };
 
 
@@ -516,7 +217,7 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
               <Maximize2 className="h-4 w-4" />
             </Button>
             <Button
-              onClick={handleDownload}
+              onClick={handleDownloadPDF}
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 text-sm px-4 py-2"
             >
               <Download className="h-4 w-4 mr-2" />
