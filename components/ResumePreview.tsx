@@ -47,9 +47,9 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
       case 'creative':
         return <CreativeTemplate resumeData={resumeData} />;
       case 'executive':
-        return <ExecutiveTemplate data={resumeData} />;
+        return <ExecutiveTemplate resumeData={resumeData} />;
       case 'technical':
-        return <TechnicalTemplate data={resumeData} />;
+        return <TechnicalTemplate resumeData={resumeData} />;
       default:
         return <ModernTemplate resumeData={resumeData} />;
     }
@@ -57,71 +57,54 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
 
   const handleDownloadPDF = async () => {
     const element = document.getElementById('resume-preview-content');
-    if (!element) return;
+    if (!element) {
+      console.error('Resume preview element not found');
+      return;
+    }
 
     try {
       // Import html2pdf dynamically
       const html2pdf = (await import('html2pdf.js')).default;
       
-      // Configure options for better PDF output
-      const options = {
-        margin: 0.5,
-        filename: `${resumeData.personalInfo?.fullName || 'resume'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 2, 
-          useCORS: true,
-          letterRendering: true,
-          allowTaint: true
-        },
-        jsPDF: { 
-          unit: 'in', 
-          format: 'letter', 
-          orientation: 'portrait' 
-        }
-      };
-
-      // Generate and download PDF with template styling preserved
-      await html2pdf().set(options).from(element).save();
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-
-    try {
-      // Dynamic import of html2pdf
-      const html2pdf = (await import('html2pdf.js')).default;
-      
       // Clone the element to avoid modifying the original
       const clonedElement = element.cloneNode(true) as HTMLElement;
       
-      // Create a temporary container with proper styling
+      // Create a temporary container with proper styling for PDF
       const container = document.createElement('div');
       container.style.width = '8.5in';
       container.style.minHeight = '11in';
       container.style.margin = '0';
       container.style.padding = '0.5in';
       container.style.backgroundColor = 'white';
-      container.style.fontFamily = 'Inter, sans-serif';
+      container.style.fontFamily = 'Inter, system-ui, sans-serif';
       container.style.fontSize = '12px';
       container.style.lineHeight = '1.4';
       container.style.color = '#000';
-      container.appendChild(clonedElement);
-      
-      // Temporarily add to DOM for rendering
       container.style.position = 'fixed';
       container.style.top = '-9999px';
       container.style.left = '-9999px';
+      container.style.zIndex = '-1';
+      
+      // Apply PDF-specific styles to cloned element
+      clonedElement.style.transform = 'none';
+      clonedElement.style.width = '100%';
+      clonedElement.style.height = 'auto';
+      clonedElement.style.overflow = 'visible';
+      
+      container.appendChild(clonedElement);
       document.body.appendChild(container);
 
       const options = {
         margin: [0.5, 0.5, 0.5, 0.5],
-        filename: `${resumeData.personalInfo.fullName || 'Resume'}.pdf`,
+        filename: `${resumeData.personalInfo?.fullName || 'Resume'}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
           scale: 2,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: '#ffffff'
+          backgroundColor: '#ffffff',
+          letterRendering: true,
+          logging: false
         },
         jsPDF: { 
           unit: 'in', 
@@ -138,6 +121,7 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
     } catch (error) {
       console.error('PDF generation failed:', error);
       // Fallback to print dialog
+      alert('PDF generation failed. Using browser print instead.');
       window.print();
     }
   };

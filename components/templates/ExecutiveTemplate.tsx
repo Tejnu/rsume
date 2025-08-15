@@ -5,11 +5,11 @@ import { ResumeData } from '@/types/resume';
 import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
 
 interface ExecutiveTemplateProps {
-  data: ResumeData;
+  resumeData: ResumeData;
 }
 
-export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
-  if (!data) {
+export function ExecutiveTemplate({ resumeData }: ExecutiveTemplateProps) {
+  if (!resumeData) {
     return (
       <div className="w-full h-96 flex items-center justify-center text-gray-500">
         Loading template...
@@ -17,7 +17,7 @@ export function ExecutiveTemplate({ data }: ExecutiveTemplateProps) {
     );
   }
 
-  const { personalInfo, workExperience, education, skills, projects, certifications, languages } = data;
+  const { personalInfo, workExperience, education, skills, projects, certifications, languages } = resumeData;
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';

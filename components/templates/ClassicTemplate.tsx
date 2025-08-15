@@ -3,11 +3,11 @@ import React from 'react';
 import { ResumeData } from '@/types/resume';
 
 interface ClassicTemplateProps {
-  data: ResumeData;
+  resumeData: ResumeData;
 }
 
-export function ClassicTemplate({ data }: ClassicTemplateProps) {
-  const { personalInfo, workExperience, education, skills, certifications, projects } = data;
+export function ClassicTemplate({ resumeData }: ClassicTemplateProps) {
+  const { personalInfo, workExperience, education, skills, certifications, projects } = resumeData;
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';

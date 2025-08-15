@@ -56,6 +56,10 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
                 src="/alumna-logo.png"
                 alt="Alumna logo"
                 className="w-16 h-16 rounded-xl object-cover shadow-lg"
+                onError={(e) => {
+                  console.error('Logo failed to load');
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             </div>
             <div>
