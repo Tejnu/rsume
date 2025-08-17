@@ -57,67 +57,70 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
   };
 
   const handleDownloadPDF = async () => {
+    setIsDownloading(true);
     const element = document.getElementById('resume-preview-content');
     if (!element) {
       console.error('Resume preview element not found');
+      setIsDownloading(false);
       return;
     }
 
     try {
-      // Import html2pdf dynamically
-      const html2pdf = (await import('html2pdf.js')).default;
-
-      const options = {
-        margin: [10, 10, 10, 10],
-        filename: `${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Resume'}.pdf`,
-        image: { 
-          type: 'jpeg', 
-          quality: 0.98 
-        },
-        html2canvas: { 
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          backgroundColor: '#ffffff',
-          letterRendering: true,
-          logging: false,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth: 794,
-          windowHeight: 1123
-        },
-        jsPDF: { 
-          unit: 'mm', 
-          format: 'a4', 
-          orientation: 'portrait',
-          compress: true
-        }
-      };
-
-      await html2pdf().set(options).from(element).save();
-
-    } catch (error) {
-      console.error('PDF generation failed:', error);
-      // Fallback to window.print()
+      // Use browser's print functionality for better compatibility
       const printWindow = window.open('', '_blank');
       if (printWindow) {
+        // Clone the element to avoid affecting the original
+        const clonedElement = element.cloneNode(true) as HTMLElement;
+        
         printWindow.document.write(`
+          <!DOCTYPE html>
           <html>
             <head>
               <title>Resume - ${resumeData.personalInfo?.fullName || 'Resume'}</title>
               <style>
-                body { margin: 0; padding: 20px; font-family: system-ui, sans-serif; }
-                @media print { body { margin: 0; padding: 0; } }
+                * {
+                  margin: 0;
+                  padding: 0;
+                  box-sizing: border-box;
+                }
+                body { 
+                  font-family: system-ui, -apple-system, sans-serif;
+                  line-height: 1.4;
+                  color: #333;
+                  background: white;
+                }
+                .lucide {
+                  display: inline-block;
+                  width: 16px;
+                  height: 16px;
+                }
+                @media print {
+                  body { margin: 0; }
+                  @page { size: A4; margin: 0.5in; }
+                }
+                @media screen {
+                  body { padding: 20px; }
+                }
               </style>
             </head>
             <body>
-              ${element.innerHTML}
+              ${clonedElement.innerHTML}
+              <script>
+                window.onload = function() {
+                  window.print();
+                  setTimeout(() => window.close(), 100);
+                };
+              </script>
             </body>
           </html>
         `);
         printWindow.document.close();
-        printWindow.print();
       }
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      alert('PDF generation failed. Please try again or use your browser\'s print function.');
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -158,10 +161,15 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
             </Button>
             <Button
               onClick={handleDownloadPDF}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 text-sm px-4 py-2"
+              disabled={isDownloading}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 text-sm px-4 py-2 disabled:opacity-50"
             >
-              <Download className="h-4 w-4 mr-2" />
-              PDF
+              {isDownloading ? (
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <Download className="h-4 w-4 mr-2" />
+              )}
+              {isDownloading ? 'Generating...' : 'PDF'}
             </Button>
           </div>
         </div>

@@ -50,17 +50,17 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing }: HeaderProp
         <div className="flex items-center justify-between">
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
-            <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg">
+            <div className="relative w-16 h-16 rounded-xl bg-white border border-gray-200 flex items-center justify-center shadow-lg">
               <img
                 src="/LOGOwithouttagline-01_1755244238390.png"
-                alt="Alumna logo"
-                className="w-12 h-12 object-contain filter brightness-0 invert"
+                alt="Logo"
+                className="w-14 h-14 object-contain"
                 onError={(e) => {
                   const target = e.currentTarget;
                   target.style.display = 'none';
                   const parent = target.parentElement;
                   if (parent) {
-                    parent.innerHTML = '<span class="text-white font-bold text-2xl">A</span>';
+                    parent.innerHTML = '<span class="text-purple-600 font-bold text-2xl">A</span>';
                   }
                 }}
                 onLoad={(e) => {
@@ -68,12 +68,6 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing }: HeaderProp
                   target.style.display = 'block';
                 }}
               />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Alumna
-              </h1>
-              <p className="text-sm text-gray-600 hidden sm:block">AI-Powered Resume Builder</p>
             </div>
           </div>
 

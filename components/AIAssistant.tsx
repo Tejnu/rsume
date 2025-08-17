@@ -34,13 +34,13 @@ export function AIAssistant({ resumeData, onApplySuggestion }: AIAssistantProps)
     setIsGenerating(true);
     const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
     const newSuggestions: AISuggestion[] = [];
-    
+
     // Analyze resume content for intelligent suggestions
     const hasWorkExperience = resumeData.workExperience.length > 0;
     const currentSkills = resumeData.skills.map(s => s.name.toLowerCase());
     const summaryLength = resumeData.personalInfo.summary?.length || 0;
     const totalExperienceText = resumeData.workExperience.map(exp => exp.description).join(' ');
-    
+
     // Advanced skill analysis based on job market trends
     const techSkillsMap = {
       'javascript': ['TypeScript', 'React', 'Node.js', 'Vue.js', 'Angular'],
@@ -166,20 +166,20 @@ RULES:
     // Experience enhancement with quantified metrics
     if (hasWorkExperience) {
       const hasMetrics = /\d+%|\d+\+|\$\d+|increased|decreased|improved|reduced|led|managed/i.test(totalExperienceText);
-      
-      if (!hasMetrics) {
-        const experienceEnhancements = resumeData.workExperience.map(exp => ({
-          id: exp.id,
-          original: exp.description,
-          enhancement: `${exp.description}\n\n• Improved system performance by 40% through code optimization and database query enhancement\n• Led cross-functional team of 8+ members, delivering projects 25% ahead of schedule\n• Reduced deployment time by 60% by implementing CI/CD pipelines and automated testing\n• Mentored 5 junior developers, achieving 100% retention rate and 3 internal promotions\n• Collaborated with stakeholders to define requirements, resulting in 95% client satisfaction rate`
-        }));
 
+      if (!hasMetrics) {
         newSuggestions.push({
           id: 3,
           type: 'experience',
           title: 'Add Quantified Achievements',
           description: 'Transform your experience bullets into compelling, metric-driven accomplishments',
-          suggestions: experienceEnhancements.map(enh => enh.enhancement),
+          suggestions: [
+            'Add quantified achievements with specific metrics and percentages',
+            'Include leadership experience and team management details',
+            'Mention technology implementations and process improvements',
+            'Highlight mentoring experience and career development impact',
+            'Add client satisfaction metrics and stakeholder collaboration'
+          ],
           priority: 'high',
           impact: 'Increases interview callbacks by 70%',
           category: 'Experience',
@@ -378,7 +378,7 @@ RULES:
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
-                  
+
                   {suggestion.type === 'skill' && suggestion.suggestions && (
                     <div className="flex flex-wrap gap-2 mb-6">
                       {suggestion.suggestions.map((skill: string, index: number) => (
@@ -388,7 +388,7 @@ RULES:
                       ))}
                     </div>
                   )}
-                  
+
                   {suggestion.type === 'summary' && suggestion.suggestion && (
                     <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 mb-6">
                       <p className="text-gray-700 leading-relaxed">{suggestion.suggestion}</p>
@@ -404,7 +404,7 @@ RULES:
                       ))}
                     </div>
                   )}
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <TrendingUp className="h-4 w-4 text-emerald-600" />

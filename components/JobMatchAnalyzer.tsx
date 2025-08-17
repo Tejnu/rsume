@@ -60,12 +60,12 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
 
   const analyzeMatch = async () => {
     if (!jobTitle.trim() || !jobDescription.trim()) return;
-    
+
     setIsAnalyzing(true);
-    
+
     // Simulate comprehensive job matching analysis
     await new Promise(resolve => setTimeout(resolve, 3500));
-    
+
     // First, analyze the actual resume content
     const resumeText = `
       ${resumeData.personalInfo.fullName} 
@@ -77,7 +77,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
       ${resumeData.projects?.map(proj => `${proj.name} ${proj.description} ${proj.technologies?.join(' ') || ''}`).join(' ') || ''}
       ${resumeData.certifications?.map(cert => `${cert.name} ${cert.issuer}`).join(' ') || ''}
     `.toLowerCase();
-    
+
     // Extract and analyze keywords from job description
     const jobText = `${jobTitle} ${jobDescription}`.toLowerCase();
     const commonTechKeywords = [
@@ -95,7 +95,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
       'shell', 'powershell', 'windows', 'macos', 'ios', 'android', 'mobile', 'responsive', 'ui', 'ux',
       'user experience', 'user interface', 'design', 'wireframe', 'prototype', 'mockup'
     ];
-    
+
     const jobKeywords = commonTechKeywords.filter(keyword => {
       // Check for exact matches and variations
       return jobText.includes(keyword) || 
@@ -104,31 +104,31 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
              jobText.includes(keyword.replace('/', '')) ||
              jobText.includes(keyword.replace(' ', ''));
     });
-    
+
     // Remove duplicates and variations
     const uniqueJobKeywords = [...new Set(jobKeywords)];
-    
+
     // Analyze resume skills against job requirements with context
     const resumeSkills = resumeData.skills.map(s => s.name.toLowerCase());
     const resumeExperience = resumeData.workExperience.map(exp => exp.description.toLowerCase()).join(' ');
-    
+
     const matchedSkills = resumeSkills.filter(skill => 
       uniqueJobKeywords.some(keyword => {
         const skillNormalized = skill.replace(/[.\s\-\/]/g, '');
         const keywordNormalized = keyword.replace(/[.\s\-\/]/g, '');
-        
+
         // Check if skill matches keyword or if it's mentioned in experience
         const directMatch = skillNormalized.includes(keywordNormalized) || 
                            keywordNormalized.includes(skillNormalized) ||
                            skill.toLowerCase() === keyword.toLowerCase();
-        
+
         const experienceMatch = resumeExperience.includes(skill) && 
                                resumeExperience.includes(keyword);
-        
+
         return directMatch || experienceMatch;
       })
     );
-    
+
     // Find missing critical skills
     const criticalSkills = uniqueJobKeywords.filter(keyword => 
       !resumeSkills.some(skill => {
@@ -138,7 +138,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                keywordNormalized.includes(skillNormalized);
       })
     );
-    
+
     // Calculate years of experience match
     const currentYear = new Date().getFullYear();
     const totalExperience = resumeData.workExperience.reduce((total, exp) => {
@@ -147,30 +147,30 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                      exp.endDate ? new Date(exp.endDate + '-01').getFullYear() : currentYear;
       return total + Math.max(0, endYear - startYear);
     }, 0);
-    
+
     // Check if experience level matches job requirements
     const jobTextLower = jobDescription.toLowerCase();
     let requiredExperience = 0;
     const expMatch = jobTextLower.match(/(\d+)[\s\-+]*(?:years?|yrs?)[\s\w]*(?:experience|exp)/i);
     if (expMatch) requiredExperience = parseInt(expMatch[1]);
-    
+
     const experienceMatch = totalExperience >= requiredExperience * 0.8; // 80% match threshold
-    
+
     const matchedKeywords = uniqueJobKeywords.filter(keyword => 
       resumeText.includes(keyword) || 
       resumeText.includes(keyword.replace(/[.\s\-\/]/g, ''))
     );
-    
+
     const missingKeywords = uniqueJobKeywords.filter(keyword => 
       !resumeText.includes(keyword) && 
       !resumeText.includes(keyword.replace(/[.\s\-\/]/g, ''))
     );
-    
+
     // Calculate comprehensive scores
     const skillMatchRate = matchedSkills.length / Math.max(uniqueJobKeywords.length, 1);
     const keywordMatchRate = matchedKeywords.length / Math.max(uniqueJobKeywords.length, 1);
     const experienceScore = experienceMatch ? 1 : Math.min(totalExperience / Math.max(requiredExperience, 1), 1);
-    
+
     // Weight the scoring: 40% skills, 30% keywords, 20% experience, 10% completeness
     const completenessScore = Math.min(
       (resumeData.workExperience.length * 0.3 + 
@@ -178,27 +178,27 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
        resumeData.skills.length * 0.3 + 
        (resumeData.personalInfo.summary ? 0.2 : 0)) / 1.0, 1
     );
-    
+
     const overallScore = Math.round(
       (skillMatchRate * 0.4 + 
        keywordMatchRate * 0.3 + 
        experienceScore * 0.2 + 
        completenessScore * 0.1) * 100
     );
-    
+
     // Calculate ATS score
     const atsScore = Math.round(
       (matchedKeywords.length / Math.max(uniqueJobKeywords.length, 1)) * 100
     );
-    
+
     // Determine competitiveness
     let competitiveness: 'low' | 'medium' | 'high' = 'low';
     if (overallScore >= 75) competitiveness = 'high';
     else if (overallScore >= 50) competitiveness = 'medium';
-    
+
     // Generate suggestions
     const suggestions: MatchSuggestion[] = [];
-    
+
     if (criticalSkills.length > 0) {
       suggestions.push({
         id: '1',
@@ -209,7 +209,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
         impact: 'Increases match score by 15-25%'
       });
     }
-    
+
     if (missingKeywords.length > 0) {
       suggestions.push({
         id: '2',
@@ -220,7 +220,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
         impact: 'Improves ATS compatibility by 30%'
       });
     }
-    
+
     suggestions.push({
       id: '3',
       type: 'experience',
@@ -229,7 +229,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
       priority: 'medium',
       impact: 'Enhances relevance by 20%'
     });
-    
+
     suggestions.push({
       id: '4',
       type: 'format',
@@ -238,7 +238,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
       priority: 'medium',
       impact: 'Improves readability and focus'
     });
-    
+
     setMatchResult({
       score: overallScore,
       matchedSkills: matchedSkills.map(skill => 
@@ -255,19 +255,19 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
       atsScore,
       competitiveness
     });
-    
+
     // Save job for comparison
     setSavedJobs(prev => [
       { title: jobTitle, company: companyName || 'Unknown Company', score: overallScore },
       ...prev.slice(0, 4)
     ]);
-    
+
     setIsAnalyzing(false);
   };
 
   const optimizeForJob = () => {
     if (!matchResult) return;
-    
+
     const optimizations = {
       type: 'job-optimization',
       addSkills: matchResult.missingSkills.slice(0, 5),
@@ -276,7 +276,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
       jobTitle,
       companyName
     };
-    
+
     onOptimize(optimizations);
   };
 
@@ -350,7 +350,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                   />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="job-description" className="form-label">Job Description *</Label>
                 <Textarea
@@ -365,7 +365,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                   Include requirements, responsibilities, and preferred qualifications for best results
                 </p>
               </div>
-              
+
               <Button
                 onClick={analyzeMatch}
                 disabled={isAnalyzing || !jobTitle.trim() || !jobDescription.trim()}
@@ -416,7 +416,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                 <p className="text-lg font-medium mb-1" style={{ color: 'var(--figma-neutral-700)' }}>Job Match Score</p>
                 <p className="text-sm mb-4" style={{ color: 'var(--figma-neutral-500)' }}>{getScoreLabel(matchResult.score)}</p>
                 <Progress value={matchResult.score} className="h-3" />
-                
+
                 <div className="grid grid-cols-2 gap-4 mt-4 pt-4" style={{ borderTop: '1px solid var(--figma-neutral-200)' }}>
                   <div>
                     <div className={`text-2xl font-bold ${getScoreColor(matchResult.atsScore)}`}>
@@ -451,7 +451,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                     </div>
                   </div>
                 )}
-                
+
                 {/* Missing Skills */}
                 {matchResult.missingSkills.length > 0 && (
                   <div className="bg-white rounded-lg border p-4">
@@ -489,7 +489,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                     </div>
                   </div>
                 )}
-                
+
                 {/* Missing Keywords */}
                 {matchResult.missingKeywords.length > 0 && (
                   <div className="bg-white rounded-lg border p-4">
@@ -508,7 +508,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                   </div>
                 )}
               </div>
-              
+
               {/* Optimization Suggestions */}
               <div className="bg-white rounded-lg border p-4">
                 <h3 className="font-semibold mb-4 flex items-center" style={{ color: 'var(--figma-neutral-800)' }}>
@@ -533,7 +533,7 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
                   ))}
                 </div>
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button

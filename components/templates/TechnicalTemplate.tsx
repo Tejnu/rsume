@@ -31,24 +31,24 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
         <div className="border-l-4 border-blue-500 pl-6 mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2 font-mono">{personalInfo?.fullName || 'Your Name'}</h1>
           <p className="text-lg text-blue-600 mb-4 font-semibold font-mono">{personalInfo?.title || 'Your Title'}</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-600">
             {personalInfo?.email && (
-              <span className="flex items-center">
-                <Mail className="h-4 w-4 mr-2" />
-                {personalInfo.email}
-              </span>
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 flex-shrink-0" />
+                <span className="break-all">{personalInfo.email}</span>
+              </div>
             )}
             {personalInfo?.phone && (
-              <span className="flex items-center">
-                <Phone className="h-4 w-4 mr-2" />
-                {personalInfo.phone}
-              </span>
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 flex-shrink-0" />
+                <span>{personalInfo.phone}</span>
+              </div>
             )}
             {personalInfo?.location && (
-              <span className="flex items-center">
-                <MapPin className="h-4 w-4 mr-2" />
-                {personalInfo.location}
-              </span>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 flex-shrink-0" />
+                <span>{personalInfo.location}</span>
+              </div>
             )}
           </div>
         </div>
@@ -68,9 +68,9 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
         {/* Technical Skills */}
         {skills && skills.length > 0 && (
           <section className="mb-8">
-            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center">
-              <Code className="mr-2" />
-              TECHNICAL SKILLS
+            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center gap-2">
+              <Code className="h-5 w-5 flex-shrink-0" />
+              <span>TECHNICAL SKILLS</span>
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {['Expert', 'Advanced', 'Intermediate', 'Beginner'].map(level => {
@@ -191,9 +191,9 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
           {/* Education */}
           {education && education.length > 0 && (
             <section>
-              <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center">
-                <BookOpen className="mr-2" />
-                EDUCATION
+              <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center gap-2">
+                <BookOpen className="h-5 w-5 flex-shrink-0" />
+                <span>EDUCATION</span>
               </h2>
               <div className="space-y-4">
                 {education.map((edu) => (
@@ -212,9 +212,9 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
           {/* Certifications */}
           {certifications && certifications.length > 0 && (
             <section>
-              <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center">
-                <Award className="mr-2" />
-                CERTIFICATIONS
+              <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center gap-2">
+                <Award className="h-5 w-5 flex-shrink-0" />
+                <span>CERTIFICATIONS</span>
               </h2>
               <div className="space-y-3">
                 {certifications.map((cert) => (
@@ -237,9 +237,9 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
         {/* Languages */}
         {languages && languages.length > 0 && (
           <section>
-            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center">
-              <Languages className="mr-2" />
-              LANGUAGES
+            <h2 className="text-xl font-bold text-purple-700 mb-4 border-b-2 border-purple-200 pb-2 flex items-center gap-2">
+              <Languages className="h-5 w-5 flex-shrink-0" />
+              <span>LANGUAGES</span>
             </h2>
             <div className="grid grid-cols-2 gap-4">
               {languages.map((lang) => (
