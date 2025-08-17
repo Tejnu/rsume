@@ -66,6 +66,18 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
     // Simulate comprehensive job matching analysis
     await new Promise(resolve => setTimeout(resolve, 3500));
     
+    // First, analyze the actual resume content
+    const resumeText = `
+      ${resumeData.personalInfo.fullName} 
+      ${resumeData.personalInfo.title || ''} 
+      ${resumeData.personalInfo.summary || ''} 
+      ${resumeData.workExperience.map(exp => `${exp.position} ${exp.company} ${exp.description}`).join(' ')}
+      ${resumeData.education.map(edu => `${edu.degree} ${edu.school} ${edu.field || ''}`).join(' ')}
+      ${resumeData.skills.map(skill => skill.name).join(' ')}
+      ${resumeData.projects?.map(proj => `${proj.name} ${proj.description} ${proj.technologies?.join(' ') || ''}`).join(' ') || ''}
+      ${resumeData.certifications?.map(cert => `${cert.name} ${cert.issuer}`).join(' ') || ''}
+    `.toLowerCase();
+    
     // Extract and analyze keywords from job description
     const jobText = `${jobTitle} ${jobDescription}`.toLowerCase();
     const commonTechKeywords = [
@@ -96,15 +108,24 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
     // Remove duplicates and variations
     const uniqueJobKeywords = [...new Set(jobKeywords)];
     
-    // Analyze resume skills against job requirements
+    // Analyze resume skills against job requirements with context
     const resumeSkills = resumeData.skills.map(s => s.name.toLowerCase());
+    const resumeExperience = resumeData.workExperience.map(exp => exp.description.toLowerCase()).join(' ');
+    
     const matchedSkills = resumeSkills.filter(skill => 
       uniqueJobKeywords.some(keyword => {
         const skillNormalized = skill.replace(/[.\s\-\/]/g, '');
         const keywordNormalized = keyword.replace(/[.\s\-\/]/g, '');
-        return skillNormalized.includes(keywordNormalized) || 
-               keywordNormalized.includes(skillNormalized) ||
-               skill.toLowerCase() === keyword.toLowerCase();
+        
+        // Check if skill matches keyword or if it's mentioned in experience
+        const directMatch = skillNormalized.includes(keywordNormalized) || 
+                           keywordNormalized.includes(skillNormalized) ||
+                           skill.toLowerCase() === keyword.toLowerCase();
+        
+        const experienceMatch = resumeExperience.includes(skill) && 
+                               resumeExperience.includes(keyword);
+        
+        return directMatch || experienceMatch;
       })
     );
     
@@ -118,11 +139,22 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
       })
     );
     
-    // Analyze keyword density in resume content
-    const resumeText = `
-      ${resumeData.personalInfo.summary} 
-      ${resumeData.workExperience.map(exp => exp.description).join(' ')}
-    `.toLowerCase();
+    // Calculate years of experience match
+    const currentYear = new Date().getFullYear();
+    const totalExperience = resumeData.workExperience.reduce((total, exp) => {
+      const startYear = exp.startDate ? new Date(exp.startDate + '-01').getFullYear() : currentYear;
+      const endYear = exp.isCurrentJob ? currentYear : 
+                     exp.endDate ? new Date(exp.endDate + '-01').getFullYear() : currentYear;
+      return total + Math.max(0, endYear - startYear);
+    }, 0);
+    
+    // Check if experience level matches job requirements
+    const jobTextLower = jobDescription.toLowerCase();
+    let requiredExperience = 0;
+    const expMatch = jobTextLower.match(/(\d+)[\s\-+]*(?:years?|yrs?)[\s\w]*(?:experience|exp)/i);
+    if (expMatch) requiredExperience = parseInt(expMatch[1]);
+    
+    const experienceMatch = totalExperience >= requiredExperience * 0.8; // 80% match threshold
     
     const matchedKeywords = uniqueJobKeywords.filter(keyword => 
       resumeText.includes(keyword) || 
@@ -134,10 +166,25 @@ export function JobMatchAnalyzer({ resumeData, onOptimize }: JobMatchAnalyzerPro
       !resumeText.includes(keyword.replace(/[.\s\-\/]/g, ''))
     );
     
-    // Calculate scores
+    // Calculate comprehensive scores
     const skillMatchRate = matchedSkills.length / Math.max(uniqueJobKeywords.length, 1);
     const keywordMatchRate = matchedKeywords.length / Math.max(uniqueJobKeywords.length, 1);
-    const overallScore = Math.round((skillMatchRate * 0.6 + keywordMatchRate * 0.4) * 100);
+    const experienceScore = experienceMatch ? 1 : Math.min(totalExperience / Math.max(requiredExperience, 1), 1);
+    
+    // Weight the scoring: 40% skills, 30% keywords, 20% experience, 10% completeness
+    const completenessScore = Math.min(
+      (resumeData.workExperience.length * 0.3 + 
+       resumeData.education.length * 0.2 + 
+       resumeData.skills.length * 0.3 + 
+       (resumeData.personalInfo.summary ? 0.2 : 0)) / 1.0, 1
+    );
+    
+    const overallScore = Math.round(
+      (skillMatchRate * 0.4 + 
+       keywordMatchRate * 0.3 + 
+       experienceScore * 0.2 + 
+       completenessScore * 0.1) * 100
+    );
     
     // Calculate ATS score
     const atsScore = Math.round(

@@ -29,22 +29,22 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
       <div className="p-6">
         {/* Header */}
         <div className="border-l-4 border-blue-500 pl-6 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2 font-mono">{personalInfo.fullName}</h1>
-          <p className="text-lg text-blue-600 mb-4 font-semibold font-mono">{personalInfo.title}</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 font-mono">{personalInfo?.fullName || 'Your Name'}</h1>
+          <p className="text-lg text-blue-600 mb-4 font-semibold font-mono">{personalInfo?.title || 'Your Title'}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-            {personalInfo.email && (
+            {personalInfo?.email && (
               <span className="flex items-center">
                 <Mail className="h-4 w-4 mr-2" />
                 {personalInfo.email}
               </span>
             )}
-            {personalInfo.phone && (
+            {personalInfo?.phone && (
               <span className="flex items-center">
                 <Phone className="h-4 w-4 mr-2" />
                 {personalInfo.phone}
               </span>
             )}
-            {personalInfo.location && (
+            {personalInfo?.location && (
               <span className="flex items-center">
                 <MapPin className="h-4 w-4 mr-2" />
                 {personalInfo.location}
@@ -72,18 +72,18 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
               <Code className="mr-2" />
               TECHNICAL SKILLS
             </h2>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {['Expert', 'Advanced', 'Intermediate', 'Beginner'].map(level => {
-                const levelSkills = skills.filter(skill => skill.level === level);
+                const levelSkills = skills.filter(skill => skill?.level === level);
                 if (levelSkills.length === 0) return null;
 
                 return (
                   <div key={level} className="mb-4">
                     <h3 className="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wider">{level}</h3>
                     <div className="flex flex-wrap gap-2">
-                      {levelSkills.map(skill => (
+                      {levelSkills.map((skill, index) => (
                         <span
-                          key={skill.id}
+                          key={skill?.id || index}
                           className={`px-3 py-1 rounded-md text-xs font-medium border ${
                             level === 'Expert' ? 'bg-purple-100 text-purple-800 border-purple-300' :
                             level === 'Advanced' ? 'bg-blue-100 text-blue-800 border-blue-300' :
@@ -91,7 +91,7 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
                             'bg-gray-100 text-gray-800 border-gray-300'
                           }`}
                         >
-                          {skill.name}
+                          {skill?.name || 'Unknown Skill'}
                         </span>
                       ))}
                     </div>
@@ -110,24 +110,24 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
             </h2>
             <div className="space-y-6">
               {workExperience.map((exp, index) => (
-                <div key={exp.id} className="relative">
+                <div key={exp?.id || index} className="relative">
                   {index !== workExperience.length - 1 && (
                     <div className="absolute left-0 top-8 bottom-0 w-px bg-purple-200"></div>
                   )}
                   <div className="flex">
                     <div className="flex-shrink-0 w-4 h-4 bg-purple-600 rounded-full mt-1 mr-4"></div>
                     <div className="flex-grow">
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start mb-2">
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900">{exp.position}</h3>
-                          <p className="text-purple-600 font-semibold">{exp.company}</p>
-                          {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
+                          <h3 className="text-lg font-bold text-gray-900">{exp?.position || 'Position'}</h3>
+                          <p className="text-purple-600 font-semibold">{exp?.company || 'Company'}</p>
+                          {exp?.location && <p className="text-sm text-gray-500">{exp.location}</p>}
                         </div>
-                        <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                          {formatDate(exp.startDate)} - {exp.isCurrentJob ? 'Present' : formatDate(exp.endDate)}
+                        <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full mt-2 lg:mt-0 self-start">
+                          {formatDate(exp?.startDate)} - {exp?.isCurrentJob ? 'Present' : formatDate(exp?.endDate)}
                         </div>
                       </div>
-                      {exp.description && (
+                      {exp?.description && (
                         <p className="text-gray-700 text-sm leading-relaxed">{exp.description}</p>
                       )}
                     </div>

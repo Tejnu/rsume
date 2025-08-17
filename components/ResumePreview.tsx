@@ -10,7 +10,7 @@ import { TechnicalTemplate } from './templates/TechnicalTemplate'; // Added
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Download, Maximize2, ZoomIn, ZoomOut } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react'; // Added useRef
 
 interface ResumePreviewProps {
   resumeData: ResumeData;
@@ -19,6 +19,8 @@ interface ResumePreviewProps {
 export function ResumePreview({ resumeData }: ResumePreviewProps) {
   const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false); // Added state for download status
+  const resumeRef = useRef<HTMLDivElement>(null); // Added ref for the resume content
 
   // Safety check for resumeData
   if (!resumeData || !resumeData.personalInfo) {
@@ -64,7 +66,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
     try {
       // Import html2pdf dynamically
       const html2pdf = (await import('html2pdf.js')).default;
-      
+
       const options = {
         margin: [10, 10, 10, 10],
         filename: `${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Resume'}.pdf`,
@@ -93,7 +95,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
       };
 
       await html2pdf().set(options).from(element).save();
-      
+
     } catch (error) {
       console.error('PDF generation failed:', error);
       // Fallback to window.print()
@@ -180,6 +182,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
 
           <div
             className="bg-white shadow-2xl mx-auto overflow-auto"
+            ref={resumeRef} // Added ref here
             style={{
               width: isFullscreen ? '210mm' : '100%',
               maxWidth: isFullscreen ? '210mm' : '820px',

@@ -54,19 +54,23 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing }: HeaderProp
               <img
                 src="/LOGOwithouttagline-01_1755244238390.png"
                 alt="Alumna logo"
-                className="w-14 h-14 rounded-lg object-contain"
+                className="w-12 h-12 object-contain filter brightness-0 invert"
                 onError={(e) => {
                   const target = e.currentTarget;
                   target.style.display = 'none';
                   const parent = target.parentElement;
                   if (parent) {
-                    parent.innerHTML = '<span class="text-white font-bold text-xl">A</span>';
+                    parent.innerHTML = '<span class="text-white font-bold text-2xl">A</span>';
                   }
+                }}
+                onLoad={(e) => {
+                  const target = e.currentTarget;
+                  target.style.display = 'block';
                 }}
               />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-black">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                 Alumna
               </h1>
               <p className="text-sm text-gray-600 hidden sm:block">AI-Powered Resume Builder</p>
