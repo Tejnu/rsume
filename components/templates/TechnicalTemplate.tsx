@@ -1,7 +1,7 @@
 'use client';
 
 import { ResumeData } from '@/types/resume';
-import { Mail, Phone, MapPin, Globe, Linkedin, Github, Calendar, GraduationCap, Briefcase, Award, Code, Languages, User, Zap } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Linkedin, Github, Calendar, GraduationCap, Briefcase, Award, Code, Languages, User, Zap, BookOpen } from 'lucide-react';
 
 interface TechnicalTemplateProps {
   resumeData: ResumeData;
