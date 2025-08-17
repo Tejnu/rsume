@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ResumeData } from '@/types/resume';
 
@@ -7,7 +6,15 @@ interface ClassicTemplateProps {
 }
 
 export function ClassicTemplate({ resumeData }: ClassicTemplateProps) {
-  const { personalInfo, workExperience, education, skills, certifications, projects } = resumeData;
+  if (!resumeData) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center text-gray-500">
+        Loading template...
+      </div>
+    );
+  }
+
+  const { personalInfo, workExperience = [], education = [], skills = [], projects = [], certifications = [], languages = [] } = resumeData;
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '';

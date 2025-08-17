@@ -88,11 +88,30 @@ export function AIAssistant({ resumeData, onApplySuggestion }: AIAssistantProps)
               role: 'user',
               parts: [
                 {
-                  text: `You are an expert resume coach. Given this resume JSON, return concise JSON with fields: {
-                    skillSuggestions: string[6],
-                    improvedSummary: string,
-                    experienceEnhancements: Array<{id: string, enhancement: string}>
-                  }. Resume JSON: ${JSON.stringify(resumeData).slice(0, 6000)}`
+                  text: `You are an expert resume coach. Analyze this resume and provide improvements based on EXISTING content:
+
+CURRENT RESUME:
+${JSON.stringify(resumeData, null, 2).slice(0, 8000)}
+
+Return JSON with:
+{
+  "skillSuggestions": ["skill1", "skill2", ...] // Max 8 relevant skills based on their experience
+  "improvedSummary": "Enhanced version of their current summary with stronger action words and quantifiable achievements",
+  "experienceEnhancements": [
+    {
+      "id": "experience_id",
+      "enhancement": "Rewritten description with quantified achievements, stronger action verbs, and industry keywords"
+    }
+  ]
+}
+
+RULES:
+- Keep the core meaning of their existing content
+- Add quantifiable metrics where logical
+- Use stronger action verbs
+- Include relevant industry keywords
+- Make achievements more impactful
+- Don't fabricate information, enhance what exists`
                 }
               ]
             }
@@ -107,7 +126,12 @@ export function AIAssistant({ resumeData, onApplySuggestion }: AIAssistantProps)
         const data = await resp.json();
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
         let modelJson: any = {};
-        try { modelJson = JSON.parse(text); } catch {}
+        try { 
+          const cleanText = text.replace(/```json|```/g, '').trim();
+          modelJson = JSON.parse(cleanText); 
+        } catch (e) {
+          console.error('Failed to parse AI response:', e);
+        }
 
         if (Array.isArray(modelJson.skillSuggestions) && modelJson.skillSuggestions.length > 0) {
           newSuggestions.push({
@@ -144,16 +168,18 @@ export function AIAssistant({ resumeData, onApplySuggestion }: AIAssistantProps)
       const hasMetrics = /\d+%|\d+\+|\$\d+|increased|decreased|improved|reduced|led|managed/i.test(totalExperienceText);
       
       if (!hasMetrics) {
+        const experienceEnhancements = resumeData.workExperience.map(exp => ({
+          id: exp.id,
+          original: exp.description,
+          enhancement: `${exp.description}\n\n• Improved system performance by 40% through code optimization and database query enhancement\n• Led cross-functional team of 8+ members, delivering projects 25% ahead of schedule\n• Reduced deployment time by 60% by implementing CI/CD pipelines and automated testing\n• Mentored 5 junior developers, achieving 100% retention rate and 3 internal promotions\n• Collaborated with stakeholders to define requirements, resulting in 95% client satisfaction rate`
+        }));
+
         newSuggestions.push({
           id: 3,
           type: 'experience',
           title: 'Add Quantified Achievements',
           description: 'Transform your experience bullets into compelling, metric-driven accomplishments',
-          suggestions: resumeData.workExperience.map(exp => ({
-            id: exp.id,
-            original: exp.description,
-            enhancement: `${exp.description}\n\n• Improved system performance by 40% through code optimization and database query enhancement\n• Led cross-functional team of 8+ members, delivering projects 25% ahead of schedule\n• Reduced deployment time by 60% by implementing CI/CD pipelines and automated testing\n• Mentored 5 junior developers, achieving 100% retention rate and 3 internal promotions\n• Collaborated with stakeholders to define requirements, resulting in 95% client satisfaction rate`
-          })),
+          suggestions: experienceEnhancements.map(enh => enh.enhancement),
           priority: 'high',
           impact: 'Increases interview callbacks by 70%',
           category: 'Experience',

@@ -14,10 +14,9 @@ import { useState } from 'react';
 
 interface ResumePreviewProps {
   resumeData: ResumeData;
-  onDownloadPDF?: () => void;
 }
 
-export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps) {
+export function ResumePreview({ resumeData }: ResumePreviewProps) {
   const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -66,67 +65,24 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
       // Import html2pdf dynamically
       const html2pdf = (await import('html2pdf.js')).default;
       
-      // Clone the element to avoid modifying the original
-      const clonedElement = element.cloneNode(true) as HTMLElement;
-      
-      // Create a temporary container with proper styling for PDF
-      const container = document.createElement('div');
-      container.style.width = '210mm';
-      container.style.minHeight = '297mm';
-      container.style.margin = '0';
-      container.style.padding = '15mm';
-      container.style.backgroundColor = 'white';
-      container.style.fontFamily = 'Inter, system-ui, sans-serif';
-      container.style.fontSize = '11px';
-      container.style.lineHeight = '1.5';
-      container.style.color = '#000000';
-      container.style.position = 'fixed';
-      container.style.top = '-9999px';
-      container.style.left = '-9999px';
-      container.style.zIndex = '-1';
-      container.style.boxSizing = 'border-box';
-      
-      // Apply PDF-specific styles to cloned element
-      clonedElement.style.transform = 'none';
-      clonedElement.style.width = '100%';
-      clonedElement.style.height = 'auto';
-      clonedElement.style.overflow = 'visible';
-      clonedElement.style.margin = '0';
-      clonedElement.style.padding = '0';
-      
-      // Fix any potential styling issues for PDF
-      const allElements = clonedElement.querySelectorAll('*');
-      allElements.forEach((el: any) => {
-        const computedStyle = window.getComputedStyle(el);
-        if (computedStyle.backgroundColor === 'rgba(0, 0, 0, 0)') {
-          el.style.backgroundColor = 'transparent';
-        }
-        if (computedStyle.color === 'rgba(0, 0, 0, 0)') {
-          el.style.color = '#000000';
-        }
-        // Ensure proper text rendering
-        el.style.webkitFontSmoothing = 'antialiased';
-        el.style.mozOsxFontSmoothing = 'grayscale';
-      });
-      
-      container.appendChild(clonedElement);
-      document.body.appendChild(container);
-
       const options = {
-        margin: 0,
-        filename: `${resumeData.personalInfo?.fullName || 'Resume'}.pdf`,
-        image: { type: 'jpeg', quality: 1.0 },
+        margin: [10, 10, 10, 10],
+        filename: `${resumeData.personalInfo?.fullName?.replace(/\s+/g, '_') || 'Resume'}.pdf`,
+        image: { 
+          type: 'jpeg', 
+          quality: 0.98 
+        },
         html2canvas: { 
-          scale: 3,
+          scale: 2,
           useCORS: true,
-          allowTaint: true,
+          allowTaint: false,
           backgroundColor: '#ffffff',
           letterRendering: true,
           logging: false,
-          width: 794, // A4 width in pixels at 96 DPI
-          height: 1123, // A4 height in pixels at 96 DPI
           scrollX: 0,
-          scrollY: 0
+          scrollY: 0,
+          windowWidth: 794,
+          windowHeight: 1123
         },
         jsPDF: { 
           unit: 'mm', 
@@ -136,16 +92,30 @@ export function ResumePreview({ resumeData, onDownloadPDF }: ResumePreviewProps)
         }
       };
 
-      await html2pdf().set(options).from(container).save();
-      
-      // Clean up
-      document.body.removeChild(container);
+      await html2pdf().set(options).from(element).save();
       
     } catch (error) {
       console.error('PDF generation failed:', error);
-      // Fallback to print dialog
-      alert('PDF generation failed. Using browser print instead.');
-      window.print();
+      // Fallback to window.print()
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Resume - ${resumeData.personalInfo?.fullName || 'Resume'}</title>
+              <style>
+                body { margin: 0; padding: 20px; font-family: system-ui, sans-serif; }
+                @media print { body { margin: 0; padding: 0; } }
+              </style>
+            </head>
+            <body>
+              ${element.innerHTML}
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+      }
     }
   };
 

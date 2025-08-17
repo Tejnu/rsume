@@ -9,10 +9,9 @@ interface HeaderProps {
   onFileUpload?: (file: File) => void;
   onAIEnhance?: () => void;
   isAIProcessing?: boolean;
-  onDownloadPDF?: () => void;
 }
 
-export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPDF }: HeaderProps) {
+export function Header({ onFileUpload, onAIEnhance, isAIProcessing }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -51,14 +50,18 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
         <div className="flex items-center justify-between">
           {/* Logo and Brand */}
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            <div className="relative w-16 h-16 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center shadow-lg">
               <img
                 src="/LOGOwithouttagline-01_1755244238390.png"
                 alt="Alumna logo"
-                className="w-16 h-16 rounded-xl object-cover shadow-lg"
+                className="w-14 h-14 rounded-lg object-contain"
                 onError={(e) => {
-                  console.error('Logo failed to load');
-                  e.currentTarget.style.display = 'none';
+                  const target = e.currentTarget;
+                  target.style.display = 'none';
+                  const parent = target.parentElement;
+                  if (parent) {
+                    parent.innerHTML = '<span class="text-white font-bold text-xl">A</span>';
+                  }
                 }}
               />
             </div>
@@ -111,13 +114,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
               <span>Share</span>
             </Button>
 
-            <Button
-              onClick={onDownloadPDF}
-              className="bg-gray-800 text-white hover:bg-gray-900 flex items-center space-x-2 rounded-xl"
-            >
-              <Download className="h-4 w-4" />
-              <span>Download PDF</span>
-            </Button>
+            
           </div>
 
           {/* Mobile Menu Button */}
@@ -176,13 +173,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
                 Share
               </Button>
 
-              <Button
-                onClick={onDownloadPDF}
-                className="bg-gray-800 text-white hover:bg-gray-900 w-full justify-start rounded-xl"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </Button>
+              
             </div>
           </div>
         )}

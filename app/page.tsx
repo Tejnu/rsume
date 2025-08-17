@@ -381,7 +381,6 @@ export default function Home() {
         onFileUpload={handleFileUpload}
         onAIEnhance={handleAIEnhance}
         isAIProcessing={isAIProcessing}
-        onDownloadPDF={handleDownloadPDF}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -446,7 +445,7 @@ export default function Home() {
 
           {/* Preview Section */}
           <div className="lg:col-span-2 lg:sticky lg:top-8 lg:h-fit">
-            <ResumePreview resumeData={resumeData} onDownloadPDF={handleDownloadPDF} />
+            <ResumePreview resumeData={resumeData} />
           </div>
         </div>
       </div>
