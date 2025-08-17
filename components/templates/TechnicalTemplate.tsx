@@ -1,14 +1,14 @@
 'use client';
 
 import { ResumeData } from '@/types/resume';
-import { Mail, Phone, MapPin, Globe, Linkedin, Github, Code, Award, BookOpen, Languages } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Linkedin, Github, Calendar, GraduationCap, Briefcase, Award, Code, Languages, User, Zap } from 'lucide-react';
 
 interface TechnicalTemplateProps {
   resumeData: ResumeData;
 }
 
 export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
-  if (!resumeData) {
+  if (!resumeData || !resumeData.personalInfo) {
     return (
       <div className="w-full h-96 flex items-center justify-center text-gray-500">
         Loading template...
@@ -16,7 +16,7 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
     );
   }
 
-  const { personalInfo, workExperience, education, skills, projects, certifications, languages } = resumeData;
+  const { personalInfo, workExperience = [], education = [], skills = [], projects = [], certifications = [], languages = [] } = resumeData;
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
@@ -32,22 +32,34 @@ export function TechnicalTemplate({ resumeData }: TechnicalTemplateProps) {
           <h1 className="text-3xl font-bold text-gray-900 mb-2 font-mono">{personalInfo?.fullName || 'Your Name'}</h1>
           <p className="text-lg text-blue-600 mb-4 font-semibold font-mono">{personalInfo?.title || 'Your Title'}</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-600">
-            {personalInfo?.email && (
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 flex-shrink-0" />
-                <span className="break-all">{personalInfo.email}</span>
+            {personalInfo.email && (
+              <div className="flex items-start space-x-2 text-sm text-gray-600 mb-2">
+                <Mail className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span className="break-all leading-tight">{personalInfo.email}</span>
               </div>
             )}
-            {personalInfo?.phone && (
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 flex-shrink-0" />
-                <span>{personalInfo.phone}</span>
+            {personalInfo.phone && (
+              <div className="flex items-start space-x-2 text-sm text-gray-600 mb-2">
+                <Phone className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span className="leading-tight">{personalInfo.phone}</span>
               </div>
             )}
-            {personalInfo?.location && (
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 flex-shrink-0" />
-                <span>{personalInfo.location}</span>
+            {personalInfo.location && (
+              <div className="flex items-start space-x-2 text-sm text-gray-600 mb-2">
+                <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span className="leading-tight">{personalInfo.location}</span>
+              </div>
+            )}
+            {personalInfo.linkedin && (
+              <div className="flex items-start space-x-2 text-sm text-gray-600 mb-2">
+                <Linkedin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span className="break-all leading-tight">{personalInfo.linkedin}</span>
+              </div>
+            )}
+            {personalInfo.website && (
+              <div className="flex items-start space-x-2 text-sm text-gray-600 mb-2">
+                <Globe className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span className="break-all leading-tight">{personalInfo.website}</span>
               </div>
             )}
           </div>

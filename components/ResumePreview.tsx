@@ -66,10 +66,32 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
     }
 
     try {
-      // Use browser's print functionality for better compatibility
+      const { default: html2pdf } = await import('html2pdf.js');
+      
+      const opt = {
+        margin: 0.5,
+        filename: `${resumeData.personalInfo?.fullName || 'Resume'}_Resume.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        },
+        jsPDF: { 
+          unit: 'in', 
+          format: 'a4', 
+          orientation: 'portrait' 
+        }
+      };
+
+      await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      
+      // Fallback to print method
       const printWindow = window.open('', '_blank');
       if (printWindow) {
-        // Clone the element to avoid affecting the original
         const clonedElement = element.cloneNode(true) as HTMLElement;
         
         printWindow.document.write(`
@@ -116,9 +138,6 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
         `);
         printWindow.document.close();
       }
-    } catch (error) {
-      console.error('PDF generation failed:', error);
-      alert('PDF generation failed. Please try again or use your browser\'s print function.');
     } finally {
       setIsDownloading(false);
     }
