@@ -93,11 +93,11 @@ export default function Home() {
   const handleGetStarted = () => {
     setShowLanding(false);
     localStorage.setItem('hasSeenLanding', 'true');
-    
+
     // Check if we should show wizard
     const hasSeenWizard = localStorage.getItem('hasSeenWizard');
     const savedData = localStorage.getItem('resumeData');
-    
+
     if (!hasSeenWizard && !savedData) {
       setShowWizard(true);
     }
@@ -203,7 +203,7 @@ export default function Home() {
 
   const handleDownloadPDF = () => {
     setIsDownloading(true);
-    
+
     try {
       const printContent = document.getElementById('resume-preview-content');
       if (!printContent) return;

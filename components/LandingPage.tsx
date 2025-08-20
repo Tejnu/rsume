@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,16 +13,16 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
   const [showText, setShowText] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showContent, setShowContent] = useState(false);
-  
+
   const fullText = 'Alumna.ai';
 
   useEffect(() => {
     // Show logo first
     const logoTimer = setTimeout(() => setShowLogo(true), 500);
-    
+
     // Start typing animation after logo appears
     const textTimer = setTimeout(() => setShowText(true), 1500);
-    
+
     return () => {
       clearTimeout(logoTimer);
       clearTimeout(textTimer);
@@ -32,7 +31,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
   useEffect(() => {
     if (!showText) return;
-    
+
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
       if (currentIndex <= fullText.length) {
@@ -60,7 +59,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
         {/* Logo and Brand Animation */}
         <div className="text-center mb-12">
-          <div 
+          <div
             className={`transition-all duration-1000 transform ${
               showLogo ? 'scale-100 opacity-100 translate-y-0' : 'scale-150 opacity-0 translate-y-10'
             }`}
@@ -74,7 +73,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </div>
           </div>
 
-          <div 
+          <div
             className={`transition-all duration-500 ${
               showText ? 'opacity-100' : 'opacity-0'
             }`}
@@ -90,7 +89,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         </div>
 
         {/* Main Content */}
-        <div 
+        <div
           className={`transition-all duration-1000 transform ${
             showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
@@ -100,7 +99,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Build Your Perfect Resume in Minutes
             </h2>
             <p className="text-lg text-gray-600 leading-relaxed mb-8">
-              Transform your career story with our AI-powered resume builder. Upload your existing resume 
+              Transform your career story with our AI-powered resume builder. Upload your existing resume
               or start fresh with intelligent suggestions, professional templates, and real-time optimization.
             </p>
 
