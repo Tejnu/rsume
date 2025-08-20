@@ -1,7 +1,7 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     if (isServer) {
       // Ignore pdf-parse test files and other problematic files
       config.externals = config.externals || [];
@@ -26,7 +26,7 @@ const nextConfig = {
       
       // Ignore specific problematic files from pdf-parse
       config.plugins.push(
-        new config.webpack.IgnorePlugin({
+        new webpack.IgnorePlugin({
           resourceRegExp: /^\.\/test\/.*$/,
           contextRegExp: /pdf-parse/
         })
