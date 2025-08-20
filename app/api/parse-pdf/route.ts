@@ -65,16 +65,18 @@ export async function POST(req: Request) {
     // Dynamic import with error handling
     let pdfParse;
     try {
-      pdfParse = await import('pdf-parse').then(mod => mod.default);
+      // Use dynamic import with better error handling
+      const pdfParseModule = await import('pdf-parse');
+      pdfParse = pdfParseModule.default || pdfParseModule;
     } catch (importError) {
       console.error('PDF-parse import error:', importError);
       return new NextResponse(
-        JSON.stringify({ error: 'PDF parsing service is temporarily unavailable. Please try uploading a DOCX or TXT file instead.' }), 
+        JSON.stringify({ error: 'PDF parsing service encountered an import error. Please try uploading a DOCX or TXT file instead.' }), 
         { status: 503, headers }
       );
     }
     
-    // Parse PDF with options for better text extraction
+    // Parse PDF with error handling for runtime issues
     let result;
     try {
       result = await pdfParse(buffer, {
@@ -82,10 +84,10 @@ export async function POST(req: Request) {
       });
     } catch (parseError) {
       console.error('PDF parsing error:', parseError);
-      // Check if it's the specific ENOENT error
-      if (parseError instanceof Error && parseError.message.includes('ENOENT')) {
+      // Check for common pdf-parse errors
+      if (parseError instanceof Error && (parseError.message.includes('ENOENT') || parseError.message.includes('test/data'))) {
         return new NextResponse(
-          JSON.stringify({ error: 'PDF parsing service encountered a configuration issue. Please try uploading a DOCX or TXT file instead.' }), 
+          JSON.stringify({ error: 'PDF parsing service encountered a file system error. Please try uploading a DOCX or TXT file instead.' }), 
           { status: 503, headers }
         );
       }
