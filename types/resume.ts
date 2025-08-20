@@ -1,50 +1,51 @@
-
-export type ResumeTemplate = 'modern' | 'classic' | 'minimal' | 'creative' | 'executive' | 'technical';
-
 export interface PersonalInfo {
   fullName: string;
   email: string;
   phone: string;
   location: string;
-  website?: string;
   linkedin?: string;
   github?: string;
-  summary: string;
+  website?: string;
+  summary?: string;
   title?: string;
 }
 
 export interface WorkExperience {
   id: string;
-  position: string;
   company: string;
+  position: string;
   location?: string;
   startDate: string;
-  endDate: string;
-  isCurrentJob: boolean;
+  endDate?: string;
+  current: boolean;
   description: string;
 }
 
 export interface Education {
   id: string;
-  school: string;
+  institution: string;
   degree: string;
-  field?: string;
-  graduationDate: string;
+  field: string;
+  startDate: string;
+  endDate?: string;
+  current: boolean;
   gpa?: string;
 }
 
 export interface Skill {
   id: string;
   name: string;
-  level: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
+  level: 'beginner' | 'intermediate' | 'advanced' | 'expert';
+  category: string;
 }
 
 export interface Project {
   id: string;
-  name: string;
+  title: string;
   description: string;
   technologies: string[];
-  url?: string;
+  link?: string;
+  github?: string;
   startDate?: string;
   endDate?: string;
 }
@@ -54,25 +55,14 @@ export interface Certification {
   name: string;
   issuer: string;
   date: string;
-  dateObtained?: string;
-  expirationDate?: string;
-  credentialId?: string;
-  url?: string;
+  expiryDate?: string;
+  link?: string;
 }
 
 export interface Language {
   id: string;
   name: string;
-  proficiency: 'Basic' | 'Conversational' | 'Professional' | 'Native';
-}
-
-export interface Reference {
-  id: string;
-  name: string;
-  position: string;
-  company: string;
-  email: string;
-  phone?: string;
+  proficiency: 'basic' | 'conversational' | 'proficient' | 'fluent' | 'native';
 }
 
 export interface CustomSection {
@@ -89,105 +79,14 @@ export interface ResumeData {
   projects: Project[];
   certifications: Certification[];
   languages: Language[];
-  references?: Reference[];
   customSections?: CustomSection[];
-  selectedTemplate: ResumeTemplate;
 }
 
-export const defaultResumeData: ResumeData = {
-  personalInfo: {
-    fullName: '',
-    email: '',
-    phone: '',
-    location: '',
-    website: '',
-    linkedin: '',
-    github: '',
-    summary: '',
-    title: ''
-  },
-  workExperience: [],
-  education: [],
-  skills: [],
-  projects: [],
-  certifications: [],
-  languages: [],
-  references: [],
-  customSections: [],
-  selectedTemplate: 'modern'
-};
 export type ResumeTemplate = 'modern' | 'classic' | 'minimal' | 'creative' | 'executive' | 'technical';
 
-export interface PersonalInfo {
-  fullName: string;
-  title?: string;
-  email: string;
-  phone?: string;
-  location?: string;
-  website?: string;
-  linkedin?: string;
-  github?: string;
-  summary?: string;
-}
-
-export interface WorkExperience {
-  id: string;
-  position: string;
-  company: string;
-  location?: string;
-  startDate: string;
-  endDate?: string;
-  isCurrentJob: boolean;
-  description?: string;
-}
-
-export interface Education {
-  id: string;
-  degree: string;
-  school: string;
-  field?: string;
-  graduationDate: string;
-  gpa?: string;
-}
-
-export interface Skill {
-  id: string;
-  name: string;
-  level?: string;
-}
-
-export interface Project {
-  id: string;
-  name: string;
-  description?: string;
-  technologies?: string[];
-  url?: string;
-  startDate?: string;
-  endDate?: string;
-}
-
-export interface Certification {
-  id: string;
-  name: string;
-  issuer?: string;
-  date: string;
-  url?: string;
-  description?: string;
-}
-
-export interface Language {
-  id: string;
-  name: string;
-  proficiency: string;
-}
-
-export interface ResumeData {
-  personalInfo?: PersonalInfo;
-  workExperience?: WorkExperience[];
-  education?: Education[];
-  skills?: Skill[];
-  projects?: Project[];
-  certifications?: Certification[];
-  languages?: Language[];
+export interface ResumeState {
+  data: ResumeData;
   selectedTemplate: ResumeTemplate;
+  isGenerating: boolean;
+  lastSaved: Date | null;
 }
