@@ -60,21 +60,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No readable text found in PDF. The file may be image-based or corrupted.' }, { status: 400 });
     }
 
-    return NextResponse.json({ 
-      text,
-      pages: result.numpages,
+    // Ensure we return proper JSON
+    const response = {
+      text: text,
+      pages: result.numpages || 0,
       info: {
         title: result.info?.Title || '',
         author: result.info?.Author || '',
         subject: result.info?.Subject || ''
       }
+    };
+
+    return NextResponse.json(response, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   } catch (e: any) {
     console.error('PDF parsing error:', e);
     return NextResponse.json({ 
       error: e?.message || 'Failed to parse PDF. Please ensure the file is not corrupted and try again.' 
-    }, { status: 500 });
+    }, { 
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 }
-
-

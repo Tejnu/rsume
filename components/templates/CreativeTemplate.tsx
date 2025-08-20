@@ -9,182 +9,199 @@ interface CreativeTemplateProps {
 }
 
 export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
-  if (!resumeData) {
-    return (
-      <div className="w-full h-96 flex items-center justify-center text-gray-500">
-        Loading template...
-      </div>
-    );
-  }
-
-  const { personalInfo, workExperience = [], education = [], skills = [], projects = [], certifications = [], languages = [] } = resumeData;
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    const date = new Date(dateString + '-01');
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
-  };
+  const { personalInfo, workExperience, education, skills, certifications, projects } = resumeData;
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 to-pink-50 text-gray-900 p-8 max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-2xl overflow-hidden">
       {/* Creative Header */}
-      <header className="mb-8 relative">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 rounded-2xl transform -rotate-1"></div>
-        <div className="relative bg-white p-8 rounded-2xl shadow-lg">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-            {personalInfo?.fullName || 'Your Name'}
-          </h1>
-          {personalInfo?.title && (
-            <p className="text-2xl text-gray-700 mb-4 font-light">{personalInfo.title}</p>
-          )}
-          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+      <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 text-white p-8">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12"></div>
+        
+        <div className="relative z-10 text-center">
+          <h1 className="text-5xl font-bold mb-3 tracking-wide">{personalInfo?.fullName || 'Your Name'}</h1>
+          <p className="text-2xl font-light opacity-90 mb-6">{workExperience?.[0]?.position || 'Creative Professional'}</p>
+          
+          <div className="flex flex-wrap justify-center gap-6 text-sm">
             {personalInfo?.email && (
-              <div className="flex items-center bg-purple-100 px-3 py-1 rounded-full">
-                <Mail className="h-4 w-4 mr-2 text-purple-600" />
-                {personalInfo.email}
+              <div className="flex items-center bg-white bg-opacity-20 px-3 py-2 rounded-full">
+                <Mail className="h-4 w-4 mr-2" />
+                <span>{personalInfo.email}</span>
               </div>
             )}
             {personalInfo?.phone && (
-              <div className="flex items-center bg-pink-100 px-3 py-1 rounded-full">
-                <Phone className="h-4 w-4 mr-2 text-pink-600" />
-                {personalInfo.phone}
+              <div className="flex items-center bg-white bg-opacity-20 px-3 py-2 rounded-full">
+                <Phone className="h-4 w-4 mr-2" />
+                <span>{personalInfo.phone}</span>
               </div>
             )}
             {personalInfo?.location && (
-              <div className="flex items-center bg-orange-100 px-3 py-1 rounded-full">
-                <MapPin className="h-4 w-4 mr-2 text-orange-600" />
-                {personalInfo.location}
+              <div className="flex items-center bg-white bg-opacity-20 px-3 py-2 rounded-full">
+                <MapPin className="h-4 w-4 mr-2" />
+                <span>{personalInfo.location}</span>
               </div>
             )}
             {personalInfo?.linkedin && (
-              <div className="flex items-center bg-blue-100 px-3 py-1 rounded-full">
-                <Linkedin className="h-4 w-4 mr-2 text-blue-600" />
-                LinkedIn
+              <div className="flex items-center bg-white bg-opacity-20 px-3 py-2 rounded-full">
+                <Linkedin className="h-4 w-4 mr-2" />
+                <span>{personalInfo.linkedin}</span>
               </div>
             )}
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Creative Summary */}
-      {personalInfo?.summary && (
-        <section className="mb-8">
-          <div className="bg-white rounded-xl p-6 shadow-lg border-l-4 border-purple-500">
-            <h2 className="text-2xl font-bold text-purple-600 mb-4">
-              About Me
-            </h2>
-            <p className="text-gray-700 leading-relaxed">{personalInfo.summary}</p>
-          </div>
-        </section>
-      )}
-
-      {/* Experience */}
-      {workExperience && workExperience.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Experience
-          </h2>
-          <div className="space-y-6">
-            {workExperience.map((exp, index) => (
-              <div key={exp.id} className={`bg-white rounded-xl p-6 shadow-lg transform ${index % 2 === 0 ? 'rotate-1' : '-rotate-1'} hover:rotate-0 transition-transform duration-300`}>
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="font-bold text-xl text-gray-900">{exp.position}</h3>
-                    <p className="text-purple-600 font-semibold">{exp.company}</p>
-                    {exp.location && <p className="text-sm text-gray-600">{exp.location}</p>}
-                  </div>
-                  <div className="bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1 rounded-full text-sm text-purple-800">
-                    {formatDate(exp.startDate)} - {exp.isCurrentJob ? 'Present' : formatDate(exp.endDate)}
-                  </div>
-                </div>
-                {exp.description && (
-                  <p className="text-gray-700 leading-relaxed">{exp.description}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Projects */}
-      {projects && projects.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-pink-600 to-orange-500 bg-clip-text text-transparent">
-            Creative Projects
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((project, index) => (
-              <div key={project.id} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className={`w-full h-2 bg-gradient-to-r ${
-                  index % 3 === 0 ? 'from-purple-500 to-pink-500' :
-                  index % 3 === 1 ? 'from-pink-500 to-orange-500' :
-                  'from-orange-500 to-yellow-500'
-                } rounded-t-xl mb-4`}></div>
-                <h3 className="font-bold text-lg mb-2">{project.name}</h3>
-                {project.description && (
-                  <p className="text-gray-700 text-sm mb-3">{project.description}</p>
-                )}
-                {project.technologies && project.technologies.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {project.technologies.map((tech, techIndex) => (
-                      <span key={techIndex} className="px-2 py-1 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs rounded-full">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Skills */}
-      {skills && skills.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-orange-500 to-yellow-500 bg-clip-text text-transparent">
-            Skills & Expertise
-          </h2>
-          <div className="bg-white rounded-xl p-6 shadow-lg">
-            <div className="flex flex-wrap gap-3 justify-center">
-              {skills.map((skill, index) => (
-                <span
-                  key={skill.id}
-                  className={`px-4 py-2 rounded-full text-white font-medium shadow-lg transform hover:scale-110 transition-transform duration-200 ${
-                    index % 4 === 0 ? 'bg-gradient-to-r from-purple-500 to-purple-700' :
-                    index % 4 === 1 ? 'bg-gradient-to-r from-pink-500 to-pink-700' :
-                    index % 4 === 2 ? 'bg-gradient-to-r from-orange-500 to-orange-700' :
-                    'bg-gradient-to-r from-yellow-500 to-yellow-700'
-                  }`}
-                >
-                  {skill.name}
-                </span>
-              ))}
+      <div className="p-8">
+        {/* Creative Summary */}
+        {personalInfo?.summary && (
+          <section className="mb-8">
+            <div className="relative">
+              <h2 className="text-3xl font-bold text-gray-800 mb-6 relative inline-block">
+                About Me
+                <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+              </h2>
             </div>
-          </div>
-        </section>
-      )}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border-l-4 border-purple-500">
+              <p className="text-gray-700 leading-relaxed text-lg italic">{personalInfo.summary}</p>
+            </div>
+          </section>
+        )}
 
-      {/* Education */}
-      {education && education.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-3xl font-bold text-center mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Education
-          </h2>
-          <div className="space-y-4">
-            {education.map((edu) => (
-              <div key={edu.id} className="bg-white rounded-xl p-6 shadow-lg border-t-4 border-blue-500">
-                <div className="text-center">
-                  <h3 className="font-bold text-lg">{edu.degree}</h3>
-                  <p className="text-blue-600 font-semibold">{edu.school}</p>
-                  {edu.field && <p className="text-gray-600">{edu.field}</p>}
-                  <p className="text-sm text-gray-500">{formatDate(edu.graduationDate)}</p>
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Experience */}
+            {workExperience && workExperience.length > 0 && (
+              <section>
+                <div className="relative mb-6">
+                  <h2 className="text-3xl font-bold text-gray-800 relative inline-block">
+                    Experience
+                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  </h2>
                 </div>
-              </div>
-            ))}
+                <div className="space-y-6">
+                  {workExperience.map((job, index) => (
+                    <div key={job.id} className="relative">
+                      <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 opacity-10 rounded-full -mr-10 -mt-10"></div>
+                        
+                        <div className="relative z-10">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h3 className="text-xl font-bold text-gray-800 mb-1">{job.position}</h3>
+                              <p className="text-lg font-semibold text-purple-600">{job.company}</p>
+                            </div>
+                            <div className="bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-1 rounded-full">
+                              <p className="text-sm font-semibold text-gray-700">
+                                {job.startDate} - {job.isCurrentJob ? 'Present' : job.endDate}
+                              </p>
+                            </div>
+                          </div>
+                          {job.description && (
+                            <p className="text-gray-700 leading-relaxed">{job.description}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Projects */}
+            {projects && projects.length > 0 && (
+              <section>
+                <div className="relative mb-6">
+                  <h2 className="text-3xl font-bold text-gray-800 relative inline-block">
+                    Projects
+                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  </h2>
+                </div>
+                <div className="grid md:grid-cols-2 gap-4">
+                  {projects.map((project) => (
+                    <div key={project.id} className="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl border border-purple-200 hover:shadow-lg transition-shadow duration-300">
+                      <h3 className="text-lg font-bold text-gray-800 mb-2">{project.name}</h3>
+                      {project.description && (
+                        <p className="text-gray-700 text-sm">{project.description}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
-        </section>
-      )}
+
+          {/* Sidebar */}
+          <div className="space-y-8">
+            {/* Skills */}
+            {skills && skills.length > 0 && (
+              <section>
+                <div className="relative mb-4">
+                  <h2 className="text-2xl font-bold text-gray-800 relative inline-block">
+                    Skills
+                    <div className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  </h2>
+                </div>
+                <div className="space-y-3">
+                  {skills.map((skill, index) => (
+                    <div key={skill.id} className="relative">
+                      <div className={`bg-gradient-to-r ${
+                        index % 3 === 0 ? 'from-purple-500 to-purple-600' :
+                        index % 3 === 1 ? 'from-pink-500 to-pink-600' :
+                        'from-orange-500 to-orange-600'
+                      } text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg transform hover:scale-105 transition-transform duration-200`}>
+                        {skill.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Education */}
+            {education && education.length > 0 && (
+              <section>
+                <div className="relative mb-4">
+                  <h2 className="text-2xl font-bold text-gray-800 relative inline-block">
+                    Education
+                    <div className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  </h2>
+                </div>
+                <div className="space-y-4">
+                  {education.map((edu) => (
+                    <div key={edu.id} className="bg-white border border-gray-200 rounded-xl p-4 shadow-md">
+                      <h3 className="font-bold text-gray-800 mb-1">{edu.degree}</h3>
+                      <p className="text-purple-600 font-semibold">{edu.school}</p>
+                      {edu.field && <p className="text-gray-600 text-sm">{edu.field}</p>}
+                      {edu.graduationDate && <p className="text-gray-500 text-sm">{edu.graduationDate}</p>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Certifications */}
+            {certifications && certifications.length > 0 && (
+              <section>
+                <div className="relative mb-4">
+                  <h2 className="text-2xl font-bold text-gray-800 relative inline-block">
+                    Certifications
+                    <div className="absolute -bottom-1 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
+                  </h2>
+                </div>
+                <div className="space-y-3">
+                  {certifications.map((cert) => (
+                    <div key={cert.id} className="bg-gradient-to-r from-purple-50 to-pink-50 p-3 rounded-lg border border-purple-200">
+                      <h3 className="font-semibold text-gray-800 text-sm">{cert.name}</h3>
+                      {cert.description && <p className="text-gray-600 text-xs mt-1">{cert.description}</p>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
