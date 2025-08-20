@@ -5,10 +5,10 @@ const nextConfig = {
       // Handle pdf-parse issues by ignoring problematic files
       config.resolve.alias = {
         ...config.resolve.alias,
-        'canvas': false,
-        'jsdom': false
+        canvas: false,
+        jsdom: false,
       };
-      
+
       // Add fallbacks for Node.js modules
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -20,45 +20,45 @@ const nextConfig = {
         buffer: false,
         assert: false,
         url: false,
-        zlib: false
+        zlib: false,
       };
     }
-    
+
     // Ignore pdf-parse test files completely
     config.module = config.module || {};
     config.module.rules = config.module.rules || [];
     config.module.rules.push({
       test: /pdf-parse/,
       use: {
-        loader: 'string-replace-loader',
+        loader: "string-replace-loader",
         options: {
           search: /require\(['"]\.\/test\/.*?['"]\)/g,
-          replace: 'null'
-        }
-      }
+          replace: "null",
+        },
+      },
     });
-    
+
     return config;
   },
   images: {
-    domains: ['localhost'],
-    unoptimized: true
+    domains: ["localhost"],
+    unoptimized: true,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // ✅ don't block build on TS errors
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // ✅ don't block build on ESLint errors
   },
   swcMinify: true,
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
-        destination: '/api/:path*',
+        source: "/api/:path*",
+        destination: "/api/:path*",
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
