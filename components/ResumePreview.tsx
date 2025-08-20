@@ -58,38 +58,16 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
 
   const handleDownloadPDF = async () => {
     setIsDownloading(true);
-    const element = document.getElementById('resume-preview-content');
-    if (!element) {
-      console.error('Resume preview element not found');
-      setIsDownloading(false);
-      return;
-    }
 
     try {
-      const { default: html2pdf } = await import('html2pdf.js');
+      const element = document.getElementById('resume-preview-content');
+      if (!element) {
+        console.error('Resume preview element not found');
+        setIsDownloading(false);
+        return;
+      }
 
-      const opt = {
-        margin: 0.5,
-        filename: `${resumeData.personalInfo?.fullName || 'Resume'}_Resume.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff'
-        },
-        jsPDF: {
-          unit: 'in',
-          format: 'a4',
-          orientation: 'portrait'
-        }
-      };
-
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error('PDF generation failed:', error);
-
-      // Fallback to print method
+      // Use browser's print functionality as primary method
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         const clonedElement = element.cloneNode(true) as HTMLElement;
@@ -98,7 +76,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
           <!DOCTYPE html>
           <html>
             <head>
-              <title>Resume - ${resumeData.personalInfo?.fullName || 'Resume'}</title>
+              <title>${resumeData.personalInfo?.fullName || 'Resume'} - Resume</title>
               <style>
                 * {
                   margin: 0;
@@ -107,18 +85,26 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
                 }
                 body {
                   font-family: system-ui, -apple-system, sans-serif;
-                  line-height: 1.4;
+                  line-height: 1.5;
                   color: #333;
                   background: white;
+                  font-size: 12px;
                 }
-                .lucide {
+                h1, h2, h3, h4, h5, h6 {
+                  margin-bottom: 0.5em;
+                  line-height: 1.2;
+                }
+                p, div {
+                  margin-bottom: 0.25em;
+                }
+                .lucide, svg {
+                  width: 14px;
+                  height: 14px;
                   display: inline-block;
-                  width: 16px;
-                  height: 16px;
                 }
                 @media print {
-                  body { margin: 0; }
-                  @page { size: A4; margin: 0.5in; }
+                  @page { size: A4; margin: 0.75in; }
+                  body { margin: 0; font-size: 11px; }
                 }
                 @media screen {
                   body { padding: 20px; }
@@ -128,21 +114,23 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
             <body>
               ${clonedElement.innerHTML}
               <script>
-                window.onload = function() {
+                setTimeout(function() {
                   window.print();
-                  setTimeout(() => window.close(), 100);
-                };
+                  setTimeout(function() {
+                    window.close();
+                  }, 500);
+                }, 1000);
               </script>
             </body>
           </html>
         `);
+        
         printWindow.document.close();
       }
     } finally {
       setIsDownloading(false);
     }
   };
-
 
   return (
     <Card className="bg-white border border-gray-200 shadow-sm sticky top-24 h-fit">
@@ -181,14 +169,14 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
             <Button
               onClick={handleDownloadPDF}
               disabled={isDownloading}
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 text-sm px-4 py-2 disabled:opacity-50"
+              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 text-sm px-4 py-2 disabled:opacity-50 transition-all duration-200"
             >
               {isDownloading ? (
                 <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
                 <Download className="h-4 w-4 mr-2" />
               )}
-              {isDownloading ? 'Generating...' : 'PDF'}
+              {isDownloading ? 'Preparing...' : 'Download PDF'}
             </Button>
           </div>
         </div>
@@ -209,7 +197,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
 
           <div
             className="bg-white shadow-2xl mx-auto overflow-auto"
-            ref={resumeRef} // Added ref here
+            ref={resumeRef}
             style={{
               width: isFullscreen ? '210mm' : '100%',
               maxWidth: isFullscreen ? '210mm' : '820px',
@@ -220,7 +208,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
             }}
           >
             <div
-              id="resume-preview-content" // Corrected ID to match getElementById
+              id="resume-preview-content"
               className="h-full overflow-auto"
               style={{
                 fontSize: isFullscreen ? '12px' : '12px',
