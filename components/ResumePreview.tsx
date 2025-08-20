@@ -67,33 +67,33 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
 
     try {
       const { default: html2pdf } = await import('html2pdf.js');
-      
+
       const opt = {
         margin: 0.5,
         filename: `${resumeData.personalInfo?.fullName || 'Resume'}_Resume.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
+        html2canvas: {
           scale: 2,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#ffffff'
         },
-        jsPDF: { 
-          unit: 'in', 
-          format: 'a4', 
-          orientation: 'portrait' 
+        jsPDF: {
+          unit: 'in',
+          format: 'a4',
+          orientation: 'portrait'
         }
       };
 
       await html2pdf().set(opt).from(element).save();
     } catch (error) {
       console.error('PDF generation failed:', error);
-      
+
       // Fallback to print method
       const printWindow = window.open('', '_blank');
       if (printWindow) {
         const clonedElement = element.cloneNode(true) as HTMLElement;
-        
+
         printWindow.document.write(`
           <!DOCTYPE html>
           <html>
@@ -105,7 +105,7 @@ export function ResumePreview({ resumeData }: ResumePreviewProps) {
                   padding: 0;
                   box-sizing: border-box;
                 }
-                body { 
+                body {
                   font-family: system-ui, -apple-system, sans-serif;
                   line-height: 1.4;
                   color: #333;

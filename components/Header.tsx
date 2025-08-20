@@ -9,9 +9,10 @@ interface HeaderProps {
   onFileUpload?: (file: File) => void;
   onAIEnhance?: () => void;
   isAIProcessing?: boolean;
+  onDownloadPDF?: () => void;
 }
 
-export function Header({ onFileUpload, onAIEnhance, isAIProcessing }: HeaderProps) {
+export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPDF }: HeaderProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -55,7 +56,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing }: HeaderProp
                 src="/LOGOwithouttagline-01_1755244238390.png"
                 alt="Alumna Logo"
                 className="w-full h-full object-contain p-1"
-                style={{ 
+                style={{
                   display: 'block',
                   maxWidth: '100%',
                   maxHeight: '100%'
@@ -116,7 +117,16 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing }: HeaderProp
               <span>Share</span>
             </Button>
 
-            
+            {onDownloadPDF && (
+              <Button
+                variant="outline"
+                onClick={onDownloadPDF}
+                className="flex items-center space-x-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
+              >
+                <Download className="h-4 w-4" />
+                <span>Download PDF</span>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -175,7 +185,16 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing }: HeaderProp
                 Share
               </Button>
 
-              
+              {onDownloadPDF && (
+                <Button
+                  variant="outline"
+                  onClick={onDownloadPDF}
+                  className="w-full justify-start border-gray-300 text-gray-700 hover:bg-gray-50 rounded-xl"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </Button>
+              )}
             </div>
           </div>
         )}

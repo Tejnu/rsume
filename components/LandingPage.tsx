@@ -67,7 +67,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           >
             <div className="flex items-center justify-center mb-6">
               <img
-                src="/1752047483145.jpeg"
+                src="/alumna-logo.png"
                 alt="Alumna logo"
                 className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover shadow-2xl"
               />

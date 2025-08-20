@@ -45,6 +45,7 @@ export default function Home() {
   const [showWizard, setShowWizard] = useState(false);
   const [wizardData, setWizardData] = useState<any>(null);
   const [showLanding, setShowLanding] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     // Load data from localStorage on component mount
@@ -52,7 +53,7 @@ export default function Home() {
     const hasSeenWizard = localStorage.getItem('hasSeenWizard');
     const hasSeenLanding = localStorage.getItem('hasSeenLanding');
 
-    if (hasSeenLanding) {
+    if (hasSeenLanding === 'true') {
       setShowLanding(false);
       if (savedData) {
         try {
@@ -60,7 +61,7 @@ export default function Home() {
         } catch (error) {
           console.error('Error loading saved resume data:', error);
         }
-      } else if (!hasSeenWizard) {
+      } else if (hasSeenWizard !== 'true') {
         setShowWizard(true);
       }
     }
@@ -201,57 +202,65 @@ export default function Home() {
   };
 
   const handleDownloadPDF = () => {
-    const printContent = document.getElementById('resume-preview-content');
-    if (!printContent) return;
+    setIsDownloading(true);
+    
+    try {
+      const printContent = document.getElementById('resume-preview-content');
+      if (!printContent) return;
 
-    // Create a new window for printing
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+      // Create a new window for printing
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) return;
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Resume - ${resumeData.personalInfo.fullName || 'Resume'}</title>
-          <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-              line-height: 1.5;
-              color: #1f2937;
-              background: white;
-            }
-            @page { 
-              margin: 0.5in; 
-              size: letter; 
-            }
-            .resume-content {
-              width: 100%;
-              max-width: none;
-              margin: 0;
-              padding: 0;
-              background: white;
-            }
-            @media print {
-              body { -webkit-print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body>
-          <div class="resume-content">
-            ${printContent.innerHTML}
-          </div>
-        </body>
-      </html>
-    `);
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Resume - ${resumeData.personalInfo.fullName || 'Resume'}</title>
+            <style>
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                line-height: 1.5;
+                color: #1f2937;
+                background: white;
+              }
+              @page { 
+                margin: 0.5in; 
+                size: letter; 
+              }
+              .resume-content {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                padding: 0;
+                background: white;
+              }
+              @media print {
+                body { -webkit-print-color-adjust: exact; }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="resume-content">
+              ${printContent.innerHTML}
+            </div>
+          </body>
+        </html>
+      `);
 
-    printWindow.document.close();
+      printWindow.document.close();
 
-    // Wait for content to load, then print
-    setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+      // Wait for content to load, then print
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+        setIsDownloading(false);
+      }, 500);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      setIsDownloading(false);
+    }
   };
 
   const handleApplySuggestion = (type: string, suggestion: any) => {
@@ -381,6 +390,7 @@ export default function Home() {
         onFileUpload={handleFileUpload}
         onAIEnhance={handleAIEnhance}
         isAIProcessing={isAIProcessing}
+        onDownloadPDF={handleDownloadPDF}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -445,7 +455,11 @@ export default function Home() {
 
           {/* Preview Section */}
           <div className="lg:col-span-2 lg:sticky lg:top-8 lg:h-fit">
-            <ResumePreview resumeData={resumeData} />
+            <ResumePreview 
+              resumeData={resumeData} 
+              onDownloadPDF={handleDownloadPDF}
+              isDownloading={isDownloading}
+            />
           </div>
         </div>
       </div>
