@@ -1,6 +1,27 @@
 
 import { NextResponse } from 'next/server';
-import pdfParse from 'pdf-parse/lib/pdf-parse.js';
+
+// Type declaration for pdf-parse
+declare module 'pdf-parse' {
+  interface PDFData {
+    numpages: number;
+    numrender: number;
+    info: any;
+    metadata: any;
+    version: string;
+    text: string;
+  }
+  
+  interface PDFOptions {
+    max?: number;
+    version?: string;
+  }
+  
+  function pdfParse(buffer: Buffer, options?: PDFOptions): Promise<PDFData>;
+  export = pdfParse;
+}
+
+import pdfParse from 'pdf-parse';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30; // 30 seconds timeout
@@ -29,8 +50,7 @@ export async function POST(req: Request) {
     
     // Parse PDF with options for better text extraction
     const result = await pdfParse(buffer, {
-      max: 0, // parse all pages
-      version: 'v1.10.100' // specify version for stability
+      max: 0 // parse all pages
     });
     
     const text = (result.text || '').trim();
