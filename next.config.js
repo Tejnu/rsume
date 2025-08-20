@@ -1,14 +1,13 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer, webpack }) => {
+  webpack: (config, { isServer }) => {
     if (isServer) {
-      // Ignore pdf-parse test files and other problematic files
-      config.externals = config.externals || [];
-      config.externals.push({
-        'canvas': 'canvas',
-        'jsdom': 'jsdom'
-      });
+      // Handle pdf-parse issues by ignoring problematic files
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'canvas': false,
+        'jsdom': false
+      };
       
       // Add fallbacks for Node.js modules
       config.resolve.fallback = {
@@ -23,15 +22,21 @@ const nextConfig = {
         url: false,
         zlib: false
       };
-      
-      // Ignore specific problematic files from pdf-parse
-      config.plugins.push(
-        new webpack.IgnorePlugin({
-          resourceRegExp: /test\/data/,
-          contextRegExp: /pdf-parse/
-        })
-      );
     }
+    
+    // Ignore pdf-parse test files completely
+    config.module = config.module || {};
+    config.module.rules = config.module.rules || [];
+    config.module.rules.push({
+      test: /pdf-parse/,
+      use: {
+        loader: 'string-replace-loader',
+        options: {
+          search: /require\(['"]\.\/test\/.*?['"]\)/g,
+          replace: 'null'
+        }
+      }
+    });
     
     return config;
   },
