@@ -62,13 +62,35 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
     
-    // Dynamic import to avoid build issues
-    const pdfParse = await import('pdf-parse').then(mod => mod.default);
+    // Dynamic import with error handling
+    let pdfParse;
+    try {
+      pdfParse = await import('pdf-parse').then(mod => mod.default);
+    } catch (importError) {
+      console.error('PDF-parse import error:', importError);
+      return new NextResponse(
+        JSON.stringify({ error: 'PDF parsing service is temporarily unavailable. Please try uploading a DOCX or TXT file instead.' }), 
+        { status: 503, headers }
+      );
+    }
     
     // Parse PDF with options for better text extraction
-    const result = await pdfParse(buffer, {
-      max: 0 // parse all pages
-    });
+    let result;
+    try {
+      result = await pdfParse(buffer, {
+        max: 0 // parse all pages
+      });
+    } catch (parseError) {
+      console.error('PDF parsing error:', parseError);
+      // Check if it's the specific ENOENT error
+      if (parseError instanceof Error && parseError.message.includes('ENOENT')) {
+        return new NextResponse(
+          JSON.stringify({ error: 'PDF parsing service encountered a configuration issue. Please try uploading a DOCX or TXT file instead.' }), 
+          { status: 503, headers }
+        );
+      }
+      throw parseError;
+    }
     
     const text = (result.text || '').trim();
     

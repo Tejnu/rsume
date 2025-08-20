@@ -620,15 +620,21 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
           
           const contentType = resp.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) {
-            throw new Error('Server returned invalid response format');
+            // Server returned HTML or other non-JSON response
+            throw new Error('PDF parsing service is temporarily unavailable. Please try uploading a DOCX or TXT file instead.');
           }
           
           const data = await resp.json();
-          if (!resp.ok) throw new Error(data?.error || 'Failed to parse PDF');
+          if (!resp.ok) {
+            if (resp.status === 503) {
+              throw new Error('PDF parsing service is temporarily unavailable. Please try uploading a DOCX or TXT file instead.');
+            }
+            throw new Error(data?.error || 'Failed to parse PDF');
+          }
           rawText = data.text || '';
         } catch (error) {
           if (error instanceof SyntaxError) {
-            throw new Error('Server returned invalid response. Please try again.');
+            throw new Error('PDF parsing service encountered an error. Please try uploading a DOCX or TXT file instead.');
           }
           throw error;
         }
