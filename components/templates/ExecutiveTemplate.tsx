@@ -258,3 +258,166 @@ export function ExecutiveTemplate({ resumeData }: { resumeData: ResumeData }) {
     </div>
   );
 }
+'use client';
+
+import { ResumeData } from '@/types/resume';
+import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
+
+interface ExecutiveTemplateProps {
+  resumeData: ResumeData;
+}
+
+export function ExecutiveTemplate({ resumeData }: ExecutiveTemplateProps) {
+  if (!resumeData) {
+    return (
+      <div className="w-full h-96 flex items-center justify-center text-gray-500">
+        Loading template...
+      </div>
+    );
+  }
+
+  const { personalInfo, workExperience = [], education = [], skills = [], projects = [], certifications = [], languages = [] } = resumeData;
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString + '-01');
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+  };
+
+  return (
+    <div className="bg-white text-gray-900 p-8 max-w-4xl mx-auto border-l-4 border-slate-800">
+      {/* Executive Header */}
+      <header className="mb-8 text-center border-b-2 border-slate-200 pb-6">
+        <h1 className="text-4xl font-bold text-slate-900 mb-2 tracking-wide">
+          {personalInfo?.fullName || 'Your Name'}
+        </h1>
+        {personalInfo?.title && (
+          <p className="text-xl text-slate-600 mb-4 font-light">{personalInfo.title}</p>
+        )}
+        <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-600">
+          {personalInfo?.email && (
+            <div className="flex items-center">
+              <Mail className="h-4 w-4 mr-2" />
+              {personalInfo.email}
+            </div>
+          )}
+          {personalInfo?.phone && (
+            <div className="flex items-center">
+              <Phone className="h-4 w-4 mr-2" />
+              {personalInfo.phone}
+            </div>
+          )}
+          {personalInfo?.location && (
+            <div className="flex items-center">
+              <MapPin className="h-4 w-4 mr-2" />
+              {personalInfo.location}
+            </div>
+          )}
+          {personalInfo?.linkedin && (
+            <div className="flex items-center">
+              <Linkedin className="h-4 w-4 mr-2" />
+              LinkedIn
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Executive Summary */}
+      {personalInfo?.summary && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 text-center">
+            EXECUTIVE SUMMARY
+          </h2>
+          <p className="text-gray-700 leading-relaxed text-justify font-light text-lg">
+            {personalInfo.summary}
+          </p>
+        </section>
+      )}
+
+      {/* Leadership Experience */}
+      {workExperience && workExperience.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 text-center">
+            LEADERSHIP EXPERIENCE
+          </h2>
+          <div className="space-y-8">
+            {workExperience.map((exp) => (
+              <div key={exp.id} className="border-b border-slate-200 pb-6">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <h3 className="font-bold text-xl text-slate-900">{exp.position}</h3>
+                    <p className="text-slate-700 font-semibold text-lg">{exp.company}</p>
+                    {exp.location && <p className="text-sm text-slate-600">{exp.location}</p>}
+                  </div>
+                  <div className="text-sm text-slate-600 font-medium">
+                    {formatDate(exp.startDate)} - {exp.isCurrentJob ? 'Present' : formatDate(exp.endDate)}
+                  </div>
+                </div>
+                {exp.description && (
+                  <div className="text-gray-700 leading-relaxed">
+                    {exp.description.split('\n').map((line, idx) => (
+                      <p key={idx} className="mb-2">{line}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Education */}
+      {education && education.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 text-center">
+            EDUCATION
+          </h2>
+          <div className="space-y-4">
+            {education.map((edu) => (
+              <div key={edu.id} className="text-center">
+                <h3 className="font-bold text-lg">{edu.degree}</h3>
+                <p className="text-slate-700 font-semibold">{edu.school}</p>
+                {edu.field && <p className="text-slate-600">{edu.field}</p>}
+                <p className="text-sm text-slate-600">{formatDate(edu.graduationDate)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Core Competencies */}
+      {skills && skills.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 text-center">
+            CORE COMPETENCIES
+          </h2>
+          <div className="grid grid-cols-3 gap-4">
+            {skills.map(skill => (
+              <div key={skill.id} className="text-center p-3 bg-slate-50 rounded">
+                <span className="font-medium text-slate-800">{skill.name}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Board Positions / Certifications */}
+      {certifications && certifications.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-4 text-center">
+            CERTIFICATIONS & ACHIEVEMENTS
+          </h2>
+          <div className="space-y-3">
+            {certifications.map((cert) => (
+              <div key={cert.id} className="text-center">
+                <h3 className="font-semibold">{cert.name}</h3>
+                <p className="text-slate-700">{cert.issuer}</p>
+                <p className="text-sm text-slate-600">{formatDate(cert.date)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}

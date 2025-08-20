@@ -116,3 +116,78 @@ export const defaultResumeData: ResumeData = {
   customSections: [],
   selectedTemplate: 'modern'
 };
+export type ResumeTemplate = 'modern' | 'classic' | 'minimal' | 'creative' | 'executive' | 'technical';
+
+export interface PersonalInfo {
+  fullName: string;
+  title?: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  website?: string;
+  linkedin?: string;
+  github?: string;
+  summary?: string;
+}
+
+export interface WorkExperience {
+  id: string;
+  position: string;
+  company: string;
+  location?: string;
+  startDate: string;
+  endDate?: string;
+  isCurrentJob: boolean;
+  description?: string;
+}
+
+export interface Education {
+  id: string;
+  degree: string;
+  school: string;
+  field?: string;
+  graduationDate: string;
+  gpa?: string;
+}
+
+export interface Skill {
+  id: string;
+  name: string;
+  level?: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  technologies?: string[];
+  url?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface Certification {
+  id: string;
+  name: string;
+  issuer?: string;
+  date: string;
+  url?: string;
+  description?: string;
+}
+
+export interface Language {
+  id: string;
+  name: string;
+  proficiency: string;
+}
+
+export interface ResumeData {
+  personalInfo?: PersonalInfo;
+  workExperience?: WorkExperience[];
+  education?: Education[];
+  skills?: Skill[];
+  projects?: Project[];
+  certifications?: Certification[];
+  languages?: Language[];
+  selectedTemplate: ResumeTemplate;
+}

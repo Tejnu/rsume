@@ -1,14 +1,11 @@
+
 'use client';
 
+import React from 'react';
+import { ResumeTemplate } from '@/types/resume';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ResumeTemplate } from '@/types/resume';
-import { CheckCircle, Sparkles, Award, Zap, Target, Code } from 'lucide-react';
-
-interface TemplateSelectorProps {
-  selectedTemplate: string;
-  onTemplateChange: (template: ResumeTemplate) => void;
-}
+import { CheckCircle, Sparkles, Award, Target, Zap, Code } from 'lucide-react';
 
 const templates: { 
   id: ResumeTemplate; 
@@ -71,6 +68,11 @@ const templates: {
     isNew: true
   }
 ];
+
+interface TemplateSelectorProps {
+  selectedTemplate: string;
+  onTemplateChange: (template: ResumeTemplate) => void;
+}
 
 export function TemplateSelector({ selectedTemplate, onTemplateChange }: TemplateSelectorProps) {
   return (
@@ -140,24 +142,10 @@ export function TemplateSelector({ selectedTemplate, onTemplateChange }: Templat
               </div>
               
               {/* Hover Effect */}
-              <div className={`absolute inset-0 rounded-lg transition-opacity duration-300 ${
-                isSelected 
-                  ? 'opacity-0' 
-                  : 'opacity-0 hover:opacity-5 bg-black'
-              }`} />
+              <div className={`absolute inset-0 bg-gradient-to-r ${template.color} opacity-0 hover:opacity-5 rounded-lg transition-opacity duration-300`} />
             </Card>
           );
         })}
-      </div>
-      
-      {/* Template Preview Note */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-        <div className="flex items-center space-x-2">
-          <Sparkles className="h-5 w-5 text-black" />
-          <p className="text-sm text-gray-800">
-            <span className="font-medium">Pro Tip:</span> All templates are ATS-friendly and optimized for both human recruiters and applicant tracking systems.
-          </p>
-        </div>
       </div>
     </div>
   );
