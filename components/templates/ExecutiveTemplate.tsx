@@ -1,7 +1,7 @@
 'use client';
 
 import { ResumeData } from '@/types/resume';
-import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
 
 interface ExecutiveTemplateProps {
   resumeData: ResumeData;

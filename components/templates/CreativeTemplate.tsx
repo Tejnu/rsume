@@ -1,8 +1,7 @@
-
 'use client';
 
 import { ResumeData } from '@/types/resume';
-import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
+import { Mail, Phone, MapPin, Linkedin } from 'lucide-react';
 
 interface CreativeTemplateProps {
   resumeData: ResumeData;
@@ -17,11 +16,11 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
       <div className="relative bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 text-white p-8">
         <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12"></div>
-        
+
         <div className="relative z-10 text-center">
           <h1 className="text-5xl font-bold mb-3 tracking-wide">{personalInfo?.fullName || 'Your Name'}</h1>
           <p className="text-2xl font-light opacity-90 mb-6">{workExperience?.[0]?.position || 'Creative Professional'}</p>
-          
+
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             {personalInfo?.email && (
               <div className="flex items-center bg-white bg-opacity-20 px-3 py-2 rounded-full">
@@ -84,7 +83,7 @@ export function CreativeTemplate({ resumeData }: CreativeTemplateProps) {
                     <div key={job.id} className="relative">
                       <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-300 relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-purple-400 to-pink-400 opacity-10 rounded-full -mr-10 -mt-10"></div>
-                        
+
                         <div className="relative z-10">
                           <div className="flex justify-between items-start mb-4">
                             <div>

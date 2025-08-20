@@ -608,10 +608,30 @@ export function ResumeUploader({ onResumeExtracted, externalFile, onExternalFile
       if (isPdf) {
         const body = new FormData();
         body.append('file', file);
-        const resp = await fetch('/api/parse-pdf', { method: 'POST', body });
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data?.error || 'Failed to parse PDF');
-        rawText = data.text || '';
+        
+        try {
+          const resp = await fetch('/api/parse-pdf', { 
+            method: 'POST', 
+            body,
+            headers: {
+              'Accept': 'application/json',
+            }
+          });
+          
+          const contentType = resp.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Server returned invalid response format');
+          }
+          
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data?.error || 'Failed to parse PDF');
+          rawText = data.text || '';
+        } catch (error) {
+          if (error instanceof SyntaxError) {
+            throw new Error('Server returned invalid response. Please try again.');
+          }
+          throw error;
+        }
       } else if (isDocx) {
         rawText = await extractTextFromDocx(file);
       } else if (isTxt) {

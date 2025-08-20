@@ -21,33 +21,49 @@ declare module 'pdf-parse' {
   export = pdfParse;
 }
 
-import pdfParse from 'pdf-parse';
-
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-export const maxDuration = 30; // 30 seconds timeout
+export const maxDuration = 30;
 
 export async function POST(req: Request) {
+  // Set proper headers for JSON response
+  const headers = {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache',
+  };
+
   try {
     const form = await req.formData();
     const file = form.get('file') as File | null;
     
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return new NextResponse(
+        JSON.stringify({ error: 'No file provided' }), 
+        { status: 400, headers }
+      );
     }
 
     // Validate file type
     if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
-      return NextResponse.json({ error: 'Invalid file type. Please upload a PDF file.' }, { status: 400 });
+      return new NextResponse(
+        JSON.stringify({ error: 'Invalid file type. Please upload a PDF file.' }), 
+        { status: 400, headers }
+      );
     }
 
     // Validate file size (10MB limit)
     if (file.size > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File too large. Please upload a file smaller than 10MB.' }, { status: 400 });
+      return new NextResponse(
+        JSON.stringify({ error: 'File too large. Please upload a file smaller than 10MB.' }), 
+        { status: 400, headers }
+      );
     }
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    
+    // Dynamic import to avoid build issues
+    const pdfParse = await import('pdf-parse').then(mod => mod.default);
     
     // Parse PDF with options for better text extraction
     const result = await pdfParse(buffer, {
@@ -57,7 +73,10 @@ export async function POST(req: Request) {
     const text = (result.text || '').trim();
     
     if (!text || text.length < 10) {
-      return NextResponse.json({ error: 'No readable text found in PDF. The file may be image-based or corrupted.' }, { status: 400 });
+      return new NextResponse(
+        JSON.stringify({ error: 'No readable text found in PDF. The file may be image-based or corrupted.' }), 
+        { status: 400, headers }
+      );
     }
 
     // Ensure we return proper JSON
@@ -71,21 +90,18 @@ export async function POST(req: Request) {
       }
     };
 
-    return NextResponse.json(response, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    return new NextResponse(
+      JSON.stringify(response), 
+      { status: 200, headers }
+    );
   } catch (e: any) {
     console.error('PDF parsing error:', e);
-    return NextResponse.json({ 
-      error: e?.message || 'Failed to parse PDF. Please ensure the file is not corrupted and try again.' 
-    }, { 
-      status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    
+    return new NextResponse(
+      JSON.stringify({ 
+        error: e?.message || 'Failed to parse PDF. Please ensure the file is not corrupted and try again.' 
+      }), 
+      { status: 500, headers }
+    );
   }
 }

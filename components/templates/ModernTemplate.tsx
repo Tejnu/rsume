@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ResumeData } from '@/types/resume';
