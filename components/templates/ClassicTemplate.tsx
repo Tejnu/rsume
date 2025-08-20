@@ -1,6 +1,9 @@
 import React from 'react';
 import { ResumeData } from '@/types/resume';
 
+import { ResumeData } from '@/types/resume';
+import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
+
 interface ClassicTemplateProps {
   resumeData: ResumeData;
 }
@@ -23,6 +26,133 @@ export function ClassicTemplate({ resumeData }: ClassicTemplateProps) {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return `${monthNames[parseInt(month) - 1]} ${year}`;
   };
+
+  return (
+    <div className="w-full max-w-4xl mx-auto bg-white p-8 font-serif text-gray-900">
+      {/* Header */}
+      <div className="text-center mb-8 pb-4 border-b border-gray-300">
+        <h1 className="text-3xl font-bold mb-2">
+          {personalInfo?.fullName || 'Your Name'}
+        </h1>
+        
+        <div className="text-sm text-gray-600 space-y-1">
+          {personalInfo?.email && <div>{personalInfo.email}</div>}
+          {personalInfo?.phone && <div>{personalInfo.phone}</div>}
+          {personalInfo?.location && <div>{personalInfo.location}</div>}
+          {personalInfo?.website && <div>{personalInfo.website}</div>}
+          {personalInfo?.linkedin && <div>LinkedIn Profile</div>}
+        </div>
+        
+        {personalInfo?.summary && (
+          <p className="mt-4 text-gray-800 leading-relaxed max-w-3xl mx-auto">
+            {personalInfo.summary}
+          </p>
+        )}
+      </div>
+
+      {/* Work Experience */}
+      {workExperience.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center border-b border-gray-200 pb-2">
+            PROFESSIONAL EXPERIENCE
+          </h2>
+          {workExperience.map((job) => (
+            <div key={job.id} className="mb-6 last:mb-0">
+              <div className="mb-2">
+                <h3 className="text-lg font-semibold">{job.position}</h3>
+                <div className="flex justify-between items-center">
+                  <p className="font-medium">{job.company}</p>
+                  <p className="text-sm text-gray-600">
+                    {formatDate(job.startDate)} - {job.isCurrentJob ? 'Present' : formatDate(job.endDate)}
+                  </p>
+                </div>
+              </div>
+              {job.description && (
+                <div className="text-gray-800 ml-4">
+                  {job.description.split('\n').map((line, idx) => (
+                    <p key={idx} className="mb-1">{line}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Education */}
+      {education.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center border-b border-gray-200 pb-2">
+            EDUCATION
+          </h2>
+          {education.map((edu) => (
+            <div key={edu.id} className="mb-4 last:mb-0">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-lg font-semibold">{edu.degree}</h3>
+                  <p className="font-medium">{edu.school}</p>
+                  {edu.field && <p className="text-gray-700">{edu.field}</p>}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {formatDate(edu.graduationDate)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Skills */}
+      {skills.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center border-b border-gray-200 pb-2">
+            SKILLS
+          </h2>
+          <div className="text-center">
+            {skills.map((skill, index) => (
+              <span key={skill.id}>
+                {skill.name}{index < skills.length - 1 ? ' • ' : ''}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center border-b border-gray-200 pb-2">
+            PROJECTS
+          </h2>
+          {projects.map((project) => (
+            <div key={project.id} className="mb-4 last:mb-0">
+              <h3 className="text-lg font-semibold">{project.name}</h3>
+              {project.description && (
+                <p className="text-gray-800 mt-1">{project.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Certifications */}
+      {certifications.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 text-center border-b border-gray-200 pb-2">
+            CERTIFICATIONS
+          </h2>
+          {certifications.map((cert) => (
+            <div key={cert.id} className="mb-2 last:mb-0">
+              <h3 className="font-semibold">{cert.name}</h3>
+              {cert.description && (
+                <p className="text-gray-800">{cert.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="bg-white text-gray-900 p-8 max-w-4xl mx-auto font-serif">

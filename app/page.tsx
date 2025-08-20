@@ -457,8 +457,6 @@ export default function Home() {
           <div className="lg:col-span-2 lg:sticky lg:top-8 lg:h-fit">
             <ResumePreview 
               resumeData={resumeData} 
-              onDownloadPDF={handleDownloadPDF}
-              isDownloading={isDownloading}
             />
           </div>
         </div>

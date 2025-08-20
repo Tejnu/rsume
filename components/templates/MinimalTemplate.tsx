@@ -4,6 +4,8 @@
 import { ResumeData } from '@/types/resume';
 import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
 
+import { ResumeData } from '@/types/resume';
+
 interface MinimalTemplateProps {
   resumeData: ResumeData;
 }
@@ -18,13 +20,138 @@ export function MinimalTemplate({ resumeData }: MinimalTemplateProps) {
     );
   }
 
-  const { personalInfo, workExperience, education, skills, projects, certifications, languages } = resumeData;
+  const { personalInfo, workExperience = [], education = [], skills = [], projects = [], certifications = [], languages = [] } = resumeData;
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     const date = new Date(dateString + '-01');
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
   };
+
+  return (
+    <div className="w-full max-w-4xl mx-auto bg-white p-8 font-sans text-gray-900">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-light mb-2">
+          {personalInfo?.fullName || 'Your Name'}
+        </h1>
+        
+        <div className="text-sm text-gray-600 space-y-1">
+          {personalInfo?.email && <div>{personalInfo.email}</div>}
+          {personalInfo?.phone && <div>{personalInfo.phone}</div>}
+          {personalInfo?.location && <div>{personalInfo.location}</div>}
+          {personalInfo?.website && <div>{personalInfo.website}</div>}
+          {personalInfo?.linkedin && <div>LinkedIn</div>}
+        </div>
+        
+        {personalInfo?.summary && (
+          <p className="mt-4 text-gray-800 leading-relaxed">
+            {personalInfo.summary}
+          </p>
+        )}
+      </div>
+
+      {/* Work Experience */}
+      {workExperience.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-light text-gray-900 mb-4">
+            Experience
+          </h2>
+          {workExperience.map((job) => (
+            <div key={job.id} className="mb-6 last:mb-0">
+              <div className="mb-2">
+                <h3 className="font-medium">{job.position}</h3>
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>{job.company}</span>
+                  <span>{formatDate(job.startDate)} - {job.isCurrentJob ? 'Present' : formatDate(job.endDate)}</span>
+                </div>
+              </div>
+              {job.description && (
+                <div className="text-gray-700 text-sm">
+                  {job.description.split('\n').map((line, idx) => (
+                    <p key={idx} className="mb-1">{line}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Education */}
+      {education.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-light text-gray-900 mb-4">
+            Education
+          </h2>
+          {education.map((edu) => (
+            <div key={edu.id} className="mb-4 last:mb-0">
+              <div className="flex justify-between">
+                <div>
+                  <h3 className="font-medium text-sm">{edu.degree}</h3>
+                  <p className="text-sm text-gray-600">{edu.school}</p>
+                  {edu.field && <p className="text-xs text-gray-500">{edu.field}</p>}
+                </div>
+                <div className="text-xs text-gray-500">
+                  {formatDate(edu.graduationDate)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Skills */}
+      {skills.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-light text-gray-900 mb-4">
+            Skills
+          </h2>
+          <div className="text-sm text-gray-700">
+            {skills.map((skill, index) => (
+              <span key={skill.id}>
+                {skill.name}{index < skills.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-light text-gray-900 mb-4">
+            Projects
+          </h2>
+          {projects.map((project) => (
+            <div key={project.id} className="mb-4 last:mb-0">
+              <h3 className="font-medium text-sm">{project.name}</h3>
+              {project.description && (
+                <p className="text-sm text-gray-700 mt-1">{project.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Certifications */}
+      {certifications.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-light text-gray-900 mb-4">
+            Certifications
+          </h2>
+          {certifications.map((cert) => (
+            <div key={cert.id} className="mb-2 last:mb-0">
+              <h3 className="font-medium text-sm">{cert.name}</h3>
+              {cert.description && (
+                <p className="text-sm text-gray-700">{cert.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="bg-white text-gray-900 p-8 max-w-4xl mx-auto">
