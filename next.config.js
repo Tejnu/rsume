@@ -27,7 +27,7 @@ const nextConfig = {
       // Ignore specific problematic files from pdf-parse
       config.plugins.push(
         new webpack.IgnorePlugin({
-          resourceRegExp: /^\.\/test\/.*$/,
+          resourceRegExp: /test\/data/,
           contextRegExp: /pdf-parse/
         })
       );
