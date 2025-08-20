@@ -4,9 +4,6 @@
 import { ResumeData } from '@/types/resume';
 import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
 
-import { ResumeData } from '@/types/resume';
-import { Mail, Phone, MapPin, Globe, Linkedin } from 'lucide-react';
-
 interface ModernTemplateProps {
   resumeData: ResumeData;
 }

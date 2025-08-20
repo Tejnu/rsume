@@ -66,9 +66,20 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           >
             <div className="flex items-center justify-center mb-6">
               <img
-                src="/alumna-logo.png"
+                src="/landing-logo.jpg"
                 alt="Alumna logo"
                 className="w-20 h-20 md:w-24 md:h-24 rounded-2xl object-cover shadow-2xl"
+                onError={(e) => {
+                  console.log('Landing logo failed, trying backup...');
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.src = '/alumna-logo.png';
+                  target.onerror = () => {
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = '<div class="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-2xl"><span class="text-white font-bold text-2xl">A</span></div>';
+                    }
+                  };
+                }}
               />
             </div>
           </div>

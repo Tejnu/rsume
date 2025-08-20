@@ -1,53 +1,29 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+  experimental: {
+    appDir: true,
+  },
+  images: {
+    domains: ['localhost'],
+    unoptimized: true
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
-  images: { 
-    unoptimized: true,
-    domains: [],
-    remotePatterns: []
+  eslint: {
+    ignoreDuringBuilds: false,
   },
-  output: 'standalone',
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve = config.resolve || {};
-      config.resolve.fallback = {
-        ...(config.resolve.fallback || {}),
-        canvas: false,
-        fs: false,
-        path: false,
-        stream: false,
-        util: false,
-      };
-    }
-    return config;
-  },
-  async headers() {
+  // Remove output: 'standalone' for Vercel compatibility
+  swcMinify: true,
+  // Add proper rewrites for static assets
+  async rewrites() {
     return [
       {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-        ],
+        source: '/api/:path*',
+        destination: '/api/:path*',
       },
-    ];
+    ]
   },
-};
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

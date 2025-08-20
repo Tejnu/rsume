@@ -53,7 +53,7 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
           <div className="flex items-center space-x-4">
             <div className="relative w-16 h-16 rounded-xl bg-white border border-gray-200 flex items-center justify-center shadow-lg overflow-hidden">
               <img
-                src="/LOGOwithouttagline-01_1755244238390.png"
+                src="/main-logo.png"
                 alt="Alumna Logo"
                 className="w-full h-full object-contain p-1"
                 style={{
@@ -62,14 +62,17 @@ export function Header({ onFileUpload, onAIEnhance, isAIProcessing, onDownloadPD
                   maxHeight: '100%'
                 }}
                 onError={(e) => {
-                  console.log('Primary logo failed, trying backup...');
+                  console.log('Main logo failed, trying backup...');
                   const target = e.currentTarget as HTMLImageElement;
-                  target.src = '/alumna-logo.png';
+                  target.src = '/LOGOwithouttagline-01_1755244238390.png';
                   target.onerror = () => {
-                    const parent = target.parentElement;
-                    if (parent) {
-                      parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-xl">A</span></div>';
-                    }
+                    target.src = '/alumna-logo.png';
+                    target.onerror = () => {
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-xl">A</span></div>';
+                      }
+                    };
                   };
                 }}
               />
